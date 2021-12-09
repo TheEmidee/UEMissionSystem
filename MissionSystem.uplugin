@@ -1,0 +1,36 @@
+{
+  "FileVersion": 3,
+  "Version": 1.0,
+  "VersionName": "1.0",
+  "EngineVersion": "4.26.0",
+  "FriendlyName": "Mission System",
+  "Description": "Mission System",
+  "Category": "Gameplay",
+  "CreatedBy": "Michael Delva",
+  "CreatedByURL": "www.fishingcactus.com",
+  "EnabledByDefault": false,
+  "CanContainContent": false,
+
+  "Modules": [
+    {
+      "Name": "MissionSystem",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+			"Name" : "MissionSystemTestSuite",
+			"Type" : "UncookedOnly",
+			"LoadingPhase" : "PreDefault"
+		}
+  ],
+  "Plugins": [
+    {
+      "Name": "DataValidationExtensions",
+      "Enabled": true
+    },
+    {
+      "Name": "CoreExtensions",
+      "Enabled": true
+    }
+  ]
+}
