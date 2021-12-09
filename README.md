@@ -34,7 +34,7 @@ Like with missions, you can define actions to be executed when the objective sta
 
 You can override the function `Execute` to execute code when the objective starts.
 
-When the objective needs to be set as done, you must call the function `CompleteObjective`. The system will automatically start the next objective of the mission. If all objectives have been completed, the mission becomes itself complete. 
+When the objective needs to be set as done, you must call the function `CompleteObjective`. The system will automatically start the next objective of the mission. If all objectives have been completed, the mission itself becomes complete. 
 
 ### Actions
 
@@ -44,7 +44,7 @@ You create actions by creating blueprints of type `UMSMissionAction`.
 
 You need to implement the `Execute` function in the blueprint and do whatever the action needs to do. When the action is over, you need to call `FinishExecute`.
 
-Note that all actions must be finished before going to the next step. This means that all start actions of an objective must must be finished before the objective `Execute` function is called. Or that all end actions of a mission must be finished before the mission is effectively completed.
+Note that all actions must be finished before going to the next step. This means that all start actions of an objective must be finished before the objective `Execute` function is called. Or that all end actions of a mission must be finished before the mission is effectively completed.
 
 ## Run unit tests
 
