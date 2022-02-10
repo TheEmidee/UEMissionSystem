@@ -25,7 +25,7 @@ void UMSMissionObjective::CompleteObjective()
     if ( !bIsComplete )
     {
         bIsComplete = true;
-        K2_OnObjectiveEnded();
+        K2_OnObjectiveEnded( false );
         EndActionsExecutor.Execute();
     }
 }
@@ -49,6 +49,6 @@ void UMSMissionObjective::K2_Execute_Implementation()
 {
 }
 
-void UMSMissionObjective::K2_OnObjectiveEnded_Implementation()
+void UMSMissionObjective::K2_OnObjectiveEnded_Implementation( bool /*was_cancelled*/ )
 {
 }

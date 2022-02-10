@@ -39,8 +39,8 @@ UMSMission * UMSMissionSystem::StartMission( UMSMissionData * mission_data )
     auto * mission = NewObject< UMSMission >( this );
     mission->Initialize( mission_data );
 
-    mission->OnMissionComplete().AddDynamic( this, &UMSMissionSystem::OnMissionComplete );
-    mission->OnMissionObjectiveComplete().AddDynamic( this, &UMSMissionSystem::OnMissionObjectiveComplete );
+    mission->OnMissionEnded().AddDynamic( this, &UMSMissionSystem::OnMissionEnded );
+    mission->OnMissionObjectiveEnded().AddDynamic( this, &UMSMissionSystem::OnMissionObjectiveEnded );
 
     ActiveMissions.Add( mission_data, mission );
 
@@ -113,11 +113,11 @@ bool UMSMissionSystem::ShouldCreateSubsystem( UObject * outer ) const
     return true;
 }
 
-void UMSMissionSystem::OnMissionComplete( UMSMissionData * mission_data )
+void UMSMissionSystem::OnMissionEnded( UMSMissionData * mission_data, const bool was_cancelled )
 {
-    UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnMissionComplete (%s)" ), *GetNameSafe( mission_data ) );
+    UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnMissionEnded (%s)" ), *GetNameSafe( mission_data ) );
 
-    OnMissionCompleteDelegate.Broadcast( mission_data );
+    OnMissionCompleteDelegate.Broadcast( mission_data, was_cancelled );
     ActiveMissions.Remove( mission_data );
     CompletedMissions.Add( mission_data );
 
@@ -127,9 +127,9 @@ void UMSMissionSystem::OnMissionComplete( UMSMissionData * mission_data )
     }
 }
 
-void UMSMissionSystem::OnMissionObjectiveComplete( UMSMissionObjective * objective )
+void UMSMissionSystem::OnMissionObjectiveEnded( UMSMissionObjective * objective, const bool was_cancelled )
 {
-    UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnMissionObjectiveComplete (%s)" ), *objective->GetClass()->GetName() );
+    UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnMissionObjectiveEnded (%s)" ), *objective->GetClass()->GetName() );
 
-    OnMissionObjectiveCompleteDelegate.Broadcast( objective );
+    OnMissionObjectiveCompleteDelegate.Broadcast( objective, was_cancelled );
 }

@@ -63,16 +63,16 @@ bool UMSMission::IsComplete() const
     return true;
 }
 
-void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective )
+void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, const bool was_cancelled )
 {
     if ( !bIsStarted )
     {
         return;
     }
 
-    mission_objective->OnMissionObjectiveComplete().RemoveDynamic( this, &UMSMission::OnObjectiveCompleted );
-    OnMissionObjectiveCompleteDelegate.Broadcast( mission_objective );
     ExecuteNextObjective();
+    mission_objective->OnMissionObjectiveEnded().RemoveDynamic( this, &UMSMission::OnObjectiveCompleted );
+    OnMissionObjectiveCompleteDelegate.Broadcast( mission_objective, was_cancelled );
 }
 
 void UMSMission::TryStart()
@@ -100,7 +100,7 @@ void UMSMission::ExecuteNextObjective()
     if ( PendingObjectives.Num() > 0 )
     {
         auto * objective = PendingObjectives.Pop();
-        objective->OnMissionObjectiveComplete().AddDynamic( this, &UMSMission::OnObjectiveCompleted );
+        objective->OnMissionObjectiveEnded().AddDynamic( this, &UMSMission::OnObjectiveCompleted );
 
         UE_LOG( LogMissionSystem, Verbose, TEXT( "Execute objective %s" ), *objective->GetClass()->GetName() );
 

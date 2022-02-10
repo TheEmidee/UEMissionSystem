@@ -11,7 +11,7 @@ class UMSMissionAction;
 class UMSMissionData;
 class UMSMissionObjective;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FMSOnMissionCompleteDelegate, UMSMissionData *, MissionData );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams( FMSOnMissionEndedDelegate, UMSMissionData *, MissionData, bool, WasCancelled );
 
 UCLASS()
 class MISSIONSYSTEM_API UMSMission final : public UObject
@@ -20,8 +20,10 @@ class MISSIONSYSTEM_API UMSMission final : public UObject
 
 public:
     UMSMissionData * GetData() const;
-    FMSOnMissionCompleteDelegate & OnMissionComplete();
-    FMSOnMissionObjectiveCompleteDelegate & OnMissionObjectiveComplete();
+    UMSMission();
+
+    FMSOnMissionEndedDelegate & OnMissionEnded();
+    FMSOnMissionObjectiveEndedDelegate & OnMissionObjectiveEnded();
     const TArray< UMSMissionObjective * > & GetObjectives() const;
     const TArray< UMSMissionAction * > & GetStartActions() const;
     bool IsStarted() const;
@@ -35,7 +37,7 @@ public:
 
 private:
     UFUNCTION()
-    void OnObjectiveCompleted( UMSMissionObjective * objective );
+    void OnObjectiveCompleted( UMSMissionObjective * objective, bool was_cancelled );
 
     void TryStart();
     void TryEnd();
@@ -45,10 +47,10 @@ private:
     UMSMissionData * Data;
 
     UPROPERTY( BlueprintAssignable )
-    FMSOnMissionCompleteDelegate OnMissionCompleteDelegate;
+    FMSOnMissionEndedDelegate OnMissionEndedDelegate;
 
     UPROPERTY( BlueprintAssignable )
-    FMSOnMissionObjectiveCompleteDelegate OnMissionObjectiveCompleteDelegate;
+    FMSOnMissionObjectiveEndedDelegate OnMissionObjectiveCompleteDelegate;
 
     UPROPERTY()
     TArray< UMSMissionObjective * > Objectives;
@@ -71,12 +73,12 @@ FORCEINLINE UMSMissionData * UMSMission::GetData() const
     return Data;
 }
 
-FORCEINLINE FMSOnMissionCompleteDelegate & UMSMission::OnMissionComplete()
+FORCEINLINE FMSOnMissionEndedDelegate & UMSMission::OnMissionEnded()
 {
-    return OnMissionCompleteDelegate;
+    return OnMissionEndedDelegate;
 }
 
-FORCEINLINE FMSOnMissionObjectiveCompleteDelegate & UMSMission::OnMissionObjectiveComplete()
+FORCEINLINE FMSOnMissionObjectiveEndedDelegate & UMSMission::OnMissionObjectiveEnded()
 {
     return OnMissionObjectiveCompleteDelegate;
 }
