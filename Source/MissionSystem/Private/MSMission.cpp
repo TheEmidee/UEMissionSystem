@@ -5,6 +5,12 @@
 #include "MSMissionData.h"
 #include "MSMissionObjective.h"
 
+UMSMission::UMSMission()
+{
+    bIsStarted = false;
+    bIsCancelled = false;
+}
+
 void UMSMission::Initialize( UMSMissionData * mission_data )
 {
     Data = mission_data;
@@ -33,7 +39,7 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
     } );
 
     EndActionsExecutor.Initialize( *this, mission_data->EndActions, [ this ]() {
-        OnMissionCompleteDelegate.Broadcast( Data );
+        OnMissionEndedDelegate.Broadcast( Data, bIsCancelled );
     } );
 }
 
@@ -42,11 +48,22 @@ void UMSMission::Start()
     StartActionsExecutor.Execute();
 }
 
-void UMSMission::End()
+void UMSMission::Cancel()
 {
+    bIsCancelled = true;
+
     for ( auto * objective : Objectives )
     {
-        objective->CompleteObjective();
+        objective->CancelObjective();
+    }
+
+    if ( Data->bExecuteEndActionsWhenCancelled )
+    {
+        EndActionsExecutor.Execute();
+    }
+    else
+    {
+        OnMissionEndedDelegate.Broadcast( Data, bIsCancelled );
     }
 }
 
@@ -70,9 +87,18 @@ void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, 
         return;
     }
 
-    ExecuteNextObjective();
     mission_objective->OnMissionObjectiveEnded().RemoveDynamic( this, &UMSMission::OnObjectiveCompleted );
     OnMissionObjectiveCompleteDelegate.Broadcast( mission_objective, was_cancelled );
+
+    if ( bIsCancelled )
+    {
+        return;
+    }
+
+    if ( !was_cancelled )
+    {
+        ExecuteNextObjective();
+    }
 }
 
 void UMSMission::TryStart()

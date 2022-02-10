@@ -19,6 +19,8 @@ class MISSIONSYSTEM_API UMSMissionObjective : public UObject
 public:
     UMSMissionObjective();
 
+    friend class UMSMission;
+
     FMSOnMissionObjectiveEndedDelegate & OnMissionObjectiveEnded();
     bool IsComplete() const;
 
@@ -37,6 +39,7 @@ protected:
     UFUNCTION( BlueprintNativeEvent, DisplayName = "OnObjectiveEnded" )
     void K2_OnObjectiveEnded( bool was_cancelled );
 
+    void CancelObjective();
 
     UPROPERTY( EditDefaultsOnly )
     TArray< TSubclassOf< UMSMissionAction > > StartActions;
@@ -53,8 +56,14 @@ protected:
     UPROPERTY( BlueprintAssignable )
     FMSOnMissionObjectiveEndedDelegate OnObjectiveCompleteDelegate;
 
+    UPROPERTY( EditAnywhere )
+    uint8 bExecuteEndActionsWhenCancelled : 1;
+
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
     uint8 bIsComplete : 1;
+
+    UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
+    uint8 bIsCancelled : 1;
 };
 
 FORCEINLINE FMSOnMissionObjectiveEndedDelegate & UMSMissionObjective::OnMissionObjectiveEnded()

@@ -4,7 +4,9 @@
 
 UMSMissionObjective::UMSMissionObjective()
 {
+    bExecuteEndActionsWhenCancelled = false;
     bIsComplete = false;
+    bIsCancelled = false;
 }
 
 void UMSMissionObjective::Execute()
@@ -14,7 +16,7 @@ void UMSMissionObjective::Execute()
     } );
 
     EndActionsExecutor.Initialize( *this, EndActions, [ this ]() {
-        OnObjectiveCompleteDelegate.Broadcast( this );
+        OnObjectiveCompleteDelegate.Broadcast( this, bIsCancelled );
     } );
 
     StartActionsExecutor.Execute();
@@ -43,6 +45,25 @@ UWorld * UMSMissionObjective::GetWorld() const
     }
 
     return nullptr;
+}
+
+void UMSMissionObjective::CancelObjective()
+{
+    if ( !bIsComplete && !bIsCancelled )
+    {
+        bIsCancelled = true;
+
+        K2_OnObjectiveEnded( true );
+
+        if ( bExecuteEndActionsWhenCancelled )
+        {
+            EndActionsExecutor.Execute();
+        }
+        else
+        {
+            OnObjectiveCompleteDelegate.Broadcast( this, bIsCancelled );
+        }
+    }
 }
 
 void UMSMissionObjective::K2_Execute_Implementation()

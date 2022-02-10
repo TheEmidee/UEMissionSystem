@@ -12,7 +12,7 @@ static FAutoConsoleCommand SkipMissionCommand(
     FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateLambda( []( const TArray< FString > & args, UWorld * world, FOutputDevice & output_device ) {
         if ( auto * mission_system = world->GetSubsystem< UMSMissionSystem >() )
         {
-            mission_system->SkipCurrentMissions();
+            mission_system->CancelCurrentMissions();
         }
     } ) );
 
@@ -75,14 +75,14 @@ UMSMission * UMSMissionSystem::GetActiveMission( UMSMissionData * mission_data )
     return nullptr;
 }
 
-void UMSMissionSystem::SkipCurrentMissions() const
+void UMSMissionSystem::CancelCurrentMissions() const
 {
     TArray< UMSMission * > result;
     ActiveMissions.GenerateValueArray( result );
 
     for ( auto * mission : result )
     {
-        mission->End();
+        mission->Cancel();
     }
 }
 
@@ -119,11 +119,18 @@ void UMSMissionSystem::OnMissionEnded( UMSMissionData * mission_data, const bool
 
     OnMissionCompleteDelegate.Broadcast( mission_data, was_cancelled );
     ActiveMissions.Remove( mission_data );
-    CompletedMissions.Add( mission_data );
 
-    for ( auto * next_mission : mission_data->NextMissions )
+    if ( !was_cancelled )
     {
-        StartMission( next_mission );
+        CompletedMissions.Add( mission_data );
+    }
+    
+    if ( !was_cancelled || mission_data->bStartNextMissionsWhenCancelled )
+    {
+        for ( auto * next_mission : mission_data->NextMissions )
+        {
+            StartMission( next_mission );
+        }
     }
 }
 

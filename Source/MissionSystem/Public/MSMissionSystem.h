@@ -32,7 +32,7 @@ public:
     UMSMission * GetActiveMission( UMSMissionData * mission_data ) const;
 
     UFUNCTION( BlueprintCallable )
-    void SkipCurrentMissions() const;
+    void CancelCurrentMissions() const;
 
     bool ShouldCreateSubsystem( UObject * outer ) const override;
 

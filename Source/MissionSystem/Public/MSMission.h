@@ -19,7 +19,6 @@ class MISSIONSYSTEM_API UMSMission final : public UObject
     GENERATED_BODY()
 
 public:
-    UMSMissionData * GetData() const;
     UMSMission();
 
     FMSOnMissionEndedDelegate & OnMissionEnded();
@@ -30,7 +29,7 @@ public:
 
     void Initialize( UMSMissionData * mission_data );
     void Start();
-    void End();
+    void Cancel();
 
     UFUNCTION( BlueprintPure )
     bool IsComplete() const;
@@ -66,12 +65,9 @@ private:
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
     uint8 bIsStarted : 1;
-};
 
-FORCEINLINE UMSMissionData * UMSMission::GetData() const
-{
-    return Data;
-}
+    uint8 bIsCancelled : 1;
+};
 
 FORCEINLINE FMSOnMissionEndedDelegate & UMSMission::OnMissionEnded()
 {
