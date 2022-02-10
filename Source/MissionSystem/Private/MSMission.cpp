@@ -48,6 +48,14 @@ void UMSMission::Start()
     StartActionsExecutor.Execute();
 }
 
+void UMSMission::Complete()
+{
+    for ( auto * objective : Objectives )
+    {
+        objective->CompleteObjective();
+    }
+}
+
 void UMSMission::Cancel()
 {
     bIsCancelled = true;

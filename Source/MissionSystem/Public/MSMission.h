@@ -19,6 +19,8 @@ class MISSIONSYSTEM_API UMSMission final : public UObject
     GENERATED_BODY()
 
 public:
+    friend class UMSMissionSystem;
+
     UMSMission();
 
     FMSOnMissionEndedDelegate & OnMissionEnded();
@@ -29,6 +31,7 @@ public:
 
     void Initialize( UMSMissionData * mission_data );
     void Start();
+    void Complete();
     void Cancel();
 
     UFUNCTION( BlueprintPure )

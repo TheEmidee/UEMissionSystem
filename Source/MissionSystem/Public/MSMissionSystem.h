@@ -34,6 +34,9 @@ public:
     UFUNCTION( BlueprintCallable )
     void CancelCurrentMissions() const;
 
+    UFUNCTION( BlueprintCallable )
+    void CompleteCurrentMissions() const;
+
     bool ShouldCreateSubsystem( UObject * outer ) const override;
 
 private:

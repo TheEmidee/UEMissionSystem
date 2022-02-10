@@ -86,6 +86,17 @@ void UMSMissionSystem::CancelCurrentMissions() const
     }
 }
 
+void UMSMissionSystem::CompleteCurrentMissions() const
+{
+    TArray< UMSMission * > result;
+    ActiveMissions.GenerateValueArray( result );
+
+    for ( auto * mission : result )
+    {
+        mission->Complete();
+    }
+}
+
 bool UMSMissionSystem::ShouldCreateSubsystem( UObject * outer ) const
 {
     if ( !Super::ShouldCreateSubsystem( outer ) )
