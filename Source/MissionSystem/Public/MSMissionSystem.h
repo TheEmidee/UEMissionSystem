@@ -20,7 +20,7 @@ public:
     FMSOnMissionObjectiveEndedDelegate & OnMissionObjectiveEnded();
 
     UFUNCTION( BlueprintCallable )
-    UMSMission * StartMission( UMSMissionData * mission_data );
+    void StartMission( UMSMissionData * mission_data );
 
     UFUNCTION( BlueprintPure )
     bool IsMissionComplete( UMSMissionData * mission_data ) const;
@@ -40,6 +40,8 @@ public:
     bool ShouldCreateSubsystem( UObject * outer ) const override;
 
 private:
+    void StartNextMissions( UMSMissionData * mission_data );
+
     UFUNCTION()
     void OnMissionEnded( UMSMissionData * mission_data, bool was_cancelled );
 
