@@ -31,6 +31,10 @@ public:
 
     UWorld * GetWorld() const override;
 
+#if WITH_EDITOR
+    EDataValidationResult IsDataValid( TArray< FText > & validation_errors ) override;
+#endif
+
 protected:
 
     UFUNCTION( BlueprintNativeEvent, DisplayName = "Execute" )

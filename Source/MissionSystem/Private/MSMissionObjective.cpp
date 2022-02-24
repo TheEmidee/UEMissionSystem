@@ -1,5 +1,6 @@
 #include "MSMissionObjective.h"
 
+#include "DVEDataValidator.h"
 #include "MSMissionAction.h"
 
 UMSMissionObjective::UMSMissionObjective()
@@ -65,6 +66,17 @@ void UMSMissionObjective::CancelObjective()
         }
     }
 }
+#if WITH_EDITOR
+EDataValidationResult UMSMissionObjective::IsDataValid( TArray<FText> & validation_errors )
+{
+    Super::IsDataValid( validation_errors );
+
+    return FDVEDataValidator( validation_errors )
+        .NoNullItem( VALIDATOR_GET_PROPERTY( StartActions ) )
+        .NoNullItem( VALIDATOR_GET_PROPERTY( EndActions ) )
+        .Result();
+}
+#endif
 
 void UMSMissionObjective::K2_Execute_Implementation()
 {
