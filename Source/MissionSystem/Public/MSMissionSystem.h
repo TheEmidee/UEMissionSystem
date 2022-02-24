@@ -16,8 +16,8 @@ class MISSIONSYSTEM_API UMSMissionSystem final : public UWorldSubsystem
     GENERATED_BODY()
 
 public:
-    FMSOnMissionCompleteDelegate & OnMissionComplete();
-    FMSOnMissionObjectiveCompleteDelegate & OnMissionObjectiveComplete();
+    FMSOnMissionEndedDelegate & OnMissionEnded();
+    FMSOnMissionObjectiveEndedDelegate & OnMissionObjectiveEnded();
 
     UFUNCTION( BlueprintCallable )
     UMSMission * StartMission( UMSMissionData * mission_data );
@@ -32,22 +32,25 @@ public:
     UMSMission * GetActiveMission( UMSMissionData * mission_data ) const;
 
     UFUNCTION( BlueprintCallable )
-    void SkipCurrentMissions() const;
+    void CancelCurrentMissions() const;
+
+    UFUNCTION( BlueprintCallable )
+    void CompleteCurrentMissions() const;
 
     bool ShouldCreateSubsystem( UObject * outer ) const override;
 
 private:
     UFUNCTION()
-    void OnMissionComplete( UMSMissionData * mission_data );
+    void OnMissionEnded( UMSMissionData * mission_data, bool was_cancelled );
 
     UFUNCTION()
-    void OnMissionObjectiveComplete( UMSMissionObjective * objective );
+    void OnMissionObjectiveEnded( UMSMissionObjective * objective, bool was_cancelled );
 
     UPROPERTY( BlueprintAssignable )
-    FMSOnMissionCompleteDelegate OnMissionCompleteDelegate;
+    FMSOnMissionEndedDelegate OnMissionCompleteDelegate;
 
     UPROPERTY( BlueprintAssignable )
-    FMSOnMissionObjectiveCompleteDelegate OnMissionObjectiveCompleteDelegate;
+    FMSOnMissionObjectiveEndedDelegate OnMissionObjectiveCompleteDelegate;
 
     UPROPERTY()
     TMap< UMSMissionData *, UMSMission * > ActiveMissions;
@@ -56,12 +59,12 @@ private:
     TArray< UMSMissionData * > CompletedMissions;
 };
 
-FORCEINLINE FMSOnMissionCompleteDelegate & UMSMissionSystem::OnMissionComplete()
+FORCEINLINE FMSOnMissionEndedDelegate & UMSMissionSystem::OnMissionEnded()
 {
     return OnMissionCompleteDelegate;
 }
 
-FORCEINLINE FMSOnMissionObjectiveCompleteDelegate & UMSMissionSystem::OnMissionObjectiveComplete()
+FORCEINLINE FMSOnMissionObjectiveEndedDelegate & UMSMissionSystem::OnMissionObjectiveEnded()
 {
     return OnMissionObjectiveCompleteDelegate;
 }

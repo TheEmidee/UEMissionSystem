@@ -9,7 +9,7 @@
 class UMSMissionAction;
 class UMSMissionObjective;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FMSOnMissionObjectiveCompleteDelegate, UMSMissionObjective *, MissionObjective );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams( FMSOnMissionObjectiveEndedDelegate, UMSMissionObjective *, MissionObjective, bool, WasCancelled );
 
 UCLASS( Abstract, BlueprintType, Blueprintable )
 class MISSIONSYSTEM_API UMSMissionObjective : public UObject
@@ -19,7 +19,9 @@ class MISSIONSYSTEM_API UMSMissionObjective : public UObject
 public:
     UMSMissionObjective();
 
-    FMSOnMissionObjectiveCompleteDelegate & OnMissionObjectiveComplete();
+    friend class UMSMission;
+
+    FMSOnMissionObjectiveEndedDelegate & OnMissionObjectiveEnded();
     bool IsComplete() const;
 
     void Execute();
@@ -34,11 +36,14 @@ public:
 #endif
 
 protected:
+
     UFUNCTION( BlueprintNativeEvent, DisplayName = "Execute" )
     void K2_Execute();
 
     UFUNCTION( BlueprintNativeEvent, DisplayName = "OnObjectiveEnded" )
-    void K2_OnObjectiveEnded();
+    void K2_OnObjectiveEnded( bool was_cancelled );
+
+    void CancelObjective();
 
     UPROPERTY( EditDefaultsOnly )
     TArray< TSubclassOf< UMSMissionAction > > StartActions;
@@ -52,15 +57,20 @@ protected:
     UPROPERTY()
     FMSActionExecutor EndActionsExecutor;
 
-private:
     UPROPERTY( BlueprintAssignable )
-    FMSOnMissionObjectiveCompleteDelegate OnObjectiveCompleteDelegate;
+    FMSOnMissionObjectiveEndedDelegate OnObjectiveCompleteDelegate;
+
+    UPROPERTY( EditAnywhere )
+    uint8 bExecuteEndActionsWhenCancelled : 1;
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
     uint8 bIsComplete : 1;
+
+    UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
+    uint8 bIsCancelled : 1;
 };
 
-FORCEINLINE FMSOnMissionObjectiveCompleteDelegate & UMSMissionObjective::OnMissionObjectiveComplete()
+FORCEINLINE FMSOnMissionObjectiveEndedDelegate & UMSMissionObjective::OnMissionObjectiveEnded()
 {
     return OnObjectiveCompleteDelegate;
 }

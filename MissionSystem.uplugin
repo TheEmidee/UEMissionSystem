@@ -16,12 +16,7 @@
       "Name": "MissionSystem",
       "Type": "Runtime",
       "LoadingPhase": "Default"
-    },
-    {
-			"Name" : "MissionSystemTestSuite",
-			"Type" : "UncookedOnly",
-			"LoadingPhase" : "PreDefault"
-		}
+    }
   ],
   "Plugins": [
     {

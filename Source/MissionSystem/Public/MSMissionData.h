@@ -41,6 +41,12 @@ public:
     UPROPERTY( EditDefaultsOnly )
     TArray< UMSMissionData * > NextMissions;
 
+    UPROPERTY( EditDefaultsOnly )
+    uint8 bExecuteEndActionsWhenCancelled : 1;
+
+    UPROPERTY( EditDefaultsOnly )
+    uint8 bStartNextMissionsWhenCancelled : 1;
+
 #if WITH_EDITOR
     EDataValidationResult IsDataValid( TArray< FText > & validation_errors ) override;
 #endif
