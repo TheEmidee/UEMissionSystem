@@ -36,7 +36,6 @@ public:
 #endif
 
 protected:
-
     UFUNCTION( BlueprintNativeEvent, DisplayName = "Execute" )
     void K2_Execute();
 

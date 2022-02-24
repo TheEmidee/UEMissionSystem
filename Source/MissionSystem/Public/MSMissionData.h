@@ -29,6 +29,8 @@ class MISSIONSYSTEM_API UMSMissionData final : public UDataAsset
     GENERATED_BODY()
 
 public:
+    UMSMissionData();
+
     UPROPERTY( EditDefaultsOnly )
     TArray< TSubclassOf< UMSMissionAction > > StartActions;
 
@@ -40,6 +42,9 @@ public:
 
     UPROPERTY( EditDefaultsOnly )
     TArray< UMSMissionData * > NextMissions;
+
+    UPROPERTY( EditDefaultsOnly )
+    uint8 bEnabled : 1;
 
     UPROPERTY( EditDefaultsOnly )
     uint8 bExecuteEndActionsWhenCancelled : 1;
