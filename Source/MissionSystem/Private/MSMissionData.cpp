@@ -20,6 +20,7 @@ EDataValidationResult UMSMissionData::IsDataValid( TArray< FText > & validation_
 
     return FDVEDataValidator( validation_errors )
         .NoNullItem( VALIDATOR_GET_PROPERTY( StartActions ) )
+        .NoNullItem( VALIDATOR_GET_PROPERTY( EndActions ) )
         .NoNullItem( VALIDATOR_GET_PROPERTY( NextMissions ) )
         .CustomValidation< TArray< FMSMissionObjectiveData > >( Objectives, []( TArray< FText > & errors, TArray< FMSMissionObjectiveData > objectives ) {
             for ( const auto & objective_data : objectives )
