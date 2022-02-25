@@ -37,6 +37,10 @@ public:
     UFUNCTION( BlueprintCallable )
     void CompleteCurrentMissions() const;
 
+#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+    void DumpActiveMissions( FOutputDevice & output_device );
+#endif
+
     bool ShouldCreateSubsystem( UObject * outer ) const override;
 
 private:

@@ -5,6 +5,8 @@
 #include "MSMissionData.h"
 #include "MSMissionObjective.h"
 
+#include <Kismet/KismetStringLibrary.h>
+
 UMSMission::UMSMission()
 {
     bIsStarted = false;
@@ -87,6 +89,16 @@ bool UMSMission::IsComplete() const
 
     return true;
 }
+
+#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+void UMSMission::DumpObjectives( FOutputDevice & output_device )
+{
+    for ( const auto * objective : Objectives )
+    {
+        output_device.Logf( ELogVerbosity::Verbose, TEXT( "   - Objective : %s - Complete : %s" ), *GetNameSafe( objective ), *UKismetStringLibrary::Conv_BoolToString( objective->IsComplete() ) );
+    }
+}
+#endif
 
 void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, const bool was_cancelled )
 {

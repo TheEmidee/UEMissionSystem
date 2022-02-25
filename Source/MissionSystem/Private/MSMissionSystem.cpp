@@ -6,16 +6,27 @@
 
 #include <Engine/World.h>
 
+#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
 static FAutoConsoleCommand SkipMissionCommand(
-    TEXT( "ms.SkipMission" ),
-    TEXT( "A custom command that skips the current mission." ),
-    FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateLambda( []( const TArray< FString > & args, UWorld * world, FOutputDevice & output_device ) {
-        if ( auto * mission_system = world->GetSubsystem< UMSMissionSystem >() )
+    TEXT( "MissionSystem.SkipMission" ),
+    TEXT( "Skips the current missions." ),
+    FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateLambda( []( const TArray< FString > & /*args*/, const UWorld * world, FOutputDevice & /*output_device*/ ) {
+        if ( const auto * mission_system = world->GetSubsystem< UMSMissionSystem >() )
         {
             mission_system->CancelCurrentMissions();
         }
     } ) );
 
+static FAutoConsoleCommand ListActiveMissionsCommand(
+    TEXT( "MissionSystem.ListActiveMissions" ),
+    TEXT( "Prints the active missions in the log." ),
+    FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateLambda( []( const TArray< FString > & /*args*/, const UWorld * world, FOutputDevice & output_device ) {
+        if ( auto * mission_system = world->GetSubsystem< UMSMissionSystem >() )
+        {
+            mission_system->DumpActiveMissions( output_device );
+        }
+    } ) );
+#endif
 
 void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
 {
@@ -101,6 +112,19 @@ void UMSMissionSystem::CompleteCurrentMissions() const
         mission->Complete();
     }
 }
+
+#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+void UMSMissionSystem::DumpActiveMissions( FOutputDevice & output_device )
+{
+    output_device.Logf( ELogVerbosity::Verbose, TEXT( "Mission System - Active Missions :" ) );
+    for ( const auto & key_pair : ActiveMissions )
+    {
+        output_device.Logf( ELogVerbosity::Verbose, TEXT( " * Mission : %s" ), *GetNameSafe( key_pair.Key ) );
+
+        key_pair.Value->DumpObjectives( output_device );
+    }
+}
+#endif
 
 bool UMSMissionSystem::ShouldCreateSubsystem( UObject * outer ) const
 {

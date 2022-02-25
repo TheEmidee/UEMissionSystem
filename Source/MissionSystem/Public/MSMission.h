@@ -37,6 +37,10 @@ public:
     UFUNCTION( BlueprintPure )
     bool IsComplete() const;
 
+#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+    void DumpObjectives( FOutputDevice & output_device );
+#endif
+
 private:
     UFUNCTION()
     void OnObjectiveCompleted( UMSMissionObjective * objective, bool was_cancelled );
