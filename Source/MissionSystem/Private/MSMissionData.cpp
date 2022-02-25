@@ -13,6 +13,13 @@ FMSMissionObjectiveData::FMSMissionObjectiveData( const TSubclassOf< UMSMissionO
 {
 }
 
+UMSMissionData::UMSMissionData() :
+    bEnabled( true ),
+    bExecuteEndActionsWhenCancelled( true ),
+    bStartNextMissionsWhenCancelled( false )
+{
+}
+
 #if WITH_EDITOR
 EDataValidationResult UMSMissionData::IsDataValid( TArray< FText > & validation_errors )
 {

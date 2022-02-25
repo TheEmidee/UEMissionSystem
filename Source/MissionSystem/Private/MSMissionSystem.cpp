@@ -16,24 +16,31 @@ static FAutoConsoleCommand SkipMissionCommand(
         }
     } ) );
 
-UMSMission * UMSMissionSystem::StartMission( UMSMissionData * mission_data )
+
+void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
 {
     if ( mission_data == nullptr )
     {
         UE_SLOG( LogMissionSystem, Warning, TEXT( "StartMission called with a null mission data" ) );
-        return nullptr;
+        return;
     }
 
     if ( ActiveMissions.Contains( mission_data ) )
     {
         UE_SLOG( LogMissionSystem, Warning, TEXT( "StartMission called with an already active mission (%s)" ), *GetNameSafe( mission_data ) );
-        return nullptr;
+        return;
     }
 
     if ( CompletedMissions.Contains( mission_data ) )
     {
         UE_SLOG( LogMissionSystem, Warning, TEXT( "StartMission called with an already completed mission (%s)" ), *GetNameSafe( mission_data ) );
-        return nullptr;
+        return;
+    }
+
+    if ( !mission_data->bEnabled )
+    {
+        StartNextMissions( mission_data );
+        return;
     }
 
     auto * mission = NewObject< UMSMission >( this );
@@ -46,8 +53,6 @@ UMSMission * UMSMissionSystem::StartMission( UMSMissionData * mission_data )
 
     UE_SLOG( LogMissionSystem, Verbose, TEXT( "Start mission (%s)" ), *GetNameSafe( mission_data ) );
     mission->Start();
-
-    return mission;
 }
 
 bool UMSMissionSystem::IsMissionComplete( UMSMissionData * mission_data ) const
@@ -124,6 +129,14 @@ bool UMSMissionSystem::ShouldCreateSubsystem( UObject * outer ) const
     return true;
 }
 
+void UMSMissionSystem::StartNextMissions( UMSMissionData * mission_data )
+{
+    for ( auto * next_mission : mission_data->NextMissions )
+    {
+        StartMission( next_mission );
+    }
+}
+
 void UMSMissionSystem::OnMissionEnded( UMSMissionData * mission_data, const bool was_cancelled )
 {
     UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnMissionEnded (%s)" ), *GetNameSafe( mission_data ) );
@@ -135,13 +148,10 @@ void UMSMissionSystem::OnMissionEnded( UMSMissionData * mission_data, const bool
     {
         CompletedMissions.Add( mission_data );
     }
-    
+
     if ( !was_cancelled || mission_data->bStartNextMissionsWhenCancelled )
     {
-        for ( auto * next_mission : mission_data->NextMissions )
-        {
-            StartMission( next_mission );
-        }
+        StartNextMissions( mission_data );
     }
 }
 
