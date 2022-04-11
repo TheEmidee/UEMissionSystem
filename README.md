@@ -55,3 +55,4 @@ Note that all actions must be finished before going to the next step. This means
 * `MissionSystem.SkipMission` will complete all active missions
 * `MissionSystem.ListActiveMissions` will output in the log the list of active missions and their active objectives
 * `MissionSystem.IgnoreObjectivesWithTag XXX YYY` will add all the parameters to a list of tokens to ignore objectives from being executed
+* `MissionSystem.ClearIgnoreObjectivesTags` will clear the tags to ignore mission objectives
