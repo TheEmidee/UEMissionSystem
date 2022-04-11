@@ -4,6 +4,7 @@
 #include "MSMissionAction.h"
 #include "MSMissionData.h"
 #include "MSMissionObjective.h"
+#include "MSMissionSystem.h"
 
 #include <Engine/World.h>
 #include <Kismet/KismetStringLibrary.h>
@@ -46,10 +47,17 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
         auto * objective = NewObject< UMSMissionObjective >( this, objective_data.Objective );
         check( objective );
 
-        Objectives.Add( objective );
+        if ( CanExecuteObjective( objective ) )
+        {
+            Objectives.Add( objective );
 
-        // Insert in reverse order as objectives to start will be popped out of the list
-        PendingObjectives.Insert( objective, 0 );
+            // Insert in reverse order as objectives to start will be popped out of the list
+            PendingObjectives.Insert( objective, 0 );
+        }
+        else
+        {
+            objective->MarkPendingKill();
+        }
     }
 
     StartActionsExecutor.Initialize( *this, mission_data->StartActions, [ this ]() {
@@ -126,6 +134,8 @@ void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, 
     mission_objective->OnMissionObjectiveEnded().RemoveDynamic( this, &UMSMission::OnObjectiveCompleted );
     OnMissionObjectiveCompleteDelegate.Broadcast( mission_objective, was_cancelled );
 
+    mission_objective->MarkPendingKill();
+
     if ( bIsCancelled )
     {
         return;
@@ -162,6 +172,15 @@ void UMSMission::ExecuteNextObjective()
     if ( PendingObjectives.Num() > 0 )
     {
         auto * objective = PendingObjectives.Pop();
+
+        if ( !CanExecuteObjective( objective ) )
+        {
+            objective->MarkPendingKill();
+            Objectives.Remove( objective );
+            ExecuteNextObjective();
+            return;
+        }
+
         objective->OnMissionObjectiveEnded().AddDynamic( this, &UMSMission::OnObjectiveCompleted );
 
         UE_LOG( LogMissionSystem, Verbose, TEXT( "Execute objective %s" ), *objective->GetClass()->GetName() );
@@ -172,4 +191,16 @@ void UMSMission::ExecuteNextObjective()
     {
         TryEnd();
     }
+}
+
+bool UMSMission::CanExecuteObjective( UMSMissionObjective * objective ) const
+{
+#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+    if ( const auto * mission_system = GetWorld()->GetSubsystem< UMSMissionSystem >() )
+    {
+        return !mission_system->MustObjectiveBeIgnored( objective );
+    }
+#endif
+
+    return true;
 }
