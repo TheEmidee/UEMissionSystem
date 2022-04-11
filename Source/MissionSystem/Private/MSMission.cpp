@@ -103,7 +103,7 @@ void UMSMission::Cancel()
 
 bool UMSMission::IsComplete() const
 {
-    for ( auto * objective : Objectives )
+    for ( const auto * objective : Objectives )
     {
         if ( !objective->IsComplete() )
         {
