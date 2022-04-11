@@ -26,6 +26,18 @@ static FAutoConsoleCommand ListActiveMissionsCommand(
             mission_system->DumpActiveMissions( output_device );
         }
     } ) );
+
+static FAutoConsoleCommand IgnoreObjectivesWithTag(
+    TEXT( "MissionSystem.IgnoreObjectivesWithTag" ),
+    TEXT( "Don't start objectives that contain this tag." )
+        TEXT( "Can be used multiple times." )
+            TEXT( "Objectives already started that match the tags will be completed." ),
+    FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateLambda( []( const TArray< FString > & args, const UWorld * world, FOutputDevice & output_device ) {
+        if ( auto * mission_system = world->GetSubsystem< UMSMissionSystem >() )
+        {
+            mission_system->IgnoreObjectivesWithTags( args );
+        }
+    } ) );
 #endif
 
 void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
@@ -123,6 +135,48 @@ void UMSMissionSystem::DumpActiveMissions( FOutputDevice & output_device )
 
         key_pair.Value->DumpObjectives( output_device );
     }
+}
+
+void UMSMissionSystem::IgnoreObjectivesWithTags( const TArray< FString > & tags )
+{
+    for ( const auto & tag : tags )
+    {
+        TagsToIgnoreForObjectives.AddUnique( tag );
+    }
+
+    for ( const auto & key_pair : ActiveMissions )
+    {
+        for ( auto * objective : key_pair.Value->GetObjectives() )
+        {
+            if ( objective->IsComplete() )
+            {
+                continue;
+            }
+
+            if ( MustObjectiveBeIgnored( objective ) )
+            {
+                objective->CompleteObjective();
+            }
+        }
+    }
+}
+
+bool UMSMissionSystem::MustObjectiveBeIgnored( UMSMissionObjective * objective ) const
+{
+    FGameplayTagContainer objective_tag_container;
+    objective->GetOwnedGameplayTags( objective_tag_container );
+
+    TArray< FGameplayTag > objective_tags;
+    objective_tag_container.GetGameplayTagArray( objective_tags );
+
+    // Look in the tags of the objective if we can find one that contains any of the ignored tags
+    // Note that it does not need to match exactly. A substring is enough to return true
+    return objective_tags.FindByPredicate( [ this ]( const FGameplayTag & tag ) {
+        const auto objective_tag_name = tag.ToString();
+        return TagsToIgnoreForObjectives.ContainsByPredicate( [ &objective_tag_name ]( const FString & tag_to_ignore ) {
+            return objective_tag_name.Contains( tag_to_ignore );
+        } );
+    } ) != nullptr;
 }
 #endif
 
