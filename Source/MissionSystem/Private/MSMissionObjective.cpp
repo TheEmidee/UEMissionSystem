@@ -48,6 +48,11 @@ UWorld * UMSMissionObjective::GetWorld() const
     return nullptr;
 }
 
+void UMSMissionObjective::GetOwnedGameplayTags( FGameplayTagContainer & tag_container ) const
+{
+    tag_container.AppendTags( Tags );
+}
+
 void UMSMissionObjective::CancelObjective()
 {
     if ( !bIsComplete && !bIsCancelled )
