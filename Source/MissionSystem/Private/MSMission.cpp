@@ -5,12 +5,28 @@
 #include "MSMissionData.h"
 #include "MSMissionObjective.h"
 
+#include <Engine/World.h>
 #include <Kismet/KismetStringLibrary.h>
 
 UMSMission::UMSMission()
 {
     bIsStarted = false;
     bIsCancelled = false;
+}
+
+UWorld * UMSMission::GetWorld() const
+{
+    if ( IsTemplate() )
+    {
+        return nullptr;
+    }
+
+    if ( const auto * outer = GetOuter() )
+    {
+        return outer->GetWorld();
+    }
+
+    return nullptr;
 }
 
 void UMSMission::Initialize( UMSMissionData * mission_data )

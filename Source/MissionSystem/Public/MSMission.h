@@ -23,6 +23,8 @@ public:
 
     UMSMission();
 
+    UWorld * GetWorld() const override;
+
     FMSOnMissionEndedDelegate & OnMissionEnded();
     FMSOnMissionObjectiveEndedDelegate & OnMissionObjectiveEnded();
     const TArray< UMSMissionObjective * > & GetObjectives() const;
