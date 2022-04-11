@@ -38,6 +38,16 @@ static FAutoConsoleCommand IgnoreObjectivesWithTag(
             mission_system->IgnoreObjectivesWithTags( args );
         }
     } ) );
+
+static FAutoConsoleCommand ClearIgnoreObjectivesTags(
+    TEXT( "MissionSystem.ClearIgnoreObjectivesTag" ),
+    TEXT( "Clears the list of tags used to ignore objectives." ),
+    FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateLambda( []( const TArray< FString > & /*args*/, const UWorld * world, FOutputDevice & /*output_device*/ ) {
+        if ( auto * mission_system = world->GetSubsystem< UMSMissionSystem >() )
+        {
+            mission_system->ClearIgnoreObjectivesTags();
+        }
+    } ) );
 #endif
 
 void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
@@ -161,7 +171,12 @@ void UMSMissionSystem::IgnoreObjectivesWithTags( const TArray< FString > & tags 
     }
 }
 
-bool UMSMissionSystem::MustObjectiveBeIgnored( UMSMissionObjective * objective ) const
+void UMSMissionSystem::ClearIgnoreObjectivesTags()
+{
+    TagsToIgnoreForObjectives.Reset();
+}
+
+bool UMSMissionSystem::MustObjectiveBeIgnored( const UMSMissionObjective * objective ) const
 {
     FGameplayTagContainer objective_tag_container;
     objective->GetOwnedGameplayTags( objective_tag_container );
