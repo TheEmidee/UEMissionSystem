@@ -3,6 +3,8 @@
 #include "MSMissionTypes.h"
 
 #include <CoreMinimal.h>
+#include <GameplayTagContainer.h>
+#include <GameplayTagAssetInterface.h>
 
 #include "MSMissionObjective.generated.h"
 
@@ -12,7 +14,7 @@ class UMSMissionObjective;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams( FMSOnMissionObjectiveEndedDelegate, UMSMissionObjective *, MissionObjective, bool, WasCancelled );
 
 UCLASS( Abstract, BlueprintType, Blueprintable )
-class MISSIONSYSTEM_API UMSMissionObjective : public UObject
+class MISSIONSYSTEM_API UMSMissionObjective : public UObject, public IGameplayTagAssetInterface
 {
     GENERATED_BODY()
 
@@ -30,6 +32,8 @@ public:
     void CompleteObjective();
 
     UWorld * GetWorld() const override;
+
+    void GetOwnedGameplayTags( FGameplayTagContainer & tag_container ) const override;
 
 #if WITH_EDITOR
     EDataValidationResult IsDataValid( TArray< FText > & validation_errors ) override;
@@ -58,6 +62,9 @@ protected:
 
     UPROPERTY( BlueprintAssignable )
     FMSOnMissionObjectiveEndedDelegate OnObjectiveCompleteDelegate;
+
+    UPROPERTY( EditAnywhere )
+    FGameplayTagContainer Tags;
 
     UPROPERTY( EditAnywhere )
     uint8 bExecuteEndActionsWhenCancelled : 1;

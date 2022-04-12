@@ -39,6 +39,9 @@ public:
 
 #if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
     void DumpActiveMissions( FOutputDevice & output_device );
+    void IgnoreObjectivesWithTags( const TArray< FString > & tags );
+    void ClearIgnoreObjectivesTags();
+    bool MustObjectiveBeIgnored( const UMSMissionObjective * objective ) const;
 #endif
 
     bool ShouldCreateSubsystem( UObject * outer ) const override;
@@ -63,6 +66,9 @@ private:
 
     UPROPERTY()
     TArray< UMSMissionData * > CompletedMissions;
+
+    UPROPERTY()
+    TArray< FString > TagsToIgnoreForObjectives;
 };
 
 FORCEINLINE FMSOnMissionEndedDelegate & UMSMissionSystem::OnMissionEnded()

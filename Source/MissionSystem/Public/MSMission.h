@@ -23,6 +23,8 @@ public:
 
     UMSMission();
 
+    UWorld * GetWorld() const override;
+
     FMSOnMissionEndedDelegate & OnMissionEnded();
     FMSOnMissionObjectiveEndedDelegate & OnMissionObjectiveEnded();
     const TArray< UMSMissionObjective * > & GetObjectives() const;
@@ -48,6 +50,7 @@ private:
     void TryStart();
     void TryEnd();
     void ExecuteNextObjective();
+    bool CanExecuteObjective( UMSMissionObjective * objective ) const;
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
     UMSMissionData * Data;
