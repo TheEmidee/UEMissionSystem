@@ -7,13 +7,23 @@
 #include <Engine/World.h>
 
 #if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
-static FAutoConsoleCommand SkipMissionCommand(
-    TEXT( "MissionSystem.SkipMission" ),
+static FAutoConsoleCommand SkipMissionsCommand(
+    TEXT( "MissionSystem.SkipMissions" ),
     TEXT( "Skips the current missions." ),
     FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateLambda( []( const TArray< FString > & /*args*/, const UWorld * world, FOutputDevice & /*output_device*/ ) {
         if ( const auto * mission_system = world->GetSubsystem< UMSMissionSystem >() )
         {
             mission_system->CancelCurrentMissions();
+        }
+    } ) );
+
+static FAutoConsoleCommand CompleteMissionsCommand(
+    TEXT( "MissionSystem.CompleteMissions" ),
+    TEXT( "Completes the current missions." ),
+    FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateLambda( []( const TArray< FString > & /*args*/, const UWorld * world, FOutputDevice & /*output_device*/ ) {
+        if ( const auto * mission_system = world->GetSubsystem< UMSMissionSystem >() )
+        {
+            mission_system->CompleteCurrentMissions();
         }
     } ) );
 
