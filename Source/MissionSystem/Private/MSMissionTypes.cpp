@@ -3,6 +3,8 @@
 #include "MSLog.h"
 #include "MSMissionAction.h"
 
+#include <Templates/SubclassOf.h>
+
 void FMSActionExecutor::Initialize( UObject & action_owner, const TArray< TSubclassOf< UMSMissionAction > > & action_classes, const TFunction< void() > callback )
 {
     ActionClasses = action_classes;
@@ -10,6 +12,11 @@ void FMSActionExecutor::Initialize( UObject & action_owner, const TArray< TSubcl
 
     for ( const auto & action_class : action_classes )
     {
+        if ( !ensureAlwaysMsgf( IsValid( action_class ), TEXT( "%s has an invalid Mission Action!" ), *action_owner.GetName() ) )
+        {
+            continue;
+        }
+
         auto * action = NewObject< UMSMissionAction >( &action_owner, action_class );
         check( action );
 
