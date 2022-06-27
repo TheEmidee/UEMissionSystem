@@ -12,11 +12,22 @@ void FMSActionExecutor::Initialize( UObject & action_owner, const TArray< TSubcl
     ActionClasses = action_classes;
     Callback = callback;
 
-    auto * owning_mission_data = Cast< UMSMission >( &action_owner )->GetMissionData();
+    FString owning_object_name;
+    if ( const auto * owning_mission_data = Cast< UMSMission >( &action_owner ) )
+    {
+        if ( auto * mission_data = owning_mission_data->GetMissionData() )
+        {
+            owning_object_name = mission_data->GetName();
+        }
+    }
+    else if ( IsValid( &action_owner ) )
+    {
+        owning_object_name = action_owner.GetName();
+    }
 
     for ( const auto & action_class : action_classes )
     {
-        if ( !ensureAlwaysMsgf( IsValid( action_class ), TEXT( "%s has an invalid Mission Action!" ), *owning_mission_data->GetName() ) )
+        if ( !ensureAlwaysMsgf( IsValid( action_class ), TEXT( "%s has an invalid Mission Action!" ), *owning_object_name ) )
         {
             continue;
         }
