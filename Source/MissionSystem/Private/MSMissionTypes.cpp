@@ -1,7 +1,9 @@
 #include "MSMissionTypes.h"
 
 #include "MSLog.h"
+#include "MSMission.h"
 #include "MSMissionAction.h"
+#include "MSMissionData.h"
 
 #include <Templates/SubclassOf.h>
 
@@ -10,9 +12,11 @@ void FMSActionExecutor::Initialize( UObject & action_owner, const TArray< TSubcl
     ActionClasses = action_classes;
     Callback = callback;
 
+    auto * owning_mission_data = Cast< UMSMission >( &action_owner )->GetMissionData();
+
     for ( const auto & action_class : action_classes )
     {
-        if ( !ensureAlwaysMsgf( IsValid( action_class ), TEXT( "%s has an invalid Mission Action!" ), *action_owner.GetName() ) )
+        if ( !ensureAlwaysMsgf( IsValid( action_class ), TEXT( "%s has an invalid Mission Action!" ), *owning_mission_data->GetName() ) )
         {
             continue;
         }
