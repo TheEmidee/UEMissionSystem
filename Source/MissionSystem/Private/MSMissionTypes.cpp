@@ -20,7 +20,7 @@ void FMSActionExecutor::Initialize( UObject & action_owner, const TArray< TSubcl
             owning_object_name = mission_data->GetName();
         }
     }
-    else
+    else if ( IsValid( &action_owner ) )
     {
         owning_object_name = action_owner.GetName();
     }
