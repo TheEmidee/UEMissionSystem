@@ -1,15 +1,26 @@
 #include "MSMissionTypes.h"
 
 #include "MSLog.h"
+#include "MSMission.h"
 #include "MSMissionAction.h"
+#include "MSMissionData.h"
+
+#include <Templates/SubclassOf.h>
 
 void FMSActionExecutor::Initialize( UObject & action_owner, const TArray< TSubclassOf< UMSMissionAction > > & action_classes, const TFunction< void() > callback )
 {
     ActionClasses = action_classes;
     Callback = callback;
 
+    auto * owning_mission_data = Cast< UMSMission >( &action_owner )->GetMissionData();
+
     for ( const auto & action_class : action_classes )
     {
+        if ( !ensureAlwaysMsgf( IsValid( action_class ), TEXT( "%s has an invalid Mission Action!" ), *owning_mission_data->GetName() ) )
+        {
+            continue;
+        }
+
         auto * action = NewObject< UMSMissionAction >( &action_owner, action_class );
         check( action );
 
