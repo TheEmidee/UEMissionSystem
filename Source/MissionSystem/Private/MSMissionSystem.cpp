@@ -96,6 +96,17 @@ void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
 
     UE_SLOG( LogMissionSystem, Verbose, TEXT( "Start mission (%s)" ), *GetNameSafe( mission_data ) );
     mission->Start();
+
+    for ( auto & observer : MissionStartObservers )
+    {
+        observer.Callback.ExecuteIfBound( mission_data );
+    }
+}
+
+void UMSMissionSystem::StartMissionWithEndDelegate( UMSMissionData * mission_data, FMSMissionSystemMissionEndsDynamicDelegate when_mission_ends )
+{
+    StartMission( mission_data );
+    K2_WhenMissionEnds( mission_data, when_mission_ends );
 }
 
 bool UMSMissionSystem::IsMissionComplete( UMSMissionData * mission_data ) const
@@ -143,6 +154,29 @@ void UMSMissionSystem::CompleteCurrentMissions() const
     {
         mission->Complete();
     }
+}
+
+void UMSMissionSystem::WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartsDelegate & when_mission_starts )
+{
+    FMissionStartObserver observer;
+    observer.MissionData = mission_data;
+    observer.Callback = when_mission_starts;
+
+    MissionStartObservers.Emplace( MoveTemp( observer ) );
+
+    if ( IsMissionActive( mission_data ) )
+    {
+        when_mission_starts.ExecuteIfBound( mission_data );
+    }
+}
+
+void UMSMissionSystem::WhenMissionEnds( UMSMissionData * mission_data, const FMSMissionSystemMissionEndsDelegate & when_mission_ends )
+{
+    FMissionEndObserver observer;
+    observer.MissionData = mission_data;
+    observer.Callback = when_mission_ends;
+
+    MissionEndObservers.Emplace( MoveTemp( observer ) );
 }
 
 #if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
@@ -232,6 +266,24 @@ bool UMSMissionSystem::ShouldCreateSubsystem( UObject * outer ) const
     return true;
 }
 
+void UMSMissionSystem::K2_WhenMissionStartsOrIsActive( UMSMissionData * mission_data, FMSMissionSystemMissionStartsDynamicDelegate when_mission_starts )
+{
+    const auto active_delegate = FMSMissionSystemMissionStartsDelegate::CreateWeakLambda( when_mission_starts.GetUObject(), [ when_mission_starts ]( const UMSMissionData * mission_data ) {
+        when_mission_starts.ExecuteIfBound( mission_data );
+    } );
+
+    WhenMissionStartsOrIsActive( mission_data, active_delegate );
+}
+
+void UMSMissionSystem::K2_WhenMissionEnds( UMSMissionData * mission_data, FMSMissionSystemMissionEndsDynamicDelegate when_mission_ends )
+{
+    const auto ended_delegate = FMSMissionSystemMissionEndsDelegate::CreateWeakLambda( when_mission_ends.GetUObject(), [ when_mission_ends ]( const UMSMissionData * mission_data, const bool was_cancelled ) {
+        when_mission_ends.ExecuteIfBound( mission_data, was_cancelled );
+    } );
+
+    WhenMissionEnds( mission_data, ended_delegate );
+}
+
 void UMSMissionSystem::StartNextMissions( UMSMissionData * mission_data )
 {
     for ( auto * next_mission : mission_data->NextMissions )
@@ -250,6 +302,11 @@ void UMSMissionSystem::OnMissionEnded( UMSMissionData * mission_data, const bool
     if ( !was_cancelled )
     {
         CompletedMissions.Add( mission_data );
+    }
+
+    for ( auto & observer : MissionEndObservers )
+    {
+        observer.Callback.ExecuteIfBound( mission_data, was_cancelled );
     }
 
     if ( !was_cancelled || mission_data->bStartNextMissionsWhenCancelled )
