@@ -44,6 +44,11 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
             continue;
         }
 
+        if ( !ensureAlwaysMsgf( IsValid( objective_data.Objective ), TEXT( "%s has an invalid Mission Objective!" ), *mission_data->GetName() ) )
+        {
+            continue;
+        }
+
         auto * objective = NewObject< UMSMissionObjective >( this, objective_data.Objective );
         check( objective );
 

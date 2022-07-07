@@ -43,6 +43,8 @@ public:
     void DumpObjectives( FOutputDevice & output_device );
 #endif
 
+    const UMSMissionData * GetMissionData() const;
+
 private:
     UFUNCTION()
     void OnObjectiveCompleted( UMSMissionObjective * objective, bool was_cancelled );
@@ -102,4 +104,9 @@ FORCEINLINE const TArray< UMSMissionAction * > & UMSMission::GetStartActions() c
 FORCEINLINE bool UMSMission::IsStarted() const
 {
     return bIsStarted;
+}
+
+FORCEINLINE const UMSMissionData * UMSMission::GetMissionData() const
+{
+    return Data;
 }
