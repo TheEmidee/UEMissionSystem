@@ -10,6 +10,12 @@
 
 class UMSMissionData;
 
+DECLARE_DYNAMIC_DELEGATE_OneParam( FMSMissionSystemMissionStartsDynamicDelegate, const UMSMissionData *, MissionData );
+DECLARE_DELEGATE_OneParam( FMSMissionSystemMissionStartsDelegate, const UMSMissionData * MissionData );
+
+DECLARE_DYNAMIC_DELEGATE_TwoParams( FMSMissionSystemMissionEndsDynamicDelegate, const UMSMissionData *, MissionData, bool, WasCancelled );
+DECLARE_DELEGATE_TwoParams( FMSMissionSystemMissionEndsDelegate, const UMSMissionData * MissionData, bool WasCancelled );
+
 UCLASS()
 class MISSIONSYSTEM_API UMSMissionSystem final : public UWorldSubsystem
 {
@@ -19,23 +25,29 @@ public:
     FMSOnMissionEndedDelegate & OnMissionEnded();
     FMSOnMissionObjectiveEndedDelegate & OnMissionObjectiveEnded();
 
-    UFUNCTION( BlueprintCallable )
+    UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System" )
     void StartMission( UMSMissionData * mission_data );
 
-    UFUNCTION( BlueprintPure )
+    UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System", meta = ( AutoCreateRefTerm = "when_mission_ends" ) )
+    void StartMissionWithEndDelegate( UMSMissionData * mission_data, FMSMissionSystemMissionEndsDynamicDelegate when_mission_ends );
+
+    UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
     bool IsMissionComplete( UMSMissionData * mission_data ) const;
 
-    UFUNCTION( BlueprintPure )
+    UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
     bool IsMissionActive( UMSMissionData * mission_data ) const;
 
-    UFUNCTION( BlueprintPure )
+    UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
     UMSMission * GetActiveMission( UMSMissionData * mission_data ) const;
 
-    UFUNCTION( BlueprintCallable )
+    UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System" )
     void CancelCurrentMissions() const;
 
-    UFUNCTION( BlueprintCallable )
+    UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System" )
     void CompleteCurrentMissions() const;
+
+    void WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartsDelegate & when_mission_starts );
+    void WhenMissionEnds( UMSMissionData * mission_data, const FMSMissionSystemMissionEndsDelegate & when_mission_ends );
 
 #if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
     void DumpActiveMissions( FOutputDevice & output_device );
@@ -46,7 +58,26 @@ public:
 
     bool ShouldCreateSubsystem( UObject * outer ) const override;
 
+protected:
+    UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System", meta = ( DisplayName = "When Mission Starts or Is Active", AutoCreateRefTerm = "when_mission_starts" ) )
+    void K2_WhenMissionStartsOrIsActive( UMSMissionData * mission_data, FMSMissionSystemMissionStartsDynamicDelegate when_mission_starts );
+
+    UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System", meta = ( DisplayName = "When Mission Ends", AutoCreateRefTerm = "when_mission_ends" ) )
+    void K2_WhenMissionEnds( UMSMissionData * mission_data, FMSMissionSystemMissionEndsDynamicDelegate when_mission_ends );
+
 private:
+    struct FMissionStartObserver
+    {
+        UMSMissionData * MissionData;
+        FMSMissionSystemMissionStartsDelegate Callback;
+    };
+
+    struct FMissionEndObserver
+    {
+        UMSMissionData * MissionData;
+        FMSMissionSystemMissionEndsDelegate Callback;
+    };
+
     void StartNextMissions( UMSMissionData * mission_data );
 
     UFUNCTION()
@@ -69,6 +100,9 @@ private:
 
     UPROPERTY()
     TArray< FString > TagsToIgnoreForObjectives;
+
+    TArray< FMissionStartObserver > MissionStartObservers;
+    TArray< FMissionEndObserver > MissionEndObservers;
 };
 
 FORCEINLINE FMSOnMissionEndedDelegate & UMSMissionSystem::OnMissionEnded()
