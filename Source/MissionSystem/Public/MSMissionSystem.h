@@ -28,9 +28,6 @@ public:
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System" )
     void StartMission( UMSMissionData * mission_data );
 
-    UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System", meta = ( AutoCreateRefTerm = "when_mission_ends" ) )
-    void StartMissionWithEndDelegate( UMSMissionData * mission_data, FMSMissionSystemMissionEndsDynamicDelegate when_mission_ends );
-
     UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
     bool IsMissionComplete( UMSMissionData * mission_data ) const;
 
