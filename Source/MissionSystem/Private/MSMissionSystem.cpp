@@ -103,12 +103,6 @@ void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
     }
 }
 
-void UMSMissionSystem::StartMissionWithEndDelegate( UMSMissionData * mission_data, FMSMissionSystemMissionEndsDynamicDelegate when_mission_ends )
-{
-    StartMission( mission_data );
-    K2_WhenMissionEnds( mission_data, when_mission_ends );
-}
-
 bool UMSMissionSystem::IsMissionComplete( UMSMissionData * mission_data ) const
 {
     if ( /*ensureAlways*/ ( mission_data != nullptr ) )
