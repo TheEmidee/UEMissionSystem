@@ -61,7 +61,7 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
         }
         else
         {
-            objective->MarkPendingKill();
+            objective->MarkAsGarbage();
         }
     }
 
@@ -139,7 +139,7 @@ void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, 
     mission_objective->OnMissionObjectiveEnded().RemoveDynamic( this, &UMSMission::OnObjectiveCompleted );
     OnMissionObjectiveCompleteDelegate.Broadcast( mission_objective, was_cancelled );
 
-    mission_objective->MarkPendingKill();
+    mission_objective->MarkAsGarbage();
 
     if ( bIsCancelled )
     {
@@ -180,7 +180,7 @@ void UMSMission::ExecuteNextObjective()
 
         if ( !CanExecuteObjective( objective ) )
         {
-            objective->MarkPendingKill();
+            objective->MarkAsGarbage();
             Objectives.Remove( objective );
             ExecuteNextObjective();
             return;
