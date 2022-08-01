@@ -1,12 +1,12 @@
 #pragma once
 
+#include "MSMissionAction.h"
+#include "MSMissionObjective.h"
+
 #include <CoreMinimal.h>
 #include <Engine/DataAsset.h>
 
 #include "MSMissionData.generated.h"
-
-class UMSMissionAction;
-class UMSMissionObjective;
 
 USTRUCT( BlueprintType )
 struct MISSIONSYSTEM_API FMSMissionObjectiveData
