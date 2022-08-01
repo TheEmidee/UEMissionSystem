@@ -3,6 +3,7 @@
 #include "Chaos/AABB.h"
 
 #include <CoreMinimal.h>
+#include <Templates/SubclassOf.h>
 
 #include "MSMissionTypes.generated.h"
 
