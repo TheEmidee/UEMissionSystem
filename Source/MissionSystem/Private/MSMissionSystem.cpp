@@ -300,7 +300,10 @@ void UMSMissionSystem::OnMissionEnded( UMSMissionData * mission_data, const bool
 
     for ( auto & observer : MissionEndObservers )
     {
-        observer.Callback.ExecuteIfBound( mission_data, was_cancelled );
+        if ( observer.MissionData == mission_data )
+        {
+            observer.Callback.ExecuteIfBound( mission_data, was_cancelled );
+        }
     }
 
     if ( !was_cancelled || mission_data->bStartNextMissionsWhenCancelled )
