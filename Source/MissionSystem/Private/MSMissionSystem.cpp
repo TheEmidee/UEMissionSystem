@@ -306,6 +306,8 @@ void UMSMissionSystem::OnMissionEnded( UMSMissionData * mission_data, const bool
         }
     }
 
+    MissionEndObservers.Empty();
+
     if ( !was_cancelled || mission_data->bStartNextMissionsWhenCancelled )
     {
         StartNextMissions( mission_data );
