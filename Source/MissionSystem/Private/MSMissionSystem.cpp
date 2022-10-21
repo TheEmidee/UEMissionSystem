@@ -298,11 +298,14 @@ void UMSMissionSystem::OnMissionEnded( UMSMissionData * mission_data, const bool
         CompletedMissions.Add( mission_data );
     }
 
-    for ( auto & observer : MissionEndObservers )
+    for ( auto index = MissionEndObservers.Num() - 1; index >= 0; --index )
     {
+        auto & observer = MissionEndObservers[ index ];
+
         if ( observer.MissionData == mission_data )
         {
             observer.Callback.ExecuteIfBound( mission_data, was_cancelled );
+            MissionEndObservers.RemoveAt( index );
         }
     }
 
