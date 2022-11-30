@@ -72,7 +72,7 @@ void UMSMissionObjective::CancelObjective()
     }
 }
 #if WITH_EDITOR
-EDataValidationResult UMSMissionObjective::IsDataValid( TArray<FText> & validation_errors )
+EDataValidationResult UMSMissionObjective::IsDataValid( TArray< FText > & validation_errors )
 {
     Super::IsDataValid( validation_errors );
 
