@@ -40,7 +40,7 @@ public:
     bool IsComplete() const;
 
 #if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
-    void DumpObjectives( FOutputDevice & output_device );
+    void DumpMission( FOutputDevice & output_device );
 #endif
 
     const UMSMissionData * GetMissionData() const;
