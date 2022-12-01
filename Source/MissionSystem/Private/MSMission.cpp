@@ -124,21 +124,22 @@ bool UMSMission::IsComplete() const
 #if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
 void UMSMission::DumpMission( FOutputDevice & output_device )
 {
-    const FString status = IsComplete() ? "Completed" : ( bIsCancelled ? "Cancelled" : "OnGoing" );
+    const auto get_status = []( bool is_complete, bool is_cancelled ) {
+        return FString( is_complete ? TEXT( "Completed" ) : ( is_cancelled ? TEXT( "Cancelled" ) : TEXT( "OnGoing" ) ) );
+    };
 
     output_device.Logf( ELogVerbosity::Verbose,
         TEXT( " * Mission : %s - Status: %s" ),
         *GetNameSafe( GetMissionData() ),
-        *status );
+        *get_status( IsComplete(), bIsCancelled ) );
 
     for ( const auto * objective : Objectives )
     {
-        const FString objective_status = objective->IsComplete() ? "Completed" : ( objective->IsCancelled() ? "Cancelled" : "OnGoing" );
         output_device.Logf(
             ELogVerbosity::Verbose,
             TEXT( "   - Objective : %s - Status : %s" ),
             *GetNameSafe( objective ),
-            *objective_status );
+            *get_status( objective->IsComplete(), objective->IsCancelled() ) );
     }
 }
 #endif
