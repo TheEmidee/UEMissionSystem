@@ -3,8 +3,8 @@
 #include "MSMissionTypes.h"
 
 #include <CoreMinimal.h>
-#include <GameplayTagContainer.h>
 #include <GameplayTagAssetInterface.h>
+#include <GameplayTagContainer.h>
 
 #include "MSMissionObjective.generated.h"
 
@@ -25,6 +25,7 @@ public:
 
     FMSOnMissionObjectiveEndedDelegate & OnMissionObjectiveEnded();
     bool IsComplete() const;
+    bool IsCancelled() const;
 
     void Execute();
 
@@ -84,4 +85,9 @@ FORCEINLINE FMSOnMissionObjectiveEndedDelegate & UMSMissionObjective::OnMissionO
 FORCEINLINE bool UMSMissionObjective::IsComplete() const
 {
     return bIsComplete;
+}
+
+FORCEINLINE bool UMSMissionObjective::IsCancelled() const
+{
+    return bIsCancelled;
 }

@@ -70,6 +70,8 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
     } );
 
     EndActionsExecutor.Initialize( *this, mission_data->EndActions, [ this ]() {
+        ensure( IsComplete() || bIsCancelled );
+        Objectives.Empty();
         OnMissionEndedDelegate.Broadcast( Data, bIsCancelled );
     } );
 }
@@ -120,11 +122,24 @@ bool UMSMission::IsComplete() const
 }
 
 #if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
-void UMSMission::DumpObjectives( FOutputDevice & output_device )
+void UMSMission::DumpMission( FOutputDevice & output_device )
 {
+    const auto get_status = []( bool is_complete, bool is_cancelled ) {
+        return FString( is_complete ? TEXT( "Completed" ) : ( is_cancelled ? TEXT( "Cancelled" ) : TEXT( "OnGoing" ) ) );
+    };
+
+    output_device.Logf( ELogVerbosity::Verbose,
+        TEXT( " * Mission : %s - Status: %s" ),
+        *GetNameSafe( GetMissionData() ),
+        *get_status( IsComplete(), bIsCancelled ) );
+
     for ( const auto * objective : Objectives )
     {
-        output_device.Logf( ELogVerbosity::Verbose, TEXT( "   - Objective : %s - Complete : %s" ), *GetNameSafe( objective ), *UKismetStringLibrary::Conv_BoolToString( objective->IsComplete() ) );
+        output_device.Logf(
+            ELogVerbosity::Verbose,
+            TEXT( "   - Objective : %s - Status : %s" ),
+            *GetNameSafe( objective ),
+            *get_status( objective->IsComplete(), objective->IsCancelled() ) );
     }
 }
 #endif
@@ -138,8 +153,6 @@ void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, 
 
     mission_objective->OnMissionObjectiveEnded().RemoveDynamic( this, &UMSMission::OnObjectiveCompleted );
     OnMissionObjectiveCompleteDelegate.Broadcast( mission_objective, was_cancelled );
-
-    mission_objective->MarkAsGarbage();
 
     if ( bIsCancelled )
     {

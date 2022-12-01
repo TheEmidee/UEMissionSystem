@@ -179,9 +179,7 @@ void UMSMissionSystem::DumpActiveMissions( FOutputDevice & output_device )
     output_device.Logf( ELogVerbosity::Verbose, TEXT( "Mission System - Active Missions :" ) );
     for ( const auto & key_pair : ActiveMissions )
     {
-        output_device.Logf( ELogVerbosity::Verbose, TEXT( " * Mission : %s" ), *GetNameSafe( key_pair.Key ) );
-
-        key_pair.Value->DumpObjectives( output_device );
+        key_pair.Value->DumpMission( output_device );
     }
 }
 
