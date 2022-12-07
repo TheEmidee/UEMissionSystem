@@ -144,6 +144,17 @@ void UMSMission::DumpMission( FOutputDevice & output_device )
 }
 #endif
 
+void UMSMission::OnObjectiveStarted( UMSMissionObjective * mission_objective )
+{
+    if ( !bIsStarted )
+    {
+        return;
+    }
+
+    mission_objective->OnMissionObjectiveStarted().RemoveDynamic( this, &ThisClass::OnObjectiveStarted );
+    OnMissionObjectiveStartedDelegate.Broadcast( mission_objective );
+}
+
 void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, const bool was_cancelled )
 {
     if ( !bIsStarted )
@@ -151,7 +162,7 @@ void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, 
         return;
     }
 
-    mission_objective->OnMissionObjectiveEnded().RemoveDynamic( this, &UMSMission::OnObjectiveCompleted );
+    mission_objective->OnMissionObjectiveEnded().RemoveDynamic( this, &ThisClass::OnObjectiveCompleted );
     OnMissionObjectiveCompleteDelegate.Broadcast( mission_objective, was_cancelled );
 
     if ( bIsCancelled )
@@ -199,6 +210,7 @@ void UMSMission::ExecuteNextObjective()
             return;
         }
 
+        objective->OnMissionObjectiveStarted().AddDynamic( this, &UMSMission::OnObjectiveStarted );
         objective->OnMissionObjectiveEnded().AddDynamic( this, &UMSMission::OnObjectiveCompleted );
 
         UE_LOG( LogMissionSystem, Verbose, TEXT( "Execute objective %s" ), *objective->GetClass()->GetName() );

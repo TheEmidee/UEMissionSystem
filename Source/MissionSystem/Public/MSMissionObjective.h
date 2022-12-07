@@ -11,6 +11,7 @@
 class UMSMissionAction;
 class UMSMissionObjective;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FMSOnMissionObjectiveStartedDelegate, UMSMissionObjective *, MissionObjective );
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams( FMSOnMissionObjectiveEndedDelegate, UMSMissionObjective *, MissionObjective, bool, WasCancelled );
 
 UCLASS( Abstract, BlueprintType, Blueprintable )
@@ -23,7 +24,9 @@ public:
 
     friend class UMSMission;
 
+    FMSOnMissionObjectiveStartedDelegate & OnMissionObjectiveStarted();
     FMSOnMissionObjectiveEndedDelegate & OnMissionObjectiveEnded();
+
     bool IsComplete() const;
     bool IsCancelled() const;
 
@@ -62,6 +65,9 @@ protected:
     FMSActionExecutor EndActionsExecutor;
 
     UPROPERTY( BlueprintAssignable )
+    FMSOnMissionObjectiveStartedDelegate OnObjectiveStartedDelegate;
+
+    UPROPERTY( BlueprintAssignable )
     FMSOnMissionObjectiveEndedDelegate OnObjectiveCompleteDelegate;
 
     UPROPERTY( EditAnywhere )
@@ -76,6 +82,11 @@ protected:
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
     uint8 bIsCancelled : 1;
 };
+
+FORCEINLINE FMSOnMissionObjectiveStartedDelegate & UMSMissionObjective::OnMissionObjectiveStarted()
+{
+    return OnObjectiveStartedDelegate;
+}
 
 FORCEINLINE FMSOnMissionObjectiveEndedDelegate & UMSMissionObjective::OnMissionObjectiveEnded()
 {

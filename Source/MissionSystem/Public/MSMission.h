@@ -26,6 +26,7 @@ public:
     UWorld * GetWorld() const override;
 
     FMSOnMissionEndedDelegate & OnMissionEnded();
+    FMSOnMissionObjectiveStartedDelegate & OnMissionObjectiveStarted();
     FMSOnMissionObjectiveEndedDelegate & OnMissionObjectiveEnded();
     const TArray< UMSMissionObjective * > & GetObjectives() const;
     const TArray< UMSMissionAction * > & GetStartActions() const;
@@ -47,10 +48,14 @@ public:
 
 private:
     UFUNCTION()
+    void OnObjectiveStarted( UMSMissionObjective * mission_objective );
+
+    UFUNCTION()
     void OnObjectiveCompleted( UMSMissionObjective * objective, bool was_cancelled );
 
     void TryStart();
     void TryEnd();
+    UFUNCTION()
     void ExecuteNextObjective();
     bool CanExecuteObjective( UMSMissionObjective * objective ) const;
 
@@ -59,6 +64,9 @@ private:
 
     UPROPERTY( BlueprintAssignable )
     FMSOnMissionEndedDelegate OnMissionEndedDelegate;
+
+    UPROPERTY( BlueprintAssignable )
+    FMSOnMissionObjectiveStartedDelegate OnMissionObjectiveStartedDelegate;
 
     UPROPERTY( BlueprintAssignable )
     FMSOnMissionObjectiveEndedDelegate OnMissionObjectiveCompleteDelegate;
@@ -84,6 +92,11 @@ private:
 FORCEINLINE FMSOnMissionEndedDelegate & UMSMission::OnMissionEnded()
 {
     return OnMissionEndedDelegate;
+}
+
+FORCEINLINE FMSOnMissionObjectiveStartedDelegate & UMSMission::OnMissionObjectiveStarted()
+{
+    return OnMissionObjectiveStartedDelegate;
 }
 
 FORCEINLINE FMSOnMissionObjectiveEndedDelegate & UMSMission::OnMissionObjectiveEnded()

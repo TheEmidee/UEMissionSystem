@@ -12,6 +12,8 @@ UMSMissionObjective::UMSMissionObjective()
 
 void UMSMissionObjective::Execute()
 {
+    OnObjectiveStartedDelegate.Broadcast( this );
+
     StartActionsExecutor.Initialize( *this, StartActions, [ this ]() {
         K2_Execute();
     } );
