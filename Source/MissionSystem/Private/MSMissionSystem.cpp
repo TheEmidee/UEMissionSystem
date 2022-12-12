@@ -185,16 +185,17 @@ bool UMSMissionSystem::IsMissionObjectiveActive( TSubclassOf< UMSMissionObjectiv
 
 void UMSMissionSystem::WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartsDelegate & when_mission_starts )
 {
+    if ( IsMissionActive( mission_data ) )
+    {
+        when_mission_starts.ExecuteIfBound( mission_data );
+        return;
+    }
+
     FMissionStartObserver observer;
     observer.MissionData = mission_data;
     observer.Callback = when_mission_starts;
 
     MissionStartObservers.Emplace( MoveTemp( observer ) );
-
-    if ( IsMissionActive( mission_data ) )
-    {
-        when_mission_starts.ExecuteIfBound( mission_data );
-    }
 }
 
 void UMSMissionSystem::WhenMissionEnds( UMSMissionData * mission_data, const FMSMissionSystemMissionEndsDelegate & when_mission_ends )
@@ -208,16 +209,17 @@ void UMSMissionSystem::WhenMissionEnds( UMSMissionData * mission_data, const FMS
 
 void UMSMissionSystem::WhenMissionObjectiveStartsOrIsActive( TSubclassOf< UMSMissionObjective > mission_objective, const FMSMissionSystemMissionObjectiveStartsDelegate & when_mission_objective_starts )
 {
+    if ( IsMissionObjectiveActive( mission_objective ) )
+    {
+        when_mission_objective_starts.ExecuteIfBound( mission_objective );
+        return;
+    }
+
     FMissionObjectiveStartObserver observer;
     observer.MissionObjective = mission_objective;
     observer.Callback = when_mission_objective_starts;
 
     MissionObjectiveStartObservers.Emplace( MoveTemp( observer ) );
-
-    if ( IsMissionObjectiveActive( mission_objective ) )
-    {
-        when_mission_objective_starts.ExecuteIfBound( mission_objective );
-    }
 }
 
 void UMSMissionSystem::WhenMissionObjectiveEnds( TSubclassOf< UMSMissionObjective > mission_objective, const FMSMissionSystemMissionObjectiveEndsDelegate & when_mission_objective_ends )
