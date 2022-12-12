@@ -72,7 +72,7 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
     EndActionsExecutor.Initialize( *this, mission_data->EndActions, [ this ]() {
         ensure( IsComplete() || bIsCancelled );
         Objectives.Empty();
-        OnMissionEndedDelegate.Broadcast( Data, bIsCancelled );
+        OnMissionEndedEvent.Broadcast( Data, bIsCancelled );
     } );
 }
 
@@ -104,7 +104,7 @@ void UMSMission::Cancel()
     }
     else
     {
-        OnMissionEndedDelegate.Broadcast( Data, bIsCancelled );
+        OnMissionEndedEvent.Broadcast( Data, bIsCancelled );
     }
 }
 
@@ -151,8 +151,8 @@ void UMSMission::OnObjectiveStarted( UMSMissionObjective * mission_objective )
         return;
     }
 
-    mission_objective->OnMissionObjectiveStarted().RemoveDynamic( this, &ThisClass::OnObjectiveStarted );
-    OnMissionObjectiveStartedDelegate.Broadcast( mission_objective );
+    mission_objective->OnMissionObjectiveStarted().RemoveAll( this );
+    OnMissionObjectiveStartedEvent.Broadcast( mission_objective );
 }
 
 void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, const bool was_cancelled )
@@ -162,8 +162,8 @@ void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, 
         return;
     }
 
-    mission_objective->OnMissionObjectiveEnded().RemoveDynamic( this, &ThisClass::OnObjectiveCompleted );
-    OnMissionObjectiveCompleteDelegate.Broadcast( mission_objective, was_cancelled );
+    mission_objective->OnMissionObjectiveEnded().RemoveAll( this );
+    OnMissionObjectiveCompleteEvent.Broadcast( mission_objective, was_cancelled );
 
     if ( bIsCancelled )
     {
@@ -210,8 +210,8 @@ void UMSMission::ExecuteNextObjective()
             return;
         }
 
-        objective->OnMissionObjectiveStarted().AddDynamic( this, &UMSMission::OnObjectiveStarted );
-        objective->OnMissionObjectiveEnded().AddDynamic( this, &UMSMission::OnObjectiveCompleted );
+        objective->OnMissionObjectiveStarted().AddUObject( this, &UMSMission::OnObjectiveStarted );
+        objective->OnMissionObjectiveEnded().AddUObject( this, &UMSMission::OnObjectiveCompleted );
 
         UE_LOG( LogMissionSystem, Verbose, TEXT( "Execute objective %s" ), *objective->GetClass()->GetName() );
 

@@ -28,8 +28,8 @@ class MISSIONSYSTEM_API UMSMissionSystem final : public UWorldSubsystem
     GENERATED_BODY()
 
 public:
-    FMSOnMissionEndedDelegate & OnMissionEnded();
-    FMSOnMissionObjectiveEndedDelegate & OnMissionObjectiveEnded();
+    FMSOnMissionEndedEvent & OnMissionEnded();
+    FMSOnMissionObjectiveEndedEvent & OnMissionObjectiveEnded();
 
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System" )
     void StartMission( UMSMissionData * mission_data );
@@ -106,21 +106,12 @@ private:
     };
 
     void StartNextMissions( UMSMissionData * mission_data );
-
-    UFUNCTION()
     void OnMissionEnded( UMSMissionData * mission_data, bool was_cancelled );
-
-    UFUNCTION()
     void OnMissionObjectiveStarted( UMSMissionObjective * objective );
-
-    UFUNCTION()
     void OnMissionObjectiveEnded( UMSMissionObjective * objective, bool was_cancelled );
 
-    UPROPERTY( BlueprintAssignable )
-    FMSOnMissionEndedDelegate OnMissionCompleteDelegate;
-
-    UPROPERTY( BlueprintAssignable )
-    FMSOnMissionObjectiveEndedDelegate OnMissionObjectiveCompleteDelegate;
+    FMSOnMissionEndedEvent OnMissionEndedEvent;
+    FMSOnMissionObjectiveEndedEvent OnMissionObjectiveEndedEvent;
 
     UPROPERTY()
     TMap< UMSMissionData *, UMSMission * > ActiveMissions;
@@ -137,12 +128,12 @@ private:
     TArray< FMissionObjectiveEndObserver > MissionObjectiveEndObservers;
 };
 
-FORCEINLINE FMSOnMissionEndedDelegate & UMSMissionSystem::OnMissionEnded()
+FORCEINLINE FMSOnMissionEndedEvent & UMSMissionSystem::OnMissionEnded()
 {
-    return OnMissionCompleteDelegate;
+    return OnMissionEndedEvent;
 }
 
-FORCEINLINE FMSOnMissionObjectiveEndedDelegate & UMSMissionSystem::OnMissionObjectiveEnded()
+FORCEINLINE FMSOnMissionObjectiveEndedEvent & UMSMissionSystem::OnMissionObjectiveEnded()
 {
-    return OnMissionObjectiveCompleteDelegate;
+    return OnMissionObjectiveEndedEvent;
 }

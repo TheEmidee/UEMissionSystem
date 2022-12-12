@@ -89,9 +89,9 @@ void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
     auto * mission = NewObject< UMSMission >( this );
     mission->Initialize( mission_data );
 
-    mission->OnMissionEnded().AddDynamic( this, &UMSMissionSystem::OnMissionEnded );
-    mission->OnMissionObjectiveStarted().AddDynamic( this, &UMSMissionSystem::OnMissionObjectiveStarted );
-    mission->OnMissionObjectiveEnded().AddDynamic( this, &UMSMissionSystem::OnMissionObjectiveEnded );
+    mission->OnMissionEnded().AddUObject( this, &UMSMissionSystem::OnMissionEnded );
+    mission->OnMissionObjectiveStarted().AddUObject( this, &UMSMissionSystem::OnMissionObjectiveStarted );
+    mission->OnMissionObjectiveEnded().AddUObject( this, &UMSMissionSystem::OnMissionObjectiveEnded );
 
     ActiveMissions.Add( mission_data, mission );
 
@@ -362,7 +362,7 @@ void UMSMissionSystem::OnMissionEnded( UMSMissionData * mission_data, const bool
 {
     UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnMissionEnded (%s)" ), *GetNameSafe( mission_data ) );
 
-    OnMissionCompleteDelegate.Broadcast( mission_data, was_cancelled );
+    OnMissionEndedEvent.Broadcast( mission_data, was_cancelled );
     ActiveMissions.Remove( mission_data );
 
     if ( !was_cancelled )
@@ -400,7 +400,7 @@ void UMSMissionSystem::OnMissionObjectiveEnded( UMSMissionObjective * objective,
 {
     UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnMissionObjectiveEnded (%s)" ), *objective->GetClass()->GetName() );
 
-    OnMissionObjectiveCompleteDelegate.Broadcast( objective, was_cancelled );
+    OnMissionObjectiveEndedEvent.Broadcast( objective, was_cancelled );
 
     for ( auto index = MissionObjectiveEndObservers.Num() - 1; index >= 0; --index )
     {

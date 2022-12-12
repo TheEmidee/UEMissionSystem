@@ -12,14 +12,14 @@ UMSMissionObjective::UMSMissionObjective()
 
 void UMSMissionObjective::Execute()
 {
-    OnObjectiveStartedDelegate.Broadcast( this );
+    OnObjectiveStartedEvent.Broadcast( this );
 
     StartActionsExecutor.Initialize( *this, StartActions, [ this ]() {
         K2_Execute();
     } );
 
     EndActionsExecutor.Initialize( *this, EndActions, [ this ]() {
-        OnObjectiveCompleteDelegate.Broadcast( this, bIsCancelled );
+        OnObjectiveCompleteEvent.Broadcast( this, bIsCancelled );
     } );
 
     StartActionsExecutor.Execute();
@@ -69,7 +69,7 @@ void UMSMissionObjective::CancelObjective()
         }
         else
         {
-            OnObjectiveCompleteDelegate.Broadcast( this, bIsCancelled );
+            OnObjectiveCompleteEvent.Broadcast( this, bIsCancelled );
         }
     }
 }

@@ -11,7 +11,7 @@ class UMSMissionAction;
 class UMSMissionData;
 class UMSMissionObjective;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams( FMSOnMissionEndedDelegate, UMSMissionData *, MissionData, bool, WasCancelled );
+DECLARE_EVENT_TwoParams( UMSMission, FMSOnMissionEndedEvent, UMSMissionData * MissionData, bool WasCancelled );
 
 UCLASS()
 class MISSIONSYSTEM_API UMSMission final : public UObject
@@ -25,9 +25,9 @@ public:
 
     UWorld * GetWorld() const override;
 
-    FMSOnMissionEndedDelegate & OnMissionEnded();
-    FMSOnMissionObjectiveStartedDelegate & OnMissionObjectiveStarted();
-    FMSOnMissionObjectiveEndedDelegate & OnMissionObjectiveEnded();
+    FMSOnMissionEndedEvent & OnMissionEnded();
+    FMSOnMissionObjectiveStartedEvent & OnMissionObjectiveStarted();
+    FMSOnMissionObjectiveEndedEvent & OnMissionObjectiveEnded();
     const TArray< UMSMissionObjective * > & GetObjectives() const;
     const TArray< UMSMissionAction * > & GetStartActions() const;
     bool IsStarted() const;
@@ -47,29 +47,22 @@ public:
     const UMSMissionData * GetMissionData() const;
 
 private:
-    UFUNCTION()
     void OnObjectiveStarted( UMSMissionObjective * mission_objective );
-
-    UFUNCTION()
     void OnObjectiveCompleted( UMSMissionObjective * objective, bool was_cancelled );
-
     void TryStart();
     void TryEnd();
+
     UFUNCTION()
     void ExecuteNextObjective();
+
     bool CanExecuteObjective( UMSMissionObjective * objective ) const;
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
     UMSMissionData * Data;
 
-    UPROPERTY( BlueprintAssignable )
-    FMSOnMissionEndedDelegate OnMissionEndedDelegate;
-
-    UPROPERTY( BlueprintAssignable )
-    FMSOnMissionObjectiveStartedDelegate OnMissionObjectiveStartedDelegate;
-
-    UPROPERTY( BlueprintAssignable )
-    FMSOnMissionObjectiveEndedDelegate OnMissionObjectiveCompleteDelegate;
+    FMSOnMissionEndedEvent OnMissionEndedEvent;
+    FMSOnMissionObjectiveStartedEvent OnMissionObjectiveStartedEvent;
+    FMSOnMissionObjectiveEndedEvent OnMissionObjectiveCompleteEvent;
 
     UPROPERTY()
     TArray< UMSMissionObjective * > Objectives;
@@ -89,19 +82,19 @@ private:
     uint8 bIsCancelled : 1;
 };
 
-FORCEINLINE FMSOnMissionEndedDelegate & UMSMission::OnMissionEnded()
+FORCEINLINE FMSOnMissionEndedEvent & UMSMission::OnMissionEnded()
 {
-    return OnMissionEndedDelegate;
+    return OnMissionEndedEvent;
 }
 
-FORCEINLINE FMSOnMissionObjectiveStartedDelegate & UMSMission::OnMissionObjectiveStarted()
+FORCEINLINE FMSOnMissionObjectiveStartedEvent & UMSMission::OnMissionObjectiveStarted()
 {
-    return OnMissionObjectiveStartedDelegate;
+    return OnMissionObjectiveStartedEvent;
 }
 
-FORCEINLINE FMSOnMissionObjectiveEndedDelegate & UMSMission::OnMissionObjectiveEnded()
+FORCEINLINE FMSOnMissionObjectiveEndedEvent & UMSMission::OnMissionObjectiveEnded()
 {
-    return OnMissionObjectiveCompleteDelegate;
+    return OnMissionObjectiveCompleteEvent;
 }
 
 FORCEINLINE const TArray< UMSMissionObjective * > & UMSMission::GetObjectives() const
