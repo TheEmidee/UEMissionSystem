@@ -16,14 +16,20 @@ DECLARE_DELEGATE_OneParam( FMSMissionSystemMissionStartsDelegate, const UMSMissi
 DECLARE_DYNAMIC_DELEGATE_TwoParams( FMSMissionSystemMissionEndsDynamicDelegate, const UMSMissionData *, MissionData, bool, WasCancelled );
 DECLARE_DELEGATE_TwoParams( FMSMissionSystemMissionEndsDelegate, const UMSMissionData * MissionData, bool WasCancelled );
 
+DECLARE_DYNAMIC_DELEGATE_OneParam( FMSMissionSystemMissionObjectiveStartsDynamicDelegate, TSubclassOf< UMSMissionObjective >, MissionObjective );
+DECLARE_DELEGATE_OneParam( FMSMissionSystemMissionObjectiveStartsDelegate, TSubclassOf< UMSMissionObjective > MissionObjective );
+
+DECLARE_DYNAMIC_DELEGATE_TwoParams( FMSMissionSystemMissionObjectiveEndsDynamicDelegate, TSubclassOf< UMSMissionObjective >, MissionObjective, bool, WasCancelled );
+DECLARE_DELEGATE_TwoParams( FMSMissionSystemMissionObjectiveEndsDelegate, TSubclassOf< UMSMissionObjective > MissionObjective, bool WasCancelled );
+
 UCLASS()
 class MISSIONSYSTEM_API UMSMissionSystem final : public UWorldSubsystem
 {
     GENERATED_BODY()
 
 public:
-    FMSOnMissionEndedDelegate & OnMissionEnded();
-    FMSOnMissionObjectiveEndedDelegate & OnMissionObjectiveEnded();
+    FMSOnMissionEndedEvent & OnMissionEnded();
+    FMSOnMissionObjectiveEndedEvent & OnMissionObjectiveEnded();
 
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System" )
     void StartMission( UMSMissionData * mission_data );
@@ -43,8 +49,14 @@ public:
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System" )
     void CompleteCurrentMissions() const;
 
+    UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
+    bool IsMissionObjectiveActive( TSubclassOf< UMSMissionObjective > mission_objective_class ) const;
+
     void WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartsDelegate & when_mission_starts );
     void WhenMissionEnds( UMSMissionData * mission_data, const FMSMissionSystemMissionEndsDelegate & when_mission_ends );
+
+    void WhenMissionObjectiveStartsOrIsActive( TSubclassOf< UMSMissionObjective > mission_objective, const FMSMissionSystemMissionObjectiveStartsDelegate & when_mission_objective_starts );
+    void WhenMissionObjectiveEnds( TSubclassOf< UMSMissionObjective > mission_objective, const FMSMissionSystemMissionObjectiveEndsDelegate & when_mission_objective_ends );
 
 #if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
     void DumpActiveMissions( FOutputDevice & output_device );
@@ -62,6 +74,12 @@ protected:
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System", meta = ( DisplayName = "When Mission Ends", AutoCreateRefTerm = "when_mission_ends" ) )
     void K2_WhenMissionEnds( UMSMissionData * mission_data, FMSMissionSystemMissionEndsDynamicDelegate when_mission_ends );
 
+    UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System", meta = ( DisplayName = "When Mission Objective Starts or Is Active", AutoCreateRefTerm = "when_mission_objective_starts" ) )
+    void K2_WhenMissionObjectiveStartsOrIsActive( TSubclassOf< UMSMissionObjective > mission_objective, FMSMissionSystemMissionObjectiveStartsDynamicDelegate when_mission_objective_starts );
+
+    UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System", meta = ( DisplayName = "When Mission Objective Ends", AutoCreateRefTerm = "when_mission_objective_ends" ) )
+    void K2_WhenMissionObjectiveEnds( TSubclassOf< UMSMissionObjective > mission_objective, FMSMissionSystemMissionObjectiveEndsDynamicDelegate when_mission_objective_ends );
+
 private:
     struct FMissionStartObserver
     {
@@ -75,19 +93,25 @@ private:
         FMSMissionSystemMissionEndsDelegate Callback;
     };
 
+    struct FMissionObjectiveStartObserver
+    {
+        TSubclassOf< UMSMissionObjective > MissionObjective;
+        FMSMissionSystemMissionObjectiveStartsDelegate Callback;
+    };
+
+    struct FMissionObjectiveEndObserver
+    {
+        TSubclassOf< UMSMissionObjective > MissionObjective;
+        FMSMissionSystemMissionObjectiveEndsDelegate Callback;
+    };
+
     void StartNextMissions( UMSMissionData * mission_data );
-
-    UFUNCTION()
     void OnMissionEnded( UMSMissionData * mission_data, bool was_cancelled );
-
-    UFUNCTION()
+    void OnMissionObjectiveStarted( UMSMissionObjective * objective );
     void OnMissionObjectiveEnded( UMSMissionObjective * objective, bool was_cancelled );
 
-    UPROPERTY( BlueprintAssignable )
-    FMSOnMissionEndedDelegate OnMissionCompleteDelegate;
-
-    UPROPERTY( BlueprintAssignable )
-    FMSOnMissionObjectiveEndedDelegate OnMissionObjectiveCompleteDelegate;
+    FMSOnMissionEndedEvent OnMissionEndedEvent;
+    FMSOnMissionObjectiveEndedEvent OnMissionObjectiveEndedEvent;
 
     UPROPERTY()
     TMap< UMSMissionData *, UMSMission * > ActiveMissions;
@@ -100,14 +124,16 @@ private:
 
     TArray< FMissionStartObserver > MissionStartObservers;
     TArray< FMissionEndObserver > MissionEndObservers;
+    TArray< FMissionObjectiveStartObserver > MissionObjectiveStartObservers;
+    TArray< FMissionObjectiveEndObserver > MissionObjectiveEndObservers;
 };
 
-FORCEINLINE FMSOnMissionEndedDelegate & UMSMissionSystem::OnMissionEnded()
+FORCEINLINE FMSOnMissionEndedEvent & UMSMissionSystem::OnMissionEnded()
 {
-    return OnMissionCompleteDelegate;
+    return OnMissionEndedEvent;
 }
 
-FORCEINLINE FMSOnMissionObjectiveEndedDelegate & UMSMissionSystem::OnMissionObjectiveEnded()
+FORCEINLINE FMSOnMissionObjectiveEndedEvent & UMSMissionSystem::OnMissionObjectiveEnded()
 {
-    return OnMissionObjectiveCompleteDelegate;
+    return OnMissionObjectiveEndedEvent;
 }

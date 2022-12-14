@@ -72,7 +72,7 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
     EndActionsExecutor.Initialize( *this, mission_data->EndActions, [ this ]() {
         ensure( IsComplete() || bIsCancelled );
         Objectives.Empty();
-        OnMissionEndedDelegate.Broadcast( Data, bIsCancelled );
+        OnMissionEndedEvent.Broadcast( Data, bIsCancelled );
     } );
 }
 
@@ -104,7 +104,7 @@ void UMSMission::Cancel()
     }
     else
     {
-        OnMissionEndedDelegate.Broadcast( Data, bIsCancelled );
+        OnMissionEndedEvent.Broadcast( Data, bIsCancelled );
     }
 }
 
@@ -144,6 +144,17 @@ void UMSMission::DumpMission( FOutputDevice & output_device )
 }
 #endif
 
+void UMSMission::OnObjectiveStarted( UMSMissionObjective * mission_objective )
+{
+    if ( !bIsStarted )
+    {
+        return;
+    }
+
+    mission_objective->OnMissionObjectiveStarted().RemoveAll( this );
+    OnMissionObjectiveStartedEvent.Broadcast( mission_objective );
+}
+
 void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, const bool was_cancelled )
 {
     if ( !bIsStarted )
@@ -151,8 +162,8 @@ void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, 
         return;
     }
 
-    mission_objective->OnMissionObjectiveEnded().RemoveDynamic( this, &UMSMission::OnObjectiveCompleted );
-    OnMissionObjectiveCompleteDelegate.Broadcast( mission_objective, was_cancelled );
+    mission_objective->OnMissionObjectiveEnded().RemoveAll( this );
+    OnMissionObjectiveCompleteEvent.Broadcast( mission_objective, was_cancelled );
 
     if ( bIsCancelled )
     {
@@ -199,7 +210,8 @@ void UMSMission::ExecuteNextObjective()
             return;
         }
 
-        objective->OnMissionObjectiveEnded().AddDynamic( this, &UMSMission::OnObjectiveCompleted );
+        objective->OnMissionObjectiveStarted().AddUObject( this, &UMSMission::OnObjectiveStarted );
+        objective->OnMissionObjectiveEnded().AddUObject( this, &UMSMission::OnObjectiveCompleted );
 
         UE_LOG( LogMissionSystem, Verbose, TEXT( "Execute objective %s" ), *objective->GetClass()->GetName() );
 

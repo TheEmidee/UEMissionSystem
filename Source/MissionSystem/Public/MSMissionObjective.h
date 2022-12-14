@@ -11,7 +11,8 @@
 class UMSMissionAction;
 class UMSMissionObjective;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams( FMSOnMissionObjectiveEndedDelegate, UMSMissionObjective *, MissionObjective, bool, WasCancelled );
+DECLARE_EVENT_OneParam( UMSMissionObjective, FMSOnMissionObjectiveStartedEvent, UMSMissionObjective * MissionObjective );
+DECLARE_EVENT_TwoParams( UMSMissionObjective, FMSOnMissionObjectiveEndedEvent, UMSMissionObjective * MissionObjective, bool WasCancelled );
 
 UCLASS( Abstract, BlueprintType, Blueprintable )
 class MISSIONSYSTEM_API UMSMissionObjective : public UObject, public IGameplayTagAssetInterface
@@ -23,7 +24,9 @@ public:
 
     friend class UMSMission;
 
-    FMSOnMissionObjectiveEndedDelegate & OnMissionObjectiveEnded();
+    FMSOnMissionObjectiveStartedEvent & OnMissionObjectiveStarted();
+    FMSOnMissionObjectiveEndedEvent & OnMissionObjectiveEnded();
+
     bool IsComplete() const;
     bool IsCancelled() const;
 
@@ -61,9 +64,6 @@ protected:
     UPROPERTY()
     FMSActionExecutor EndActionsExecutor;
 
-    UPROPERTY( BlueprintAssignable )
-    FMSOnMissionObjectiveEndedDelegate OnObjectiveCompleteDelegate;
-
     UPROPERTY( EditAnywhere )
     FGameplayTagContainer Tags;
 
@@ -75,11 +75,19 @@ protected:
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
     uint8 bIsCancelled : 1;
+
+    FMSOnMissionObjectiveStartedEvent OnObjectiveStartedEvent;
+    FMSOnMissionObjectiveEndedEvent OnObjectiveCompleteEvent;
 };
 
-FORCEINLINE FMSOnMissionObjectiveEndedDelegate & UMSMissionObjective::OnMissionObjectiveEnded()
+FORCEINLINE FMSOnMissionObjectiveStartedEvent & UMSMissionObjective::OnMissionObjectiveStarted()
 {
-    return OnObjectiveCompleteDelegate;
+    return OnObjectiveStartedEvent;
+}
+
+FORCEINLINE FMSOnMissionObjectiveEndedEvent & UMSMissionObjective::OnMissionObjectiveEnded()
+{
+    return OnObjectiveCompleteEvent;
 }
 
 FORCEINLINE bool UMSMissionObjective::IsComplete() const
