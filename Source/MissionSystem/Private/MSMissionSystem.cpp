@@ -411,7 +411,7 @@ void UMSMissionSystem::OnMissionObjectiveEnded( UMSMissionObjective * objective,
         if ( observer.MissionObjective == objective->GetClass() )
         {
             observer.Callback.ExecuteIfBound( objective->GetClass(), was_cancelled );
-            MissionEndObservers.RemoveAt( index );
+            MissionObjectiveEndObservers.RemoveAt( index );
         }
     }
 }
