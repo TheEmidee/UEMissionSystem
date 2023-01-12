@@ -83,7 +83,8 @@ void UMSMission::Start()
 
 void UMSMission::Complete()
 {
-    for ( auto * objective : Objectives )
+    auto objectives = Objectives;
+    for ( auto * objective : objectives )
     {
         objective->CompleteObjective();
     }
