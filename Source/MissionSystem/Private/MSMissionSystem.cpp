@@ -372,7 +372,6 @@ void UMSMissionSystem::OnMissionEnded( UMSMissionData * mission_data, const bool
         CompletedMissions.Add( mission_data );
     }
 
-    // :TODO: Make sure observers of not yet started missions get cleaned up as well
     for ( auto index = MissionEndObservers.Num() - 1; index >= 0; --index )
     {
         auto & observer = MissionEndObservers[ index ];
