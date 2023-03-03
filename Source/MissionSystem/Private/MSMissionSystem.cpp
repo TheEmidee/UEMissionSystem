@@ -98,9 +98,15 @@ void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
     UE_SLOG( LogMissionSystem, Verbose, TEXT( "Start mission (%s)" ), *GetNameSafe( mission_data ) );
     mission->Start();
 
-    for ( auto & observer : MissionStartObservers )
+    for ( auto index = MissionStartObservers.Num() - 1; index >= 0; --index )
     {
-        observer.Callback.ExecuteIfBound( mission_data );
+        auto & observer = MissionStartObservers[ index ];
+
+        if ( observer.MissionData == mission_data )
+        {
+            observer.Callback.ExecuteIfBound( mission_data );
+            MissionStartObservers.RemoveAt( index );
+        }
     }
 }
 
