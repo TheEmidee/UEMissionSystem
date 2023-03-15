@@ -185,8 +185,6 @@ void UMSMission::TryStart()
 
     bIsStarted = true;
 
-
-
     ExecuteNextObjective();
 }
 
