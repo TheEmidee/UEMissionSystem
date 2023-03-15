@@ -31,28 +31,28 @@ class MISSIONSYSTEM_API UMSMissionData final : public UDataAsset
 public:
     UMSMissionData();
 
-    UPROPERTY( EditDefaultsOnly )
+    UPROPERTY( EditDefaultsOnly, Category = "Actions" )
     TArray< TSubclassOf< UMSMissionAction > > StartActions;
 
-    UPROPERTY( EditDefaultsOnly )
-    TArray< FMSMissionObjectiveData > Objectives;
-
-    UPROPERTY( EditDefaultsOnly )
+    UPROPERTY( EditDefaultsOnly, Category = "Actions" )
     TArray< TSubclassOf< UMSMissionAction > > EndActions;
 
-    UPROPERTY( EditDefaultsOnly )
+    UPROPERTY( EditDefaultsOnly, Category = "Objectives" )
+    TArray< FMSMissionObjectiveData > Objectives;
+
+    UPROPERTY( EditDefaultsOnly, Category = "Other missions" )
     TArray< UMSMissionData * > NextMissions;
 
-    UPROPERTY( EditDefaultsOnly )
+    UPROPERTY( EditDefaultsOnly, Category = "Other missions" )
     TArray< UMSMissionData * > MissionsToCancel;
 
-    UPROPERTY( EditDefaultsOnly )
+    UPROPERTY( EditDefaultsOnly, Category = "Options" )
     uint8 bEnabled : 1;
 
-    UPROPERTY( EditDefaultsOnly )
+    UPROPERTY( EditDefaultsOnly, Category = "Options" )
     uint8 bExecuteEndActionsWhenCancelled : 1;
 
-    UPROPERTY( EditDefaultsOnly )
+    UPROPERTY( EditDefaultsOnly, Category = "Options" )
     uint8 bStartNextMissionsWhenCancelled : 1;
 
 #if WITH_EDITOR
