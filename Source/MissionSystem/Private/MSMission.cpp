@@ -7,7 +7,6 @@
 #include "MSMissionSystem.h"
 
 #include <Engine/World.h>
-#include <Kismet/KismetStringLibrary.h>
 
 UMSMission::UMSMission()
 {

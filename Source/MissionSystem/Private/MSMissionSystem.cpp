@@ -80,6 +80,14 @@ void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
         return;
     }
 
+    for ( const auto * mission_to_cancel : mission_data->MissionsToCancel )
+    {
+        if ( const auto * active_mission_to_cancel_ptr = ActiveMissions.Find( mission_to_cancel ) )
+        {
+            ( *active_mission_to_cancel_ptr )->Cancel();
+        }
+    }
+
     if ( !mission_data->bEnabled )
     {
         StartNextMissions( mission_data );
@@ -137,10 +145,10 @@ UMSMission * UMSMissionSystem::GetActiveMission( UMSMissionData * mission_data )
 
 void UMSMissionSystem::CancelCurrentMissions() const
 {
-    TArray< UMSMission * > result;
-    ActiveMissions.GenerateValueArray( result );
+    TArray< UMSMission *, TInlineAllocator< 32 > > active_missions;
+    GetActiveMissions( active_missions );
 
-    for ( auto * mission : result )
+    for ( auto * mission : active_missions )
     {
         mission->Cancel();
     }
@@ -148,10 +156,10 @@ void UMSMissionSystem::CancelCurrentMissions() const
 
 void UMSMissionSystem::CompleteCurrentMissions() const
 {
-    TArray< UMSMission * > result;
-    ActiveMissions.GenerateValueArray( result );
+    TArray< UMSMission *, TInlineAllocator< 32 > > active_missions;
+    GetActiveMissions( active_missions );
 
-    for ( auto * mission : result )
+    for ( auto * mission : active_missions )
     {
         mission->Complete();
     }

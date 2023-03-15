@@ -52,10 +52,10 @@ protected:
 
     void CancelObjective();
 
-    UPROPERTY( EditDefaultsOnly )
+    UPROPERTY( EditDefaultsOnly, Category = "Actions" )
     TArray< TSubclassOf< UMSMissionAction > > StartActions;
 
-    UPROPERTY( EditDefaultsOnly )
+    UPROPERTY( EditDefaultsOnly, Category = "Actions" )
     TArray< TSubclassOf< UMSMissionAction > > EndActions;
 
     UPROPERTY()
@@ -64,10 +64,10 @@ protected:
     UPROPERTY()
     FMSActionExecutor EndActionsExecutor;
 
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category = "Tags" )
     FGameplayTagContainer Tags;
 
-    UPROPERTY( EditAnywhere )
+    UPROPERTY( EditAnywhere, Category = "Actions" )
     uint8 bExecuteEndActionsWhenCancelled : 1;
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
