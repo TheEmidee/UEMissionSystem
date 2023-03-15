@@ -80,6 +80,14 @@ void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
         return;
     }
 
+    for ( const auto * mission_to_cancel : mission_data->MissionsToCancel )
+    {
+        if ( const auto * active_mission_to_cancel_ptr = ActiveMissions.Find( mission_to_cancel ) )
+        {
+            ( *active_mission_to_cancel_ptr )->Cancel();
+        }
+    }
+
     if ( !mission_data->bEnabled )
     {
         StartNextMissions( mission_data );

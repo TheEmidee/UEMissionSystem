@@ -44,6 +44,9 @@ public:
     TArray< UMSMissionData * > NextMissions;
 
     UPROPERTY( EditDefaultsOnly )
+    TArray< UMSMissionData * > MissionsToCancel;
+
+    UPROPERTY( EditDefaultsOnly )
     uint8 bEnabled : 1;
 
     UPROPERTY( EditDefaultsOnly )
