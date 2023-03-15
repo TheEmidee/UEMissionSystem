@@ -145,10 +145,10 @@ UMSMission * UMSMissionSystem::GetActiveMission( UMSMissionData * mission_data )
 
 void UMSMissionSystem::CancelCurrentMissions() const
 {
-    TArray< UMSMission * > result;
-    ActiveMissions.GenerateValueArray( result );
+    TArray< UMSMission *, TInlineAllocator< 32 > > active_missions;
+    GetActiveMissions( active_missions );
 
-    for ( auto * mission : result )
+    for ( auto * mission : active_missions )
     {
         mission->Cancel();
     }
@@ -156,10 +156,10 @@ void UMSMissionSystem::CancelCurrentMissions() const
 
 void UMSMissionSystem::CompleteCurrentMissions() const
 {
-    TArray< UMSMission * > result;
-    ActiveMissions.GenerateValueArray( result );
+    TArray< UMSMission *, TInlineAllocator< 32 > > active_missions;
+    GetActiveMissions( active_missions );
 
-    for ( auto * mission : result )
+    for ( auto * mission : active_missions )
     {
         mission->Complete();
     }

@@ -105,6 +105,12 @@ private:
         FMSMissionSystemMissionObjectiveEndsDelegate Callback;
     };
 
+    template< typename _ALLOCATOR_TYPE_ >
+    void GetActiveMissions( TArray< UMSMission *, _ALLOCATOR_TYPE_ > & missions ) const
+    {
+        ActiveMissions.GenerateValueArray( missions );
+    }
+
     void StartNextMissions( UMSMissionData * mission_data );
     void OnMissionEnded( UMSMissionData * mission_data, bool was_cancelled );
     void OnMissionObjectiveStarted( UMSMissionObjective * objective );
