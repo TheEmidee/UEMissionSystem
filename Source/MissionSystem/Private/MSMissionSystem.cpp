@@ -183,9 +183,9 @@ bool UMSMissionSystem::IsMissionObjectiveActive( TSubclassOf< UMSMissionObjectiv
         }
     }
 
-    for ( auto * completed_mission : CompletedMissions )
+    for ( const auto & [ mission_data, was_cancelled ] : CompletedMissions )
     {
-        for ( const auto & objective_data : completed_mission->Objectives )
+        for ( const auto & objective_data : mission_data->Objectives )
         {
             if ( objective_data.bEnabled && objective_data.Objective == mission_objective_class )
             {
@@ -214,6 +214,12 @@ void UMSMissionSystem::WhenMissionStartsOrIsActive( UMSMissionData * mission_dat
 
 void UMSMissionSystem::WhenMissionEnds( UMSMissionData * mission_data, const FMSMissionSystemMissionEndsDelegate & when_mission_ends )
 {
+    if ( IsMissionComplete( mission_data ))
+    {
+        when_mission_ends.ExecuteIfBound( mission_data, CompletedMissions[ mission_data ] );
+        return;
+    }
+
     FMissionEndObserver observer;
     observer.MissionData = mission_data;
     observer.Callback = when_mission_ends;
@@ -310,7 +316,7 @@ bool UMSMissionSystem::ShouldCreateSubsystem( UObject * outer ) const
         return false;
     }
 
-    auto * world = Cast< UWorld >( outer );
+    const auto * world = Cast< UWorld >( outer );
 
     if ( world == nullptr )
     {
