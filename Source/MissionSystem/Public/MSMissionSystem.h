@@ -123,7 +123,7 @@ private:
     TMap< UMSMissionData *, UMSMission * > ActiveMissions;
 
     UPROPERTY()
-    TArray< UMSMissionData * > CompletedMissions;
+    TMap< UMSMissionData *, bool > CompletedMissions;
 
     UPROPERTY()
     TArray< FString > TagsToIgnoreForObjectives;
