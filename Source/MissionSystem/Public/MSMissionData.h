@@ -56,6 +56,6 @@ public:
     uint8 bStartNextMissionsWhenCancelled : 1;
 
 #if WITH_EDITOR
-    EDataValidationResult IsDataValid( TArray< FText > & validation_errors ) override;
+    EDataValidationResult IsDataValid( FDataValidationContext & context ) const override;
 #endif
 };
