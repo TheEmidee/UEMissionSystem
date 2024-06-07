@@ -55,7 +55,7 @@ protected:
     UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
     TArray< TObjectPtr< UMSMissionAction > > StartActions;
 
-    UPROPERTY( EditDefaultsOnly, Category = "Actions" )
+    UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
     TArray< TObjectPtr< UMSMissionAction > > EndActions;
 
     UPROPERTY()
