@@ -40,7 +40,7 @@ public:
     void GetOwnedGameplayTags( FGameplayTagContainer & tag_container ) const override;
 
 #if WITH_EDITOR
-    EDataValidationResult IsDataValid( TArray< FText > & validation_errors ) override;
+    EDataValidationResult IsDataValid( FDataValidationContext & context ) const override;
 #endif
 
 protected:
@@ -52,11 +52,11 @@ protected:
 
     void CancelObjective();
 
-    UPROPERTY( EditDefaultsOnly, Category = "Actions" )
-    TArray< TSubclassOf< UMSMissionAction > > StartActions;
+    UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
+    TArray< TObjectPtr< UMSMissionAction > > StartActions;
 
     UPROPERTY( EditDefaultsOnly, Category = "Actions" )
-    TArray< TSubclassOf< UMSMissionAction > > EndActions;
+    TArray< TObjectPtr< UMSMissionAction > > EndActions;
 
     UPROPERTY()
     FMSActionExecutor StartActionsExecutor;

@@ -5,11 +5,8 @@
 #include "MSMissionAction.h"
 #include "MSMissionData.h"
 
-#include <Templates/SubclassOf.h>
-
-void FMSActionExecutor::Initialize( UObject & action_owner, const TArray< TSubclassOf< UMSMissionAction > > & action_classes, const TFunction< void() > callback )
+void FMSActionExecutor::Initialize( UObject & action_owner, const TArray< UMSMissionAction * > & action_classes, const TFunction< void() > callback )
 {
-    ActionClasses = action_classes;
     Callback = callback;
 
     FString owning_object_name;
@@ -25,18 +22,7 @@ void FMSActionExecutor::Initialize( UObject & action_owner, const TArray< TSubcl
         owning_object_name = action_owner.GetName();
     }
 
-    for ( const auto & action_class : action_classes )
-    {
-        if ( !ensureAlwaysMsgf( IsValid( action_class ), TEXT( "%s has an invalid Mission Action!" ), *owning_object_name ) )
-        {
-            continue;
-        }
-
-        auto * action = NewObject< UMSMissionAction >( &action_owner, action_class );
-        check( action );
-
-        InstancedActions.Add( action );
-    }
+    InstancedActions = action_classes;
 }
 
 void FMSActionExecutor::Execute()

@@ -74,11 +74,11 @@ void UMSMissionObjective::CancelObjective()
     }
 }
 #if WITH_EDITOR
-EDataValidationResult UMSMissionObjective::IsDataValid( TArray< FText > & validation_errors )
+EDataValidationResult UMSMissionObjective::IsDataValid( FDataValidationContext & context ) const
 {
-    Super::IsDataValid( validation_errors );
+    Super::IsDataValid( context );
 
-    return FDVEDataValidator( validation_errors )
+    return FDVEDataValidator( context )
         .NoNullItem( VALIDATOR_GET_PROPERTY( StartActions ) )
         .NoNullItem( VALIDATOR_GET_PROPERTY( EndActions ) )
         .Result();
