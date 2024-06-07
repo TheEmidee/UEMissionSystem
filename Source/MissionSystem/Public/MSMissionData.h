@@ -31,11 +31,11 @@ class MISSIONSYSTEM_API UMSMissionData final : public UDataAsset
 public:
     UMSMissionData();
 
-    UPROPERTY( EditDefaultsOnly, Category = "Actions" )
-    TArray< TSubclassOf< UMSMissionAction > > StartActions;
+    UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
+    TArray< TObjectPtr< UMSMissionAction > > StartActions;
 
-    UPROPERTY( EditDefaultsOnly, Category = "Actions" )
-    TArray< TSubclassOf< UMSMissionAction > > EndActions;
+    UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
+    TArray< TObjectPtr< UMSMissionAction > > EndActions;
 
     UPROPERTY( EditDefaultsOnly, Category = "Objectives" )
     TArray< FMSMissionObjectiveData > Objectives;
@@ -56,6 +56,6 @@ public:
     uint8 bStartNextMissionsWhenCancelled : 1;
 
 #if WITH_EDITOR
-    EDataValidationResult IsDataValid( TArray< FText > & validation_errors ) override;
+    EDataValidationResult IsDataValid( FDataValidationContext & context ) const override;
 #endif
 };

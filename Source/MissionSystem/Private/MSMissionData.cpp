@@ -21,20 +21,20 @@ UMSMissionData::UMSMissionData() :
 }
 
 #if WITH_EDITOR
-EDataValidationResult UMSMissionData::IsDataValid( TArray< FText > & validation_errors )
+EDataValidationResult UMSMissionData::IsDataValid( FDataValidationContext & context ) const
 {
-    Super::IsDataValid( validation_errors );
+    Super::IsDataValid( context );
 
-    return FDVEDataValidator( validation_errors )
+    return FDVEDataValidator( context )
         .NoNullItem( VALIDATOR_GET_PROPERTY( StartActions ) )
         .NoNullItem( VALIDATOR_GET_PROPERTY( EndActions ) )
         .NoNullItem( VALIDATOR_GET_PROPERTY( NextMissions ) )
-        .CustomValidation< TArray< FMSMissionObjectiveData > >( Objectives, []( TArray< FText > & errors, TArray< FMSMissionObjectiveData > objectives ) {
+        .CustomValidation< TArray< FMSMissionObjectiveData > >( Objectives, []( FDataValidationContext & context, const TArray< FMSMissionObjectiveData > & objectives ) {
             for ( const auto & objective_data : objectives )
             {
                 if ( objective_data.Objective == nullptr )
                 {
-                    errors.Add( FText::FromString( TEXT( "Objectives contains an invalid objective" ) ) );
+                    context.AddError( FText::FromString( TEXT( "Objectives contains an invalid objective" ) ) );
                 }
             }
         } )
