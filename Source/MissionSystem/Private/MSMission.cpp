@@ -8,10 +8,11 @@
 
 #include <Engine/World.h>
 
-UMSMission::UMSMission()
+UMSMission::UMSMission() :
+    Data( nullptr ),
+    bIsStarted( false ),
+    bIsCancelled( false )
 {
-    bIsStarted = false;
-    bIsCancelled = false;
 }
 
 UWorld * UMSMission::GetWorld() const
@@ -143,6 +144,31 @@ void UMSMission::DumpMission( FOutputDevice & output_device )
     }
 }
 #endif
+
+void UMSMission::SerializeState( FArchive & archive )
+{
+    archive << bIsStarted;
+    archive << bIsCancelled;
+
+    if ( archive.IsSaving() )
+    {
+        auto num_objectives = Objectives.Num();
+        archive << num_objectives;
+
+        for ( auto * objective : Objectives )
+        {
+            objective->SerializeState( archive );
+        }
+
+        auto num_pending_objectives = PendingObjectives.Num();
+        archive << num_pending_objectives;
+
+        for ( auto * objective : PendingObjectives )
+        {
+            objective->SerializeState( archive );
+        }
+    }
+}
 
 void UMSMission::OnObjectiveStarted( UMSMissionObjective * mission_objective )
 {

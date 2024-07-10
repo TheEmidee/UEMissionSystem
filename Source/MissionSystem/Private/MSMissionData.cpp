@@ -20,6 +20,27 @@ UMSMissionData::UMSMissionData() :
 {
 }
 
+void UMSMissionData::PostLoad()
+{
+    Super::PostLoad();
+
+    RegenerateGuidIfNeeded();
+}
+
+void UMSMissionData::PostDuplicate( bool duplicate_for_pie )
+{
+    Super::PostDuplicate( duplicate_for_pie );
+
+    RegenerateGuidIfNeeded();
+}
+
+void UMSMissionData::PostEditImport()
+{
+    Super::PostEditImport();
+
+    RegenerateGuidIfNeeded();
+}
+
 #if WITH_EDITOR
 EDataValidationResult UMSMissionData::IsDataValid( FDataValidationContext & context ) const
 {
@@ -40,4 +61,14 @@ EDataValidationResult UMSMissionData::IsDataValid( FDataValidationContext & cont
         } )
         .Result();
 }
+
 #endif
+
+void UMSMissionData::RegenerateGuidIfNeeded()
+{
+    if ( !MissionId.IsValid() )
+    {
+        MissionId = FGuid::NewGuid();
+        Modify();
+    }
+}

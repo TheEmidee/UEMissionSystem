@@ -3,11 +3,11 @@
 #include "DVEDataValidator.h"
 #include "MSMissionAction.h"
 
-UMSMissionObjective::UMSMissionObjective()
+UMSMissionObjective::UMSMissionObjective() :
+    bExecuteEndActionsWhenCancelled( false ),
+    bIsComplete( false ),
+    bIsCancelled( false )
 {
-    bExecuteEndActionsWhenCancelled = false;
-    bIsComplete = false;
-    bIsCancelled = false;
 }
 
 void UMSMissionObjective::Execute()
@@ -23,6 +23,27 @@ void UMSMissionObjective::Execute()
     } );
 
     StartActionsExecutor.Execute();
+}
+
+void UMSMissionObjective::PostLoad()
+{
+    UObject::PostLoad();
+
+    RegenerateGuidIfNeeded();
+}
+
+void UMSMissionObjective::PostDuplicate( bool duplicate_for_pie )
+{
+    UObject::PostDuplicate( duplicate_for_pie );
+
+    RegenerateGuidIfNeeded();
+}
+
+void UMSMissionObjective::PostEditImport()
+{
+    UObject::PostEditImport();
+
+    RegenerateGuidIfNeeded();
 }
 
 void UMSMissionObjective::CompleteObjective()
@@ -55,6 +76,19 @@ void UMSMissionObjective::GetOwnedGameplayTags( FGameplayTagContainer & tag_cont
     tag_container.AppendTags( Tags );
 }
 
+#if WITH_EDITOR
+EDataValidationResult UMSMissionObjective::IsDataValid( FDataValidationContext & context ) const
+{
+    Super::IsDataValid( context );
+
+    return FDVEDataValidator( context )
+        .NoNullItem( VALIDATOR_GET_PROPERTY( StartActions ) )
+        .NoNullItem( VALIDATOR_GET_PROPERTY( EndActions ) )
+        .Result();
+}
+
+#endif
+
 void UMSMissionObjective::CancelObjective()
 {
     if ( !bIsComplete && !bIsCancelled )
@@ -73,17 +107,21 @@ void UMSMissionObjective::CancelObjective()
         }
     }
 }
-#if WITH_EDITOR
-EDataValidationResult UMSMissionObjective::IsDataValid( FDataValidationContext & context ) const
-{
-    Super::IsDataValid( context );
 
-    return FDVEDataValidator( context )
-        .NoNullItem( VALIDATOR_GET_PROPERTY( StartActions ) )
-        .NoNullItem( VALIDATOR_GET_PROPERTY( EndActions ) )
-        .Result();
+void UMSMissionObjective::RegenerateGuidIfNeeded()
+{
+    if ( !ObjectiveId.IsValid() )
+    {
+        ObjectiveId = FGuid::NewGuid();
+        Modify();
+    }
 }
-#endif
+
+void UMSMissionObjective::SerializeState( FArchive & archive )
+{
+    archive << bIsComplete;
+    archive << bIsCancelled;
+}
 
 void UMSMissionObjective::K2_Execute_Implementation()
 {

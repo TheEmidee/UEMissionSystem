@@ -27,10 +27,13 @@ public:
     FMSOnMissionObjectiveStartedEvent & OnMissionObjectiveStarted();
     FMSOnMissionObjectiveEndedEvent & OnMissionObjectiveEnded();
 
+    const FGuid & GetObjectiveId() const;
     bool IsComplete() const;
     bool IsCancelled() const;
-
     void Execute();
+    void PostLoad() override;
+    void PostDuplicate( bool duplicate_for_pie ) override;
+    void PostEditImport() override;
 
     UFUNCTION( BlueprintCallable )
     void CompleteObjective();
@@ -43,6 +46,8 @@ public:
     EDataValidationResult IsDataValid( FDataValidationContext & context ) const override;
 #endif
 
+    void SerializeState( FArchive & archive );
+
 protected:
     UFUNCTION( BlueprintNativeEvent, DisplayName = "Execute" )
     void K2_Execute();
@@ -51,6 +56,7 @@ protected:
     void K2_OnObjectiveEnded( bool was_cancelled );
 
     void CancelObjective();
+    void RegenerateGuidIfNeeded();
 
     UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
     TArray< TObjectPtr< UMSMissionAction > > StartActions;
@@ -71,10 +77,13 @@ protected:
     uint8 bExecuteEndActionsWhenCancelled : 1;
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
-    uint8 bIsComplete : 1;
+    bool bIsComplete;
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
-    uint8 bIsCancelled : 1;
+    bool bIsCancelled;
+
+    UPROPERTY( VisibleAnywhere, AdvancedDisplay )
+    FGuid ObjectiveId;
 
     FMSOnMissionObjectiveStartedEvent OnObjectiveStartedEvent;
     FMSOnMissionObjectiveEndedEvent OnObjectiveCompleteEvent;
@@ -88,6 +97,11 @@ FORCEINLINE FMSOnMissionObjectiveStartedEvent & UMSMissionObjective::OnMissionOb
 FORCEINLINE FMSOnMissionObjectiveEndedEvent & UMSMissionObjective::OnMissionObjectiveEnded()
 {
     return OnObjectiveCompleteEvent;
+}
+
+FORCEINLINE const FGuid & UMSMissionObjective::GetObjectiveId() const
+{
+    return ObjectiveId;
 }
 
 FORCEINLINE bool UMSMissionObjective::IsComplete() const

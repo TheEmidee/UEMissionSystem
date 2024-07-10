@@ -31,6 +31,11 @@ class MISSIONSYSTEM_API UMSMissionData final : public UDataAsset
 public:
     UMSMissionData();
 
+    const FGuid & GetMissionId() const;
+    void PostLoad() override;
+    void PostDuplicate( bool duplicate_for_pie ) override;
+    void PostEditImport() override;
+
     UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
     TArray< TObjectPtr< UMSMissionAction > > StartActions;
 
@@ -55,7 +60,18 @@ public:
     UPROPERTY( EditDefaultsOnly, Category = "Options" )
     uint8 bStartNextMissionsWhenCancelled : 1;
 
+    UPROPERTY( VisibleAnywhere, AdvancedDisplay )
+    FGuid MissionId;
+
 #if WITH_EDITOR
     EDataValidationResult IsDataValid( FDataValidationContext & context ) const override;
 #endif
+
+private:
+    void RegenerateGuidIfNeeded();
 };
+
+FORCEINLINE const FGuid & UMSMissionData::GetMissionId() const
+{
+    return MissionId;
+}

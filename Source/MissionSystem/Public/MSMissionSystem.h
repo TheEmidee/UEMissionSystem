@@ -2,6 +2,7 @@
 
 #include "MSMission.h"
 #include "MSMissionData.h"
+#include "MSMissionHistory.h"
 
 #include <CoreMinimal.h>
 #include <Subsystems/WorldSubsystem.h>
@@ -35,13 +36,13 @@ public:
     void StartMission( UMSMissionData * mission_data );
 
     UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
-    bool IsMissionComplete( UMSMissionData * mission_data ) const;
+    bool IsMissionComplete( const UMSMissionData * mission_data ) const;
 
     UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
-    bool IsMissionActive( UMSMissionData * mission_data ) const;
+    bool IsMissionActive( const UMSMissionData * mission_data ) const;
 
     UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
-    UMSMission * GetActiveMission( UMSMissionData * mission_data ) const;
+    UMSMission * GetActiveMission( const UMSMissionData * mission_data ) const;
 
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System" )
     void CancelCurrentMissions() const;
@@ -50,13 +51,13 @@ public:
     void CompleteCurrentMissions() const;
 
     UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
-    bool IsMissionObjectiveActive( TSubclassOf< UMSMissionObjective > mission_objective_class ) const;
+    bool IsMissionObjectiveActive( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const;
 
     void WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartsDelegate & when_mission_starts );
     void WhenMissionEnds( UMSMissionData * mission_data, const FMSMissionSystemMissionEndsDelegate & when_mission_ends );
 
-    void WhenMissionObjectiveStartsOrIsActive( TSubclassOf< UMSMissionObjective > mission_objective, const FMSMissionSystemMissionObjectiveStartsDelegate & when_mission_objective_starts );
-    void WhenMissionObjectiveEnds( TSubclassOf< UMSMissionObjective > mission_objective, const FMSMissionSystemMissionObjectiveEndsDelegate & when_mission_objective_ends );
+    void WhenMissionObjectiveStartsOrIsActive(const TSubclassOf<UMSMissionObjective>& mission_objective_class, const FMSMissionSystemMissionObjectiveStartsDelegate & when_mission_objective_starts);
+    void WhenMissionObjectiveEnds( const TSubclassOf< UMSMissionObjective > & mission_objective_class, const FMSMissionSystemMissionObjectiveEndsDelegate & when_mission_objective_ends );
 
 #if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
     void DumpActiveMissions( FOutputDevice & output_device );
@@ -66,6 +67,7 @@ public:
 #endif
 
     bool ShouldCreateSubsystem( UObject * outer ) const override;
+    void Serialize( FArchive & archive ) override;
 
 protected:
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System", meta = ( DisplayName = "When Mission Starts or Is Active", AutoCreateRefTerm = "when_mission_starts" ) )
@@ -105,12 +107,8 @@ private:
         FMSMissionSystemMissionObjectiveEndsDelegate Callback;
     };
 
-    template< typename _ALLOCATOR_TYPE_ >
-    void GetActiveMissions( TArray< UMSMission *, _ALLOCATOR_TYPE_ > & missions ) const
-    {
-        ActiveMissions.GenerateValueArray( missions );
-    }
-
+    UMSMission * CreateMissionFromData( UMSMissionData * mission_data );
+    void StartMission( UMSMission * mission );
     void StartNextMissions( UMSMissionData * mission_data );
     void OnMissionEnded( UMSMissionData * mission_data, bool was_cancelled );
     void OnMissionObjectiveStarted( UMSMissionObjective * objective );
@@ -120,10 +118,7 @@ private:
     FMSOnMissionObjectiveEndedEvent OnMissionObjectiveEndedEvent;
 
     UPROPERTY()
-    TMap< UMSMissionData *, UMSMission * > ActiveMissions;
-
-    UPROPERTY()
-    TMap< UMSMissionData *, bool > CompletedMissions;
+    TArray< UMSMission * > ActiveMissions;
 
     UPROPERTY()
     TArray< FString > TagsToIgnoreForObjectives;
@@ -132,6 +127,7 @@ private:
     TArray< FMissionEndObserver > MissionEndObservers;
     TArray< FMissionObjectiveStartObserver > MissionObjectiveStartObservers;
     TArray< FMissionObjectiveEndObserver > MissionObjectiveEndObservers;
+    FMSMissionHistory MissionHistory;
 };
 
 FORCEINLINE FMSOnMissionEndedEvent & UMSMissionSystem::OnMissionEnded()

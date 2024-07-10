@@ -46,6 +46,8 @@ public:
 
     const UMSMissionData * GetMissionData() const;
 
+    void SerializeState( FArchive & archive );
+
 private:
     void OnObjectiveStarted( UMSMissionObjective * mission_objective );
     void OnObjectiveCompleted( UMSMissionObjective * objective, bool was_cancelled );
@@ -77,9 +79,9 @@ private:
     FMSActionExecutor EndActionsExecutor;
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
-    uint8 bIsStarted : 1;
+    bool bIsStarted;
 
-    uint8 bIsCancelled : 1;
+    bool bIsCancelled;
 };
 
 FORCEINLINE FMSOnMissionEndedEvent & UMSMission::OnMissionEnded()
