@@ -64,10 +64,10 @@ static FAutoConsoleCommand ClearIgnoreObjectivesTags(
 
 void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
 {
-    Does this make sense to create helper functions like that?
+    /*Does this make sense to create helper functions like that?
     How will we do when we will load the savegame?
     We will load the history, but how do we start the active missions?
-    We will most probably have to keep an array of UMSMissionData somewhere to create the missions and only activate the active objectives
+    We will most probably have to keep an array of UMSMissionData somewhere to create the missions and only activate the active objectives*/
 
     auto * mission = CreateMissionFromData( mission_data );
 
@@ -346,7 +346,7 @@ UMSMission * UMSMissionSystem::CreateMissionFromData( UMSMissionData * mission_d
         return nullptr;
     }
 
-    const auto mission_id = mission_data->GetMissionId();
+    const auto mission_id = mission_data->GetGuid();
     if ( !mission_id.IsValid() )
     {
         UE_SLOG( LogMissionSystem, Warning, TEXT( "StartMission called with a mission data with an invalid ID" ) );
@@ -365,7 +365,9 @@ UMSMission * UMSMissionSystem::CreateMissionFromData( UMSMissionData * mission_d
         return nullptr;
     }
 
-    check( !ActiveMissions.Contains( mission_data ) );
+    check( ActiveMissions.FindByPredicate( [ mission_data ]( const auto * mission ) {
+        return mission->GetMissionData() == mission_data;
+    } ) == nullptr );
 
     for ( const auto * mission_to_cancel : mission_data->MissionsToCancel )
     {
@@ -419,7 +421,7 @@ void UMSMissionSystem::StartMission( UMSMission * mission )
     }
 }
 
-void UMSMissionSystem::StartNextMissions( UMSMissionData * mission_data )
+void UMSMissionSystem::StartNextMissions( const UMSMissionData * mission_data )
 {
     for ( auto * next_mission : mission_data->NextMissions )
     {
@@ -427,14 +429,19 @@ void UMSMissionSystem::StartNextMissions( UMSMissionData * mission_data )
     }
 }
 
-void UMSMissionSystem::OnMissionEnded( UMSMissionData * mission_data, const bool was_cancelled )
+void UMSMissionSystem::OnMissionEnded( UMSMission * mission, const bool was_cancelled )
 {
+    const auto * mission_data = mission->GetMissionData();
+
     UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnMissionEnded (%s)" ), *GetNameSafe( mission_data ) );
 
-    OnMissionEndedEvent.Broadcast( mission_data, was_cancelled );
-    ActiveMissions.Remove( mission_data );
+    if ( !ensureAlways( MissionHistory.SetMissionComplete( mission_data, was_cancelled ) ) )
+    {
+        return;
+    }
 
-    CompletedMissions.Add( mission_data, was_cancelled );
+    OnMissionEndedEvent.Broadcast( mission, was_cancelled );
+    ActiveMissions.Remove( mission );
 
     for ( auto index = MissionEndObservers.Num() - 1; index >= 0; --index )
     {
@@ -453,17 +460,27 @@ void UMSMissionSystem::OnMissionEnded( UMSMissionData * mission_data, const bool
     }
 }
 
-void UMSMissionSystem::OnMissionObjectiveStarted( UMSMissionObjective * objective )
+void UMSMissionSystem::OnMissionObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective )
 {
+    if ( !ensureAlways( MissionHistory.AddActiveObjective( objective ) ) )
+    {
+        return;
+    }
+
     for ( auto & observer : MissionObjectiveStartObservers )
     {
         observer.Callback.ExecuteIfBound( objective->GetClass() );
     }
 }
 
-void UMSMissionSystem::OnMissionObjectiveEnded( UMSMissionObjective * objective, const bool was_cancelled )
+void UMSMissionSystem::OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, const bool was_cancelled )
 {
-    UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnMissionObjectiveEnded (%s)" ), *objective->GetClass()->GetName() );
+    UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnObjectiveEnded (%s)" ), *objective->GetClass()->GetName() );
+
+    if ( !ensureAlways( MissionHistory.SetObjectiveComplete( objective, was_cancelled ) ) )
+    {
+        return;
+    }
 
     OnMissionObjectiveEndedEvent.Broadcast( objective, was_cancelled );
 

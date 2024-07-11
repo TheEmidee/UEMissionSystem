@@ -31,7 +31,7 @@ class MISSIONSYSTEM_API UMSMissionData final : public UDataAsset
 public:
     UMSMissionData();
 
-    const FGuid & GetMissionId() const;
+    const FGuid & GetGuid() const;
     void PostLoad() override;
     void PostDuplicate( bool duplicate_for_pie ) override;
     void PostEditImport() override;
@@ -42,7 +42,7 @@ public:
     UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
     TArray< TObjectPtr< UMSMissionAction > > EndActions;
 
-    UPROPERTY( EditDefaultsOnly, Category = "Objectives" )
+    UPROPERTY( EditDefaultsOnly, Category = "ActiveObjectives" )
     TArray< FMSMissionObjectiveData > Objectives;
 
     UPROPERTY( EditDefaultsOnly, Category = "Other missions" )
@@ -71,7 +71,7 @@ private:
     void RegenerateGuidIfNeeded();
 };
 
-FORCEINLINE const FGuid & UMSMissionData::GetMissionId() const
+FORCEINLINE const FGuid & UMSMissionData::GetGuid() const
 {
     return MissionId;
 }

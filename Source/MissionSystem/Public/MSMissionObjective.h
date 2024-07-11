@@ -11,8 +11,7 @@
 class UMSMissionAction;
 class UMSMissionObjective;
 
-DECLARE_EVENT_OneParam( UMSMissionObjective, FMSOnMissionObjectiveStartedEvent, UMSMissionObjective * MissionObjective );
-DECLARE_EVENT_TwoParams( UMSMissionObjective, FMSOnMissionObjectiveEndedEvent, UMSMissionObjective * MissionObjective, bool WasCancelled );
+DECLARE_EVENT_TwoParams( UMSMissionObjective, FMSOnObjectiveEndedEvent, UMSMissionObjective * MissionObjective, bool WasCancelled );
 
 UCLASS( Abstract, BlueprintType, Blueprintable )
 class MISSIONSYSTEM_API UMSMissionObjective : public UObject, public IGameplayTagAssetInterface
@@ -24,10 +23,9 @@ public:
 
     friend class UMSMission;
 
-    FMSOnMissionObjectiveStartedEvent & OnMissionObjectiveStarted();
-    FMSOnMissionObjectiveEndedEvent & OnMissionObjectiveEnded();
+    FMSOnObjectiveEndedEvent & OnObjectiveEnded();
 
-    const FGuid & GetObjectiveId() const;
+    const FGuid & GetGuid() const;
     bool IsComplete() const;
     bool IsCancelled() const;
     void Execute();
@@ -85,21 +83,15 @@ protected:
     UPROPERTY( VisibleAnywhere, AdvancedDisplay )
     FGuid ObjectiveId;
 
-    FMSOnMissionObjectiveStartedEvent OnObjectiveStartedEvent;
-    FMSOnMissionObjectiveEndedEvent OnObjectiveCompleteEvent;
+    FMSOnObjectiveEndedEvent OnObjectiveCompleteEvent;
 };
 
-FORCEINLINE FMSOnMissionObjectiveStartedEvent & UMSMissionObjective::OnMissionObjectiveStarted()
-{
-    return OnObjectiveStartedEvent;
-}
-
-FORCEINLINE FMSOnMissionObjectiveEndedEvent & UMSMissionObjective::OnMissionObjectiveEnded()
+FORCEINLINE FMSOnObjectiveEndedEvent & UMSMissionObjective::OnObjectiveEnded()
 {
     return OnObjectiveCompleteEvent;
 }
 
-FORCEINLINE const FGuid & UMSMissionObjective::GetObjectiveId() const
+FORCEINLINE const FGuid & UMSMissionObjective::GetGuid() const
 {
     return ObjectiveId;
 }

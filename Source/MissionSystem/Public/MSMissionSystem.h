@@ -109,10 +109,10 @@ private:
 
     UMSMission * CreateMissionFromData( UMSMissionData * mission_data );
     void StartMission( UMSMission * mission );
-    void StartNextMissions( UMSMissionData * mission_data );
-    void OnMissionEnded( UMSMissionData * mission_data, bool was_cancelled );
-    void OnMissionObjectiveStarted( UMSMissionObjective * objective );
-    void OnMissionObjectiveEnded( UMSMissionObjective * objective, bool was_cancelled );
+    void StartNextMissions(const UMSMissionData* mission_data);
+    void OnMissionEnded(UMSMission* mission, bool was_cancelled);
+    void OnMissionObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective );
+    void OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled );
 
     FMSOnMissionEndedEvent OnMissionEndedEvent;
     FMSOnMissionObjectiveEndedEvent OnMissionObjectiveEndedEvent;

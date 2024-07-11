@@ -34,7 +34,7 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
 {
     Data = mission_data;
 
-    Objectives.Reserve( mission_data->Objectives.Num() );
+    ActiveObjectives.Reserve( mission_data->Objectives.Num() );
     PendingObjectives.Reserve( mission_data->Objectives.Num() );
 
     for ( const auto & objective_data : mission_data->Objectives )
@@ -49,20 +49,20 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
             continue;
         }
 
-        auto * objective = NewObject< UMSMissionObjective >( this, objective_data.Objective );
-        check( objective );
+        /*auto * objective = NewObject< UMSMissionObjective >( this, objective_data.Objective );
+        check( objective );*/
 
-        if ( CanExecuteObjective( objective ) )
+        if ( CanExecuteObjective( objective_data.Objective ) )
         {
-            Objectives.Add( objective );
+            // ActiveObjectives.Add( objective );
 
             // Insert in reverse order as objectives to start will be popped out of the list
-            PendingObjectives.Insert( objective, 0 );
+            PendingObjectives.Insert( objective_data.Objective, 0 );
         }
-        else
+        /*else
         {
             objective->MarkAsGarbage();
-        }
+        }*/
     }
 
     StartActionsExecutor.Initialize( *this, mission_data->StartActions, [ this ]() {
@@ -71,8 +71,8 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
 
     EndActionsExecutor.Initialize( *this, mission_data->EndActions, [ this ]() {
         ensure( IsComplete() || bIsCancelled );
-        Objectives.Empty();
-        OnMissionEndedEvent.Broadcast( Data, bIsCancelled );
+        ActiveObjectives.Empty();
+        OnMissionEndedEvent.Broadcast( this, bIsCancelled );
     } );
 }
 
@@ -83,8 +83,7 @@ void UMSMission::Start()
 
 void UMSMission::Complete()
 {
-    auto objectives = Objectives;
-    for ( auto * objective : objectives )
+    for ( auto objective : ActiveObjectives )
     {
         objective->CompleteObjective();
     }
@@ -94,7 +93,7 @@ void UMSMission::Cancel()
 {
     bIsCancelled = true;
 
-    for ( auto * objective : Objectives )
+    for ( auto objective : ActiveObjectives )
     {
         objective->CancelObjective();
     }
@@ -105,13 +104,13 @@ void UMSMission::Cancel()
     }
     else
     {
-        OnMissionEndedEvent.Broadcast( Data, bIsCancelled );
+        OnMissionEndedEvent.Broadcast( this, bIsCancelled );
     }
 }
 
 bool UMSMission::IsComplete() const
 {
-    for ( const auto * objective : Objectives )
+    for ( auto objective : ActiveObjectives )
     {
         if ( !objective->IsComplete() )
         {
@@ -134,7 +133,7 @@ void UMSMission::DumpMission( FOutputDevice & output_device )
         *GetNameSafe( GetMissionData() ),
         *get_status( IsComplete(), bIsCancelled ) );
 
-    for ( const auto * objective : Objectives )
+    for ( auto objective : ActiveObjectives )
     {
         output_device.Logf(
             ELogVerbosity::Verbose,
@@ -152,10 +151,10 @@ void UMSMission::SerializeState( FArchive & archive )
 
     if ( archive.IsSaving() )
     {
-        auto num_objectives = Objectives.Num();
+        auto num_objectives = ActiveObjectives.Num();
         archive << num_objectives;
 
-        for ( auto * objective : Objectives )
+        for ( auto objective : ActiveObjectives )
         {
             objective->SerializeState( archive );
         }
@@ -163,22 +162,11 @@ void UMSMission::SerializeState( FArchive & archive )
         auto num_pending_objectives = PendingObjectives.Num();
         archive << num_pending_objectives;
 
-        for ( auto * objective : PendingObjectives )
+        /*for ( auto objective : PendingObjectives )
         {
             objective->SerializeState( archive );
-        }
+        }*/
     }
-}
-
-void UMSMission::OnObjectiveStarted( UMSMissionObjective * mission_objective )
-{
-    if ( !bIsStarted )
-    {
-        return;
-    }
-
-    mission_objective->OnMissionObjectiveStarted().RemoveAll( this );
-    OnMissionObjectiveStartedEvent.Broadcast( mission_objective );
 }
 
 void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, const bool was_cancelled )
@@ -188,8 +176,8 @@ void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, 
         return;
     }
 
-    mission_objective->OnMissionObjectiveEnded().RemoveAll( this );
-    OnMissionObjectiveCompleteEvent.Broadcast( mission_objective, was_cancelled );
+    mission_objective->OnObjectiveEnded().RemoveAll( this );
+    OnMissionObjectiveCompleteEvent.Broadcast( mission_objective->GetClass(), was_cancelled );
 
     if ( bIsCancelled )
     {
@@ -226,22 +214,25 @@ void UMSMission::ExecuteNextObjective()
 {
     if ( PendingObjectives.Num() > 0 )
     {
-        auto * objective = PendingObjectives.Pop();
+        auto objective_class = PendingObjectives.Pop();
 
-        if ( !CanExecuteObjective( objective ) )
+        if ( !CanExecuteObjective( objective_class ) )
         {
-            objective->MarkAsGarbage();
-            Objectives.Remove( objective );
+            /*objective->MarkAsGarbage();
+            ActiveObjectives.Remove( objective );*/
             ExecuteNextObjective();
             return;
         }
 
-        objective->OnMissionObjectiveStarted().AddUObject( this, &UMSMission::OnObjectiveStarted );
-        objective->OnMissionObjectiveEnded().AddUObject( this, &UMSMission::OnObjectiveCompleted );
+        auto * objective = NewObject< UMSMissionObjective >( this, objective_class );
+        ActiveObjectives.Add( objective );
+
+        objective->OnObjectiveEnded().AddUObject( this, &UMSMission::OnObjectiveCompleted );
 
         UE_LOG( LogMissionSystem, Verbose, TEXT( "Execute objective %s" ), *objective->GetClass()->GetName() );
 
         objective->Execute();
+        OnMissionObjectiveStartedEvent.Broadcast( objective->GetClass() );
     }
     else
     {
@@ -249,12 +240,12 @@ void UMSMission::ExecuteNextObjective()
     }
 }
 
-bool UMSMission::CanExecuteObjective( UMSMissionObjective * objective ) const
+bool UMSMission::CanExecuteObjective( const TSubclassOf< UMSMissionObjective > & objective_class ) const
 {
 #if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
     if ( const auto * mission_system = GetWorld()->GetSubsystem< UMSMissionSystem >() )
     {
-        return !mission_system->MustObjectiveBeIgnored( objective );
+        // return !mission_system->MustObjectiveBeIgnored( objective_class );
     }
 #endif
 
