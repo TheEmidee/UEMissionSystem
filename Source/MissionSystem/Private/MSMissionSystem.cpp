@@ -122,6 +122,11 @@ bool UMSMissionSystem::IsMissionObjectiveActive( const TSubclassOf< UMSMissionOb
     return MissionHistory.IsObjectiveActive( mission_objective_class );
 }
 
+void UMSMissionSystem::ResumeMissionsFromHistory()
+{
+    need to store the DA of active missions so we can re-create them
+}
+
 void UMSMissionSystem::WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartsDelegate & when_mission_starts )
 {
     if ( IsMissionActive( mission_data ) )
@@ -263,6 +268,8 @@ bool UMSMissionSystem::ShouldCreateSubsystem( UObject * outer ) const
 
 void UMSMissionSystem::Serialize( FArchive & archive )
 {
+    archive << MissionHistory;
+
     /*if ( archive.IsLoading() )
     {
         ActiveMissions.Reset();
@@ -273,6 +280,7 @@ void UMSMissionSystem::Serialize( FArchive & archive )
 
     if ( archive.IsSaving() )
     {
+
         auto num_active_missions = ActiveMissions.Num();
         archive << num_active_missions;
 

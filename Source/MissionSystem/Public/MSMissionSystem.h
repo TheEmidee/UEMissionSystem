@@ -53,6 +53,9 @@ public:
     UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
     bool IsMissionObjectiveActive( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const;
 
+    UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System" )
+    void ResumeMissionsFromHistory();
+
     void WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartsDelegate & when_mission_starts );
     void WhenMissionEnds( UMSMissionData * mission_data, const FMSMissionSystemMissionEndsDelegate & when_mission_ends );
 

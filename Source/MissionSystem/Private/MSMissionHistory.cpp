@@ -155,3 +155,11 @@ bool FMSMissionHistory::DoesObjectiveHasState( const TSubclassOf< UMSMissionObje
 {
     return DoesObjectHasState( mission_objective_class, ObjectiveStates, state );
 }
+
+FArchive & operator<<( FArchive & archive, FMSMissionHistory & mission_history )
+{
+    archive << mission_history.MissionStates;
+    archive << mission_history.ObjectiveStates;
+
+    return archive;
+}
