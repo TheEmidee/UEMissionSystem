@@ -54,7 +54,7 @@ protected:
     void K2_OnObjectiveEnded( bool was_cancelled );
 
     void CancelObjective();
-    void RegenerateGuidIfNeeded();
+    void GenerateGuidIfNeeded( bool force_generation = false );
 
     UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
     TArray< TObjectPtr< UMSMissionAction > > StartActions;

@@ -24,21 +24,21 @@ void UMSMissionData::PostLoad()
 {
     Super::PostLoad();
 
-    RegenerateGuidIfNeeded();
+    GenerateGuidIfNeeded();
 }
 
 void UMSMissionData::PostDuplicate( bool duplicate_for_pie )
 {
     Super::PostDuplicate( duplicate_for_pie );
 
-    RegenerateGuidIfNeeded();
+    GenerateGuidIfNeeded( true );
 }
 
 void UMSMissionData::PostEditImport()
 {
     Super::PostEditImport();
 
-    RegenerateGuidIfNeeded();
+    GenerateGuidIfNeeded( true );
 }
 
 #if WITH_EDITOR
@@ -64,9 +64,9 @@ EDataValidationResult UMSMissionData::IsDataValid( FDataValidationContext & cont
 
 #endif
 
-void UMSMissionData::RegenerateGuidIfNeeded()
+void UMSMissionData::GenerateGuidIfNeeded( bool force_generation )
 {
-    if ( !MissionId.IsValid() )
+    if ( !MissionId.IsValid() || force_generation )
     {
         MissionId = FGuid::NewGuid();
         Modify();

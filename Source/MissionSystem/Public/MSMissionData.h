@@ -68,7 +68,7 @@ public:
 #endif
 
 private:
-    void RegenerateGuidIfNeeded();
+    void GenerateGuidIfNeeded( bool force_generation = false );
 };
 
 FORCEINLINE const FGuid & UMSMissionData::GetGuid() const

@@ -69,7 +69,7 @@ void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
     We will load the history, but how do we start the active missions?
     We will most probably have to keep an array of UMSMissionData somewhere to create the missions and only activate the active objectives*/
 
-    auto * mission = CreateMissionFromData( mission_data );
+    auto * mission = TryCreateMissionFromData( mission_data );
 
     if ( mission == nullptr )
     {
@@ -79,12 +79,12 @@ void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
     StartMission( mission );
 }
 
-bool UMSMissionSystem::IsMissionComplete( const UMSMissionData * mission_data ) const
+bool UMSMissionSystem::IsMissionComplete( UMSMissionData * mission_data ) const
 {
     return MissionHistory.IsMissionComplete( mission_data );
 }
 
-bool UMSMissionSystem::IsMissionActive( const UMSMissionData * mission_data ) const
+bool UMSMissionSystem::IsMissionActive( UMSMissionData * mission_data ) const
 {
     return MissionHistory.IsMissionActive( mission_data );
 }
@@ -124,7 +124,18 @@ bool UMSMissionSystem::IsMissionObjectiveActive( const TSubclassOf< UMSMissionOb
 
 void UMSMissionSystem::ResumeMissionsFromHistory()
 {
-    need to store the DA of active missions so we can re-create them
+    for ( const auto mission_data : MissionHistory.GetActiveMissionData() )
+    {
+        // :NOTE: Bypass the checks of TryCreateMissionFromData
+        auto * mission = CreateMissionFromData( mission_data );
+
+        if ( mission == nullptr )
+        {
+            continue;
+        }
+
+        mission->Start();
+    }
 }
 
 void UMSMissionSystem::WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartsDelegate & when_mission_starts )
@@ -269,45 +280,6 @@ bool UMSMissionSystem::ShouldCreateSubsystem( UObject * outer ) const
 void UMSMissionSystem::Serialize( FArchive & archive )
 {
     archive << MissionHistory;
-
-    /*if ( archive.IsLoading() )
-    {
-        ActiveMissions.Reset();
-        CompletedMissions.Reset();
-    }
-
-    archive << CompletedMissions;
-
-    if ( archive.IsSaving() )
-    {
-
-        auto num_active_missions = ActiveMissions.Num();
-        archive << num_active_missions;
-
-        for ( auto & [ data, mission ] : ActiveMissions )
-        {
-            archive << data;
-            mission->SerializeState( archive );
-        }
-    }
-    else
-    {
-        auto num_active_missions = 0;
-        archive << num_active_missions;
-
-        ActiveMissions.Reserve( num_active_missions );
-
-        for ( auto index = 0; index < num_active_missions; ++index )
-        {
-            UMSMissionData * mission_data;
-            archive << mission_data;
-
-            auto * mission = CreateMissionFromData( mission_data );
-            mission->SerializeState( archive );
-
-            StartMission( mission );
-        }
-    }*/
 }
 
 void UMSMissionSystem::K2_WhenMissionStartsOrIsActive( UMSMissionData * mission_data, FMSMissionSystemMissionStartsDynamicDelegate when_mission_starts )
@@ -346,7 +318,7 @@ void UMSMissionSystem::K2_WhenMissionObjectiveEnds( TSubclassOf< UMSMissionObjec
     WhenMissionObjectiveEnds( mission_objective, ended_delegate );
 }
 
-UMSMission * UMSMissionSystem::CreateMissionFromData( UMSMissionData * mission_data )
+UMSMission * UMSMissionSystem::TryCreateMissionFromData( UMSMissionData * mission_data )
 {
     if ( mission_data == nullptr )
     {
@@ -398,6 +370,11 @@ UMSMission * UMSMissionSystem::CreateMissionFromData( UMSMissionData * mission_d
         return nullptr;
     }
 
+    return CreateMissionFromData( mission_data );
+}
+
+UMSMission * UMSMissionSystem::CreateMissionFromData( UMSMissionData * mission_data )
+{
     auto * mission = NewObject< UMSMission >( this );
     mission->Initialize( mission_data );
 
@@ -439,7 +416,7 @@ void UMSMissionSystem::StartNextMissions( const UMSMissionData * mission_data )
 
 void UMSMissionSystem::OnMissionEnded( UMSMission * mission, const bool was_cancelled )
 {
-    const auto * mission_data = mission->GetMissionData();
+    auto * mission_data = mission->GetMissionData();
 
     UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnMissionEnded (%s)" ), *GetNameSafe( mission_data ) );
 

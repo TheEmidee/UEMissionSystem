@@ -31,15 +31,16 @@ class MISSIONSYSTEM_API UMSMissionSystem final : public UWorldSubsystem
 public:
     FMSOnMissionEndedEvent & OnMissionEnded();
     FMSOnMissionObjectiveEndedEvent & OnMissionObjectiveEnded();
+    const FMSMissionHistory & GetMissionHistory() const;
 
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System" )
     void StartMission( UMSMissionData * mission_data );
 
     UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
-    bool IsMissionComplete( const UMSMissionData * mission_data ) const;
+    bool IsMissionComplete(UMSMissionData* mission_data) const;
 
     UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
-    bool IsMissionActive( const UMSMissionData * mission_data ) const;
+    bool IsMissionActive(UMSMissionData* mission_data) const;
 
     UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
     UMSMission * GetActiveMission( const UMSMissionData * mission_data ) const;
@@ -59,7 +60,7 @@ public:
     void WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartsDelegate & when_mission_starts );
     void WhenMissionEnds( UMSMissionData * mission_data, const FMSMissionSystemMissionEndsDelegate & when_mission_ends );
 
-    void WhenMissionObjectiveStartsOrIsActive(const TSubclassOf<UMSMissionObjective>& mission_objective_class, const FMSMissionSystemMissionObjectiveStartsDelegate & when_mission_objective_starts);
+    void WhenMissionObjectiveStartsOrIsActive( const TSubclassOf< UMSMissionObjective > & mission_objective_class, const FMSMissionSystemMissionObjectiveStartsDelegate & when_mission_objective_starts );
     void WhenMissionObjectiveEnds( const TSubclassOf< UMSMissionObjective > & mission_objective_class, const FMSMissionSystemMissionObjectiveEndsDelegate & when_mission_objective_ends );
 
 #if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
@@ -110,10 +111,11 @@ private:
         FMSMissionSystemMissionObjectiveEndsDelegate Callback;
     };
 
-    UMSMission * CreateMissionFromData( UMSMissionData * mission_data );
+    UMSMission * TryCreateMissionFromData(UMSMissionData* mission_data);
+    UMSMission * CreateMissionFromData(UMSMissionData* mission_data);
     void StartMission( UMSMission * mission );
-    void StartNextMissions(const UMSMissionData* mission_data);
-    void OnMissionEnded(UMSMission* mission, bool was_cancelled);
+    void StartNextMissions( const UMSMissionData * mission_data );
+    void OnMissionEnded( UMSMission * mission, bool was_cancelled );
     void OnMissionObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective );
     void OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled );
 
@@ -141,4 +143,9 @@ FORCEINLINE FMSOnMissionEndedEvent & UMSMissionSystem::OnMissionEnded()
 FORCEINLINE FMSOnMissionObjectiveEndedEvent & UMSMissionSystem::OnMissionObjectiveEnded()
 {
     return OnMissionObjectiveEndedEvent;
+}
+
+FORCEINLINE const FMSMissionHistory & UMSMissionSystem::GetMissionHistory() const
+{
+    return MissionHistory;
 }

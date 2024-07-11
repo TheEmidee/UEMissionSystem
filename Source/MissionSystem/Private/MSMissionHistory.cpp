@@ -11,7 +11,7 @@ namespace
     }
 
     template <>
-    FGuid GetObjectGuid( const UMSMissionData * object )
+    FGuid GetObjectGuid( UMSMissionData * object )
     {
         return object->GetGuid();
     }
@@ -21,6 +21,29 @@ namespace
     {
         auto * cdo = object.GetDefaultObject();
         return cdo->GetGuid();
+    }
+
+    template < typename _ObjectType_ >
+    TOptional< EMSState > GetObjectState( _ObjectType_ object, const TMap< FGuid, EMSState > & object_map )
+    {
+        if ( object == nullptr )
+        {
+            return {};
+        }
+
+        const auto guid = GetObjectGuid( object );
+
+        if ( !ensureAlways( guid.IsValid() ) )
+        {
+            return {};
+        }
+
+        if ( auto * state = object_map.Find( guid ) )
+        {
+            return *state;
+        }
+
+        return {};
     }
 
     template < typename _ObjectType_ >
@@ -61,8 +84,13 @@ namespace
             return false;
         }
 
-        if ( object_map.Contains( id ) )
+        if ( auto * state = object_map.Find( id ) )
         {
+            if ( *state == EMSState::Active )
+            {
+                return true;
+            }
+
             return false;
         }
 
@@ -96,27 +124,41 @@ namespace
     }
 }
 
-bool FMSMissionHistory::IsMissionActive( const UMSMissionData * mission_data ) const
+bool FMSMissionHistory::IsMissionActive( UMSMissionData * mission_data ) const
 {
     return DoesMissionHasState( mission_data, EMSState::Active );
 }
 
-bool FMSMissionHistory::IsMissionCancelled( const UMSMissionData * mission_data ) const
+bool FMSMissionHistory::IsMissionCancelled( UMSMissionData * mission_data ) const
 {
     return DoesMissionHasState( mission_data, EMSState::Cancelled );
 }
 
-bool FMSMissionHistory::IsMissionComplete( const UMSMissionData * mission_data ) const
+bool FMSMissionHistory::IsMissionComplete( UMSMissionData * mission_data ) const
 {
     return DoesMissionHasState( mission_data, EMSState::Complete );
 }
 
-bool FMSMissionHistory::AddActiveMission( const UMSMissionData * mission_data )
+bool FMSMissionHistory::IsMissionFinished( UMSMissionData * mission_data ) const
 {
-    return TryAddObjectToMap( mission_data, MissionStates );
+    const auto state = GetObjectState( mission_data, MissionStates ).Get( EMSState::Active );
+    return state > EMSState::Active;
 }
 
-bool FMSMissionHistory::SetMissionComplete( const UMSMissionData * mission_data, bool was_cancelled )
+bool FMSMissionHistory::AddActiveMission( UMSMissionData * mission_data )
+{
+    if ( !TryAddObjectToMap( mission_data, MissionStates ) )
+    {
+        return false;
+    }
+
+    check( !ActiveMissionsData.Contains( mission_data ) );
+    ActiveMissionsData.Add( mission_data );
+
+    return true;
+}
+
+bool FMSMissionHistory::SetMissionComplete( UMSMissionData * mission_data, bool was_cancelled )
 {
     return SetObjectComplete( mission_data, MissionStates, was_cancelled );
 }
@@ -136,6 +178,12 @@ bool FMSMissionHistory::IsObjectiveComplete( const TSubclassOf< UMSMissionObject
     return DoesObjectiveHasState( mission_objective_class, EMSState::Complete );
 }
 
+bool FMSMissionHistory::IsObjectiveFinished( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const
+{
+    const auto state = GetObjectState( mission_objective_class, ObjectiveStates ).Get( EMSState::Active );
+    return state > EMSState::Active;
+}
+
 bool FMSMissionHistory::AddActiveObjective( const TSubclassOf< UMSMissionObjective > & mission_objective_class )
 {
     return TryAddObjectToMap( mission_objective_class, ObjectiveStates );
@@ -146,7 +194,7 @@ bool FMSMissionHistory::SetObjectiveComplete( const TSubclassOf< UMSMissionObjec
     return SetObjectComplete( mission_objective_class, ObjectiveStates, was_cancelled );
 }
 
-bool FMSMissionHistory::DoesMissionHasState( const UMSMissionData * mission_data, EMSState state ) const
+bool FMSMissionHistory::DoesMissionHasState( UMSMissionData * mission_data, EMSState state ) const
 {
     return DoesObjectHasState( mission_data, MissionStates, state );
 }
@@ -158,6 +206,19 @@ bool FMSMissionHistory::DoesObjectiveHasState( const TSubclassOf< UMSMissionObje
 
 FArchive & operator<<( FArchive & archive, FMSMissionHistory & mission_history )
 {
+    /*if ( archive.IsSaving() )
+    {
+        int num = mission_history.ActiveMissionsData.Num();
+        archive << num;
+
+        for ( int i = 0; i < num; ++i )
+        {
+            archive << mission_history.ActiveMissionsData[ i ];
+        }
+    }*/
+
+
+    archive << mission_history.ActiveMissionsData;
     archive << mission_history.MissionStates;
     archive << mission_history.ObjectiveStates;
 

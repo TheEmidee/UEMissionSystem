@@ -34,7 +34,7 @@ public:
     const TArray< UMSMissionAction * > & GetStartActions() const;
     bool IsStarted() const;
 
-    void Initialize( UMSMissionData * mission_data );
+    void Initialize(UMSMissionData* mission_data);
     void Start();
     void Complete();
     void Cancel();
@@ -46,7 +46,7 @@ public:
     void DumpMission( FOutputDevice & output_device );
 #endif
 
-    const UMSMissionData * GetMissionData() const;
+    UMSMissionData * GetMissionData() const;
 
     void SerializeState( FArchive & archive );
 
@@ -115,7 +115,7 @@ FORCEINLINE bool UMSMission::IsStarted() const
     return bIsStarted;
 }
 
-FORCEINLINE const UMSMissionData * UMSMission::GetMissionData() const
+FORCEINLINE UMSMissionData * UMSMission::GetMissionData() const
 {
     return Data;
 }

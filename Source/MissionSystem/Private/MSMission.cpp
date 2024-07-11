@@ -37,6 +37,11 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
     ActiveObjectives.Reserve( mission_data->Objectives.Num() );
     PendingObjectives.Reserve( mission_data->Objectives.Num() );
 
+    const auto * subsystem = Cast< UMSMissionSystem >( GetOuter() );
+    check( subsystem != nullptr );
+
+    const auto & mission_history = subsystem->GetMissionHistory();
+
     for ( const auto & objective_data : mission_data->Objectives )
     {
         if ( !objective_data.bEnabled )
@@ -45,6 +50,11 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
         }
 
         if ( !ensureAlwaysMsgf( IsValid( objective_data.Objective ), TEXT( "%s has an invalid Mission Objective!" ), *mission_data->GetName() ) )
+        {
+            continue;
+        }
+
+        if ( mission_history.IsObjectiveFinished( objective_data.Objective ) )
         {
             continue;
         }

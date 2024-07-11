@@ -27,21 +27,21 @@ void UMSMissionObjective::PostLoad()
 {
     UObject::PostLoad();
 
-    RegenerateGuidIfNeeded();
+    GenerateGuidIfNeeded();
 }
 
 void UMSMissionObjective::PostDuplicate( bool duplicate_for_pie )
 {
     UObject::PostDuplicate( duplicate_for_pie );
 
-    RegenerateGuidIfNeeded();
+    GenerateGuidIfNeeded( true );
 }
 
 void UMSMissionObjective::PostEditImport()
 {
     UObject::PostEditImport();
 
-    RegenerateGuidIfNeeded();
+    GenerateGuidIfNeeded( true );
 }
 
 void UMSMissionObjective::CompleteObjective()
@@ -106,9 +106,9 @@ void UMSMissionObjective::CancelObjective()
     }
 }
 
-void UMSMissionObjective::RegenerateGuidIfNeeded()
+void UMSMissionObjective::GenerateGuidIfNeeded( bool force_generation )
 {
-    if ( !ObjectiveId.IsValid() )
+    if ( !ObjectiveId.IsValid() || force_generation )
     {
         ObjectiveId = FGuid::NewGuid();
         Modify();
