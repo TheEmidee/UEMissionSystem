@@ -9,7 +9,7 @@ class UMSMissionAction;
 
 DECLARE_MULTICAST_DELEGATE_OneParam( FMSOnMissionActionCompleteDelegate, UMSMissionAction * );
 
-UCLASS( Blueprintable )
+UCLASS( Blueprintable, DefaultToInstanced, EditInlineNew )
 class MISSIONSYSTEM_API UMSMissionAction : public UObject
 {
     GENERATED_BODY()

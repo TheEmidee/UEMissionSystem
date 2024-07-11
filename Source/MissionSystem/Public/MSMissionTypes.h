@@ -1,9 +1,6 @@
 #pragma once
 
-#include "Chaos/AABB.h"
-
 #include <CoreMinimal.h>
-#include <Templates/SubclassOf.h>
 
 #include "MSMissionTypes.generated.h"
 
@@ -17,7 +14,7 @@ struct MISSIONSYSTEM_API FMSActionExecutor
 public:
     const TArray< UMSMissionAction * > & GetInstancedActions() const;
 
-    void Initialize( UObject & action_owner, const TArray< TSubclassOf< UMSMissionAction > > & action_classes, TFunction< void() > callback );
+    void Initialize( UObject & action_owner, const TArray< UMSMissionAction * > & action_classes, TFunction< void() > callback );
     void Execute();
 
 private:
@@ -30,7 +27,6 @@ private:
     UPROPERTY()
     TArray< UMSMissionAction * > PendingActions;
 
-    TArray< TSubclassOf< UMSMissionAction > > ActionClasses;
     TFunction< void() > Callback;
 };
 

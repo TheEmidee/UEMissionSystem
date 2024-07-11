@@ -29,12 +29,12 @@ EDataValidationResult UMSMissionData::IsDataValid( FDataValidationContext & cont
         .NoNullItem( VALIDATOR_GET_PROPERTY( StartActions ) )
         .NoNullItem( VALIDATOR_GET_PROPERTY( EndActions ) )
         .NoNullItem( VALIDATOR_GET_PROPERTY( NextMissions ) )
-        .CustomValidation< TArray< FMSMissionObjectiveData > >( Objectives, []( FDataValidationContext & errors, TArray< FMSMissionObjectiveData > objectives ) {
+        .CustomValidation< TArray< FMSMissionObjectiveData > >( Objectives, []( FDataValidationContext & context, const TArray< FMSMissionObjectiveData > & objectives ) {
             for ( const auto & objective_data : objectives )
             {
                 if ( objective_data.Objective == nullptr )
                 {
-                    errors.AddError( FText::FromString( TEXT( "Objectives contains an invalid objective" ) ) );
+                    context.AddError( FText::FromString( TEXT( "Objectives contains an invalid objective" ) ) );
                 }
             }
         } )

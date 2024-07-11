@@ -52,11 +52,11 @@ protected:
 
     void CancelObjective();
 
-    UPROPERTY( EditDefaultsOnly, Category = "Actions" )
-    TArray< TSubclassOf< UMSMissionAction > > StartActions;
+    UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
+    TArray< TObjectPtr< UMSMissionAction > > StartActions;
 
-    UPROPERTY( EditDefaultsOnly, Category = "Actions" )
-    TArray< TSubclassOf< UMSMissionAction > > EndActions;
+    UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
+    TArray< TObjectPtr< UMSMissionAction > > EndActions;
 
     UPROPERTY()
     FMSActionExecutor StartActionsExecutor;
