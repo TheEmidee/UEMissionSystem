@@ -48,8 +48,6 @@ public:
 
     UMSMissionData * GetMissionData() const;
 
-    void SerializeState( FArchive & archive );
-
 private:
     void OnObjectiveCompleted( UMSMissionObjective * mission_objective, bool was_cancelled );
     void TryStart();

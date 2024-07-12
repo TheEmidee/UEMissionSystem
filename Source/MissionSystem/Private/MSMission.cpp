@@ -59,20 +59,11 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
             continue;
         }
 
-        /*auto * objective = NewObject< UMSMissionObjective >( this, objective_data.Objective );
-        check( objective );*/
-
         if ( CanExecuteObjective( objective_data.Objective ) )
         {
-            // ActiveObjectives.Add( objective );
-
             // Insert in reverse order as objectives to start will be popped out of the list
             PendingObjectives.Insert( objective_data.Objective, 0 );
         }
-        /*else
-        {
-            objective->MarkAsGarbage();
-        }*/
     }
 
     StartActionsExecutor.Initialize( *this, mission_data->StartActions, [ this ]() {
@@ -153,31 +144,6 @@ void UMSMission::DumpMission( FOutputDevice & output_device )
     }
 }
 #endif
-
-void UMSMission::SerializeState( FArchive & archive )
-{
-    archive << bIsStarted;
-    archive << bIsCancelled;
-
-    if ( archive.IsSaving() )
-    {
-        auto num_objectives = ActiveObjectives.Num();
-        archive << num_objectives;
-
-        for ( auto objective : ActiveObjectives )
-        {
-            objective->SerializeState( archive );
-        }
-
-        auto num_pending_objectives = PendingObjectives.Num();
-        archive << num_pending_objectives;
-
-        /*for ( auto objective : PendingObjectives )
-        {
-            objective->SerializeState( archive );
-        }*/
-    }
-}
 
 void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, const bool was_cancelled )
 {

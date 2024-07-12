@@ -44,8 +44,6 @@ public:
     EDataValidationResult IsDataValid( FDataValidationContext & context ) const override;
 #endif
 
-    void SerializeState( FArchive & archive );
-
 protected:
     UFUNCTION( BlueprintNativeEvent, DisplayName = "Execute" )
     void K2_Execute();

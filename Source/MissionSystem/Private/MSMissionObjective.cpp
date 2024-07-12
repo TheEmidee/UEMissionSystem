@@ -115,12 +115,6 @@ void UMSMissionObjective::GenerateGuidIfNeeded( bool force_generation )
     }
 }
 
-void UMSMissionObjective::SerializeState( FArchive & archive )
-{
-    archive << bIsComplete;
-    archive << bIsCancelled;
-}
-
 void UMSMissionObjective::K2_Execute_Implementation()
 {
 }

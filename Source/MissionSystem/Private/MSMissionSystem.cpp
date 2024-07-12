@@ -64,11 +64,6 @@ static FAutoConsoleCommand ClearIgnoreObjectivesTags(
 
 void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
 {
-    /*Does this make sense to create helper functions like that?
-    How will we do when we will load the savegame?
-    We will load the history, but how do we start the active missions?
-    We will most probably have to keep an array of UMSMissionData somewhere to create the missions and only activate the active objectives*/
-
     auto * mission = TryCreateMissionFromData( mission_data );
 
     if ( mission == nullptr )
