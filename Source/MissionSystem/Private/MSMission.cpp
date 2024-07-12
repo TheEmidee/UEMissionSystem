@@ -194,8 +194,6 @@ void UMSMission::ExecuteNextObjective()
 
         if ( !CanExecuteObjective( objective_class ) )
         {
-            /*objective->MarkAsGarbage();
-            ActiveObjectives.Remove( objective );*/
             ExecuteNextObjective();
             return;
         }

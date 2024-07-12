@@ -374,8 +374,8 @@ UMSMission * UMSMissionSystem::CreateMissionFromData( UMSMissionData * mission_d
     mission->Initialize( mission_data );
 
     mission->OnMissionEnded().AddUObject( this, &UMSMissionSystem::OnMissionEnded );
-    mission->OnMissionObjectiveStarted().AddUObject( this, &UMSMissionSystem::OnMissionObjectiveStarted );
-    mission->OnMissionObjectiveEnded().AddUObject( this, &UMSMissionSystem::OnMissionObjectiveEnded );
+    mission->OnMissionObjectiveStarted().AddUObject( this, &UMSMissionSystem::OnMissionObjectiveStarted, mission );
+    mission->OnMissionObjectiveEnded().AddUObject( this, &UMSMissionSystem::OnMissionObjectiveEnded, mission );
 
     ActiveMissions.Add( mission );
 
@@ -384,21 +384,12 @@ UMSMission * UMSMissionSystem::CreateMissionFromData( UMSMissionData * mission_d
 
 void UMSMissionSystem::StartMission( UMSMission * mission )
 {
-    const auto * mission_data = mission->GetMissionData();
+    auto * mission_data = mission->GetMissionData();
 
     UE_SLOG( LogMissionSystem, Verbose, TEXT( "Start mission (%s)" ), *GetNameSafe( mission_data ) );
     mission->Start();
 
-    for ( auto index = MissionStartObservers.Num() - 1; index >= 0; --index )
-    {
-        auto & observer = MissionStartObservers[ index ];
-
-        if ( observer.MissionData == mission_data )
-        {
-            observer.Callback.ExecuteIfBound( mission_data );
-            MissionStartObservers.RemoveAt( index );
-        }
-    }
+    BroadcastOnMissionStarts( mission );
 }
 
 void UMSMissionSystem::StartNextMissions( const UMSMissionData * mission_data )
@@ -420,8 +411,62 @@ void UMSMissionSystem::OnMissionEnded( UMSMission * mission, const bool was_canc
         return;
     }
 
-    OnMissionEndedEvent.Broadcast( mission, was_cancelled );
     ActiveMissions.Remove( mission );
+
+    BroadcastOnMissionEnds( mission, was_cancelled );
+
+    if ( !was_cancelled || mission_data->bStartNextMissionsWhenCancelled )
+    {
+        StartNextMissions( mission_data );
+    }
+}
+
+void UMSMissionSystem::OnMissionObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective, UMSMission * mission )
+{
+    if ( !ensureAlways( MissionHistory.AddActiveObjective( objective ) ) )
+    {
+        return;
+    }
+
+    BroadcastOnMissionObjectiveStarts( mission, objective );
+}
+
+void UMSMissionSystem::OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, const bool was_cancelled, UMSMission * mission )
+{
+    UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnObjectiveEnded (%s)" ), *objective->GetClass()->GetName() );
+
+    if ( !ensureAlways( MissionHistory.SetObjectiveComplete( objective, was_cancelled ) ) )
+    {
+        return;
+    }
+
+    BroadcastOnMissionObjectiveEnds( mission, objective, was_cancelled );
+}
+
+void UMSMissionSystem::BroadcastOnMissionStarts( UMSMission * mission )
+{
+    const auto * mission_data = mission->GetMissionData();
+
+    OnMissionStartsDelegate.Broadcast( mission );
+
+    for ( auto index = MissionStartObservers.Num() - 1; index >= 0; --index )
+    {
+        auto & observer = MissionStartObservers[ index ];
+
+        if ( observer.MissionData == mission_data )
+        {
+            observer.Callback.ExecuteIfBound( mission_data );
+            MissionStartObservers.RemoveAt( index );
+        }
+    }
+}
+
+void UMSMissionSystem::BroadcastOnMissionEnds( UMSMission * mission, bool was_cancelled )
+{
+    auto * mission_data = mission->GetMissionData();
+
+    OnMissionEndedEvent.Broadcast( mission, was_cancelled );
+    OnMissionEndsDelegate.Broadcast( mission_data, was_cancelled );
 
     for ( auto index = MissionEndObservers.Num() - 1; index >= 0; --index )
     {
@@ -433,19 +478,11 @@ void UMSMissionSystem::OnMissionEnded( UMSMission * mission, const bool was_canc
             MissionEndObservers.RemoveAt( index );
         }
     }
-
-    if ( !was_cancelled || mission_data->bStartNextMissionsWhenCancelled )
-    {
-        StartNextMissions( mission_data );
-    }
 }
 
-void UMSMissionSystem::OnMissionObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective )
+void UMSMissionSystem::BroadcastOnMissionObjectiveStarts( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective )
 {
-    if ( !ensureAlways( MissionHistory.AddActiveObjective( objective ) ) )
-    {
-        return;
-    }
+    OnMissionObjectiveStartsDelegate.Broadcast( mission, objective );
 
     for ( auto & observer : MissionObjectiveStartObservers )
     {
@@ -453,15 +490,8 @@ void UMSMissionSystem::OnMissionObjectiveStarted( const TSubclassOf< UMSMissionO
     }
 }
 
-void UMSMissionSystem::OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, const bool was_cancelled )
+void UMSMissionSystem::BroadcastOnMissionObjectiveEnds( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled )
 {
-    UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnObjectiveEnded (%s)" ), *objective->GetClass()->GetName() );
-
-    if ( !ensureAlways( MissionHistory.SetObjectiveComplete( objective, was_cancelled ) ) )
-    {
-        return;
-    }
-
     OnMissionObjectiveEndedEvent.Broadcast( objective, was_cancelled );
 
     for ( auto index = MissionObjectiveEndObservers.Num() - 1; index >= 0; --index )

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Chaos/AABB.h"
 #include "MSMissionObjective.h"
 
 #include <CoreMinimal.h>
@@ -10,6 +9,7 @@
 class UMSMissionAction;
 class UMSMissionData;
 class UMSMissionObjective;
+class UMSMission;
 
 DECLARE_EVENT_TwoParams( UMSMission, FMSOnMissionEndedEvent, UMSMission * Mission, bool WasCancelled );
 DECLARE_EVENT_OneParam( UMSMission, FMSOnMissionObjectiveStartedEvent, const TSubclassOf< UMSMissionObjective > & MissionObjective );
@@ -34,7 +34,7 @@ public:
     const TArray< UMSMissionAction * > & GetStartActions() const;
     bool IsStarted() const;
 
-    void Initialize(UMSMissionData* mission_data);
+    void Initialize( UMSMissionData * mission_data );
     void Start();
     void Complete();
     void Cancel();
@@ -65,7 +65,7 @@ private:
     FMSOnMissionObjectiveStartedEvent OnMissionObjectiveStartedEvent;
     FMSOnMissionObjectiveEndedEvent OnMissionObjectiveCompleteEvent;
 
-    UPROPERTY()
+    UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
     TArray< TObjectPtr< UMSMissionObjective > > ActiveObjectives;
 
     UPROPERTY()

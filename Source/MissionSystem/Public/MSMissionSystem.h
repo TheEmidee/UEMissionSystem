@@ -13,12 +13,15 @@ class UMSMissionData;
 
 DECLARE_DYNAMIC_DELEGATE_OneParam( FMSMissionSystemMissionStartsDynamicDelegate, const UMSMissionData *, MissionData );
 DECLARE_DELEGATE_OneParam( FMSMissionSystemMissionStartsDelegate, const UMSMissionData * MissionData );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FMSMissionSystemMissionStartsMulticastDynamicDelegate, UMSMission *, Mission );
 
 DECLARE_DYNAMIC_DELEGATE_TwoParams( FMSMissionSystemMissionEndsDynamicDelegate, const UMSMissionData *, MissionData, bool, WasCancelled );
 DECLARE_DELEGATE_TwoParams( FMSMissionSystemMissionEndsDelegate, const UMSMissionData * MissionData, bool WasCancelled );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams( FMSMissionSystemMissionEndsMulticastDynamicDelegate, const UMSMissionData *, MissionData, bool, WasCancelled );
 
 DECLARE_DYNAMIC_DELEGATE_OneParam( FMSMissionSystemMissionObjectiveStartsDynamicDelegate, TSubclassOf< UMSMissionObjective >, MissionObjective );
 DECLARE_DELEGATE_OneParam( FMSMissionSystemMissionObjectiveStartsDelegate, TSubclassOf< UMSMissionObjective > MissionObjective );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams( FMSMissionSystemMissionObjectiveStartsMulticastDynamicDelegate, UMSMission *, Mission, TSubclassOf< UMSMissionObjective > , MissionObjective );
 
 DECLARE_DYNAMIC_DELEGATE_TwoParams( FMSMissionSystemMissionObjectiveEndsDynamicDelegate, TSubclassOf< UMSMissionObjective >, MissionObjective, bool, WasCancelled );
 DECLARE_DELEGATE_TwoParams( FMSMissionSystemMissionObjectiveEndsDelegate, TSubclassOf< UMSMissionObjective > MissionObjective, bool WasCancelled );
@@ -37,10 +40,10 @@ public:
     void StartMission( UMSMissionData * mission_data );
 
     UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
-    bool IsMissionComplete(UMSMissionData* mission_data) const;
+    bool IsMissionComplete( UMSMissionData * mission_data ) const;
 
     UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
-    bool IsMissionActive(UMSMissionData* mission_data) const;
+    bool IsMissionActive( UMSMissionData * mission_data ) const;
 
     UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
     UMSMission * GetActiveMission( const UMSMissionData * mission_data ) const;
@@ -111,13 +114,17 @@ private:
         FMSMissionSystemMissionObjectiveEndsDelegate Callback;
     };
 
-    UMSMission * TryCreateMissionFromData(UMSMissionData* mission_data);
-    UMSMission * CreateMissionFromData(UMSMissionData* mission_data);
+    UMSMission * TryCreateMissionFromData( UMSMissionData * mission_data );
+    UMSMission * CreateMissionFromData( UMSMissionData * mission_data );
     void StartMission( UMSMission * mission );
     void StartNextMissions( const UMSMissionData * mission_data );
     void OnMissionEnded( UMSMission * mission, bool was_cancelled );
-    void OnMissionObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective );
-    void OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled );
+    void OnMissionObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective, UMSMission * mission );
+    void OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled, UMSMission * mission );
+    void BroadcastOnMissionStarts(UMSMission* mission);
+    void BroadcastOnMissionEnds( UMSMission * mission, bool was_cancelled );
+    void BroadcastOnMissionObjectiveStarts( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective );
+    void BroadcastOnMissionObjectiveEnds(UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled);
 
     FMSOnMissionEndedEvent OnMissionEndedEvent;
     FMSOnMissionObjectiveEndedEvent OnMissionObjectiveEndedEvent;
@@ -127,6 +134,15 @@ private:
 
     UPROPERTY()
     TArray< FString > TagsToIgnoreForObjectives;
+
+    UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess = true ) )
+    FMSMissionSystemMissionStartsMulticastDynamicDelegate OnMissionStartsDelegate;
+
+    UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess = true ) )
+    FMSMissionSystemMissionEndsMulticastDynamicDelegate OnMissionEndsDelegate;
+
+    UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess = true ) )
+    FMSMissionSystemMissionObjectiveStartsMulticastDynamicDelegate OnMissionObjectiveStartsDelegate;
 
     TArray< FMissionStartObserver > MissionStartObservers;
     TArray< FMissionEndObserver > MissionEndObservers;

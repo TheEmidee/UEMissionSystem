@@ -65,10 +65,13 @@ protected:
     UPROPERTY()
     FMSActionExecutor EndActionsExecutor;
 
-    UPROPERTY( EditAnywhere, Category = "Tags" )
+    UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Infos", meta = ( AllowPrivateAccess = true ) )
+    FText Description;
+
+    UPROPERTY( EditDefaultsOnly, Category = "Tags" )
     FGameplayTagContainer Tags;
 
-    UPROPERTY( EditAnywhere, Category = "Actions" )
+    UPROPERTY( EditDefaultsOnly, Category = "Actions" )
     uint8 bExecuteEndActionsWhenCancelled : 1;
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
