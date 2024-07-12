@@ -5,30 +5,30 @@
 namespace
 {
     template < typename _ObjectType_ >
-    FGuid GetObjectGuid( _ObjectType_ object );
+    FGuid GetGuid( _ObjectType_ object );
 
     template <>
-    FGuid GetObjectGuid( UMSMissionData * object )
+    FGuid GetGuid( UMSMissionData * object )
     {
         return object->GetGuid();
     }
 
     template <>
-    FGuid GetObjectGuid( TSubclassOf< UMSMissionObjective > object )
+    FGuid GetGuid( TSubclassOf< UMSMissionObjective > object )
     {
         auto * cdo = object.GetDefaultObject();
         return cdo->GetGuid();
     }
 
     template < typename _ObjectType_ >
-    TOptional< EMSState > GetObjectState( _ObjectType_ object, const TMap< FGuid, EMSState > & object_map )
+    TOptional< EMSState > GetState( _ObjectType_ object, const TMap< FGuid, EMSState > & object_map )
     {
         if ( object == nullptr )
         {
             return {};
         }
 
-        const auto guid = GetObjectGuid( object );
+        const auto guid = GetGuid( object );
 
         if ( !ensureAlways( guid.IsValid() ) )
         {
@@ -44,14 +44,14 @@ namespace
     }
 
     template < typename _ObjectType_ >
-    bool DoesObjectHasState( _ObjectType_ object, const TMap< FGuid, EMSState > & object_map, EMSState required_state )
+    bool DoesHaveState( _ObjectType_ object, const TMap< FGuid, EMSState > & object_map, EMSState required_state )
     {
         if ( object == nullptr )
         {
             return false;
         }
 
-        const auto guid = GetObjectGuid( object );
+        const auto guid = GetGuid( object );
 
         if ( !ensureAlways( guid.IsValid() ) )
         {
@@ -67,14 +67,14 @@ namespace
     }
 
     template < typename _ObjectType_ >
-    bool TryAddObjectToMap( _ObjectType_ object, TMap< FGuid, EMSState > & object_map )
+    bool TryAddToMap( _ObjectType_ object, TMap< FGuid, EMSState > & object_map )
     {
         if ( !ensureAlways( object != nullptr ) )
         {
             return false;
         }
 
-        const auto id = GetObjectGuid( object );
+        const auto id = GetGuid( object );
 
         if ( !ensureAlways( id.IsValid() ) )
         {
@@ -97,14 +97,14 @@ namespace
     }
 
     template < typename _ObjectType_ >
-    bool SetObjectComplete( _ObjectType_ object, TMap< FGuid, EMSState > & object_map, const bool was_cancelled )
+    bool SetComplete( _ObjectType_ object, TMap< FGuid, EMSState > & object_map, const bool was_cancelled )
     {
         if ( !ensureAlways( object != nullptr ) )
         {
             return false;
         }
 
-        const auto id = GetObjectGuid( object );
+        const auto id = GetGuid( object );
 
         if ( !ensureAlways( id.IsValid() ) )
         {
@@ -138,13 +138,13 @@ bool FMSMissionHistory::IsMissionComplete( UMSMissionData * mission_data ) const
 
 bool FMSMissionHistory::IsMissionFinished( UMSMissionData * mission_data ) const
 {
-    const auto state = GetObjectState( mission_data, MissionStates ).Get( EMSState::Active );
+    const auto state = GetState( mission_data, MissionStates ).Get( EMSState::Active );
     return state > EMSState::Active;
 }
 
 bool FMSMissionHistory::AddActiveMission( UMSMissionData * mission_data )
 {
-    if ( !TryAddObjectToMap( mission_data, MissionStates ) )
+    if ( !TryAddToMap( mission_data, MissionStates ) )
     {
         return false;
     }
@@ -157,7 +157,7 @@ bool FMSMissionHistory::AddActiveMission( UMSMissionData * mission_data )
 
 bool FMSMissionHistory::SetMissionComplete( UMSMissionData * mission_data, bool was_cancelled )
 {
-    if ( !SetObjectComplete( mission_data, MissionStates, was_cancelled ) )
+    if ( !SetComplete( mission_data, MissionStates, was_cancelled ) )
     {
         return false;
     }
@@ -185,28 +185,28 @@ bool FMSMissionHistory::IsObjectiveComplete( const TSubclassOf< UMSMissionObject
 
 bool FMSMissionHistory::IsObjectiveFinished( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const
 {
-    const auto state = GetObjectState( mission_objective_class, ObjectiveStates ).Get( EMSState::Active );
+    const auto state = GetState( mission_objective_class, ObjectiveStates ).Get( EMSState::Active );
     return state > EMSState::Active;
 }
 
 bool FMSMissionHistory::AddActiveObjective( const TSubclassOf< UMSMissionObjective > & mission_objective_class )
 {
-    return TryAddObjectToMap( mission_objective_class, ObjectiveStates );
+    return TryAddToMap( mission_objective_class, ObjectiveStates );
 }
 
 bool FMSMissionHistory::SetObjectiveComplete( const TSubclassOf< UMSMissionObjective > & mission_objective_class, bool was_cancelled )
 {
-    return SetObjectComplete( mission_objective_class, ObjectiveStates, was_cancelled );
+    return SetComplete( mission_objective_class, ObjectiveStates, was_cancelled );
 }
 
 bool FMSMissionHistory::DoesMissionHasState( UMSMissionData * mission_data, EMSState state ) const
 {
-    return DoesObjectHasState( mission_data, MissionStates, state );
+    return DoesHaveState( mission_data, MissionStates, state );
 }
 
 bool FMSMissionHistory::DoesObjectiveHasState( const TSubclassOf< UMSMissionObjective > & mission_objective_class, EMSState state ) const
 {
-    return DoesObjectHasState( mission_objective_class, ObjectiveStates, state );
+    return DoesHaveState( mission_objective_class, ObjectiveStates, state );
 }
 
 FArchive & operator<<( FArchive & archive, FMSMissionHistory & mission_history )
