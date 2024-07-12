@@ -5,10 +5,7 @@
 namespace
 {
     template < typename _ObjectType_ >
-    FGuid GetObjectGuid( _ObjectType_ object )
-    {
-        return FGuid();
-    }
+    FGuid GetObjectGuid( _ObjectType_ object );
 
     template <>
     FGuid GetObjectGuid( UMSMissionData * object )
@@ -160,7 +157,15 @@ bool FMSMissionHistory::AddActiveMission( UMSMissionData * mission_data )
 
 bool FMSMissionHistory::SetMissionComplete( UMSMissionData * mission_data, bool was_cancelled )
 {
-    return SetObjectComplete( mission_data, MissionStates, was_cancelled );
+    if ( !SetObjectComplete( mission_data, MissionStates, was_cancelled ) )
+    {
+        return false;
+    }
+
+    check( ActiveMissionsData.Contains( mission_data ) );
+    ActiveMissionsData.Remove( mission_data );
+
+    return true;
 }
 
 bool FMSMissionHistory::IsObjectiveActive( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const
@@ -216,7 +221,6 @@ FArchive & operator<<( FArchive & archive, FMSMissionHistory & mission_history )
             archive << mission_history.ActiveMissionsData[ i ];
         }
     }*/
-
 
     archive << mission_history.ActiveMissionsData;
     archive << mission_history.MissionStates;
