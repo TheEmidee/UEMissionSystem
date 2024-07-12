@@ -11,7 +11,9 @@ class UMSMissionAction;
 class UMSMissionData;
 class UMSMissionObjective;
 
-DECLARE_EVENT_TwoParams( UMSMission, FMSOnMissionEndedEvent, UMSMissionData * MissionData, bool WasCancelled );
+DECLARE_EVENT_TwoParams( UMSMission, FMSOnMissionEndedEvent, UMSMission * Mission, bool WasCancelled );
+DECLARE_EVENT_OneParam( UMSMission, FMSOnMissionObjectiveStartedEvent, const TSubclassOf< UMSMissionObjective > & MissionObjective );
+DECLARE_EVENT_TwoParams( UMSMission, FMSOnMissionObjectiveEndedEvent, const TSubclassOf< UMSMissionObjective > & MissionObjective, bool WasCancelled );
 
 UCLASS()
 class MISSIONSYSTEM_API UMSMission final : public UObject
@@ -32,7 +34,7 @@ public:
     const TArray< UMSMissionAction * > & GetStartActions() const;
     bool IsStarted() const;
 
-    void Initialize( UMSMissionData * mission_data );
+    void Initialize(UMSMissionData* mission_data);
     void Start();
     void Complete();
     void Cancel();
@@ -44,18 +46,17 @@ public:
     void DumpMission( FOutputDevice & output_device );
 #endif
 
-    const UMSMissionData * GetMissionData() const;
+    UMSMissionData * GetMissionData() const;
 
 private:
-    void OnObjectiveStarted( UMSMissionObjective * mission_objective );
-    void OnObjectiveCompleted( UMSMissionObjective * objective, bool was_cancelled );
+    void OnObjectiveCompleted( UMSMissionObjective * mission_objective, bool was_cancelled );
     void TryStart();
     void TryEnd();
 
     UFUNCTION()
     void ExecuteNextObjective();
 
-    bool CanExecuteObjective( UMSMissionObjective * objective ) const;
+    bool CanExecuteObjective( const TSubclassOf< UMSMissionObjective > & objective_class ) const;
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
     UMSMissionData * Data;
@@ -65,10 +66,10 @@ private:
     FMSOnMissionObjectiveEndedEvent OnMissionObjectiveCompleteEvent;
 
     UPROPERTY()
-    TArray< UMSMissionObjective * > Objectives;
+    TArray< TObjectPtr< UMSMissionObjective > > ActiveObjectives;
 
     UPROPERTY()
-    TArray< UMSMissionObjective * > PendingObjectives;
+    TArray< TSubclassOf< UMSMissionObjective > > PendingObjectives;
 
     UPROPERTY()
     FMSActionExecutor StartActionsExecutor;
@@ -77,9 +78,9 @@ private:
     FMSActionExecutor EndActionsExecutor;
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
-    uint8 bIsStarted : 1;
+    bool bIsStarted;
 
-    uint8 bIsCancelled : 1;
+    bool bIsCancelled;
 };
 
 FORCEINLINE FMSOnMissionEndedEvent & UMSMission::OnMissionEnded()
@@ -99,7 +100,7 @@ FORCEINLINE FMSOnMissionObjectiveEndedEvent & UMSMission::OnMissionObjectiveEnde
 
 FORCEINLINE const TArray< UMSMissionObjective * > & UMSMission::GetObjectives() const
 {
-    return Objectives;
+    return ActiveObjectives;
 }
 
 FORCEINLINE const TArray< UMSMissionAction * > & UMSMission::GetStartActions() const
@@ -112,7 +113,7 @@ FORCEINLINE bool UMSMission::IsStarted() const
     return bIsStarted;
 }
 
-FORCEINLINE const UMSMissionData * UMSMission::GetMissionData() const
+FORCEINLINE UMSMissionData * UMSMission::GetMissionData() const
 {
     return Data;
 }

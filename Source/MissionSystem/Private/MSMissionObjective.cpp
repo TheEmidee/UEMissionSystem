@@ -3,17 +3,15 @@
 #include "DVEDataValidator.h"
 #include "MSMissionAction.h"
 
-UMSMissionObjective::UMSMissionObjective()
+UMSMissionObjective::UMSMissionObjective() :
+    bExecuteEndActionsWhenCancelled( false ),
+    bIsComplete( false ),
+    bIsCancelled( false )
 {
-    bExecuteEndActionsWhenCancelled = false;
-    bIsComplete = false;
-    bIsCancelled = false;
 }
 
 void UMSMissionObjective::Execute()
 {
-    OnObjectiveStartedEvent.Broadcast( this );
-
     StartActionsExecutor.Initialize( *this, StartActions, [ this ]() {
         K2_Execute();
     } );
@@ -25,6 +23,27 @@ void UMSMissionObjective::Execute()
     StartActionsExecutor.Execute();
 }
 
+void UMSMissionObjective::PostLoad()
+{
+    UObject::PostLoad();
+
+    GenerateGuidIfNeeded();
+}
+
+void UMSMissionObjective::PostDuplicate( bool duplicate_for_pie )
+{
+    UObject::PostDuplicate( duplicate_for_pie );
+
+    GenerateGuidIfNeeded( true );
+}
+
+void UMSMissionObjective::PostEditImport()
+{
+    UObject::PostEditImport();
+
+    GenerateGuidIfNeeded( true );
+}
+
 void UMSMissionObjective::CompleteObjective()
 {
     if ( !bIsComplete )
@@ -32,6 +51,25 @@ void UMSMissionObjective::CompleteObjective()
         bIsComplete = true;
         K2_OnObjectiveEnded( false );
         EndActionsExecutor.Execute();
+    }
+}
+
+void UMSMissionObjective::CancelObjective()
+{
+    if ( !bIsComplete && !bIsCancelled )
+    {
+        bIsCancelled = true;
+
+        K2_OnObjectiveEnded( true );
+
+        if ( bExecuteEndActionsWhenCancelled )
+        {
+            EndActionsExecutor.Execute();
+        }
+        else
+        {
+            OnObjectiveCompleteEvent.Broadcast( this, bIsCancelled );
+        }
     }
 }
 
@@ -55,24 +93,6 @@ void UMSMissionObjective::GetOwnedGameplayTags( FGameplayTagContainer & tag_cont
     tag_container.AppendTags( Tags );
 }
 
-void UMSMissionObjective::CancelObjective()
-{
-    if ( !bIsComplete && !bIsCancelled )
-    {
-        bIsCancelled = true;
-
-        K2_OnObjectiveEnded( true );
-
-        if ( bExecuteEndActionsWhenCancelled )
-        {
-            EndActionsExecutor.Execute();
-        }
-        else
-        {
-            OnObjectiveCompleteEvent.Broadcast( this, bIsCancelled );
-        }
-    }
-}
 #if WITH_EDITOR
 EDataValidationResult UMSMissionObjective::IsDataValid( FDataValidationContext & context ) const
 {
@@ -81,9 +101,20 @@ EDataValidationResult UMSMissionObjective::IsDataValid( FDataValidationContext &
     return FDVEDataValidator( context )
         .NoNullItem( VALIDATOR_GET_PROPERTY( StartActions ) )
         .NoNullItem( VALIDATOR_GET_PROPERTY( EndActions ) )
+        .IsValid( VALIDATOR_GET_PROPERTY( ObjectiveId ) )
         .Result();
 }
+
 #endif
+
+void UMSMissionObjective::GenerateGuidIfNeeded( bool force_generation )
+{
+    if ( !ObjectiveId.IsValid() || force_generation )
+    {
+        ObjectiveId = FGuid::NewGuid();
+        Modify();
+    }
+}
 
 void UMSMissionObjective::K2_Execute_Implementation()
 {

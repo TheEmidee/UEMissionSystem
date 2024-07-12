@@ -11,8 +11,7 @@
 class UMSMissionAction;
 class UMSMissionObjective;
 
-DECLARE_EVENT_OneParam( UMSMissionObjective, FMSOnMissionObjectiveStartedEvent, UMSMissionObjective * MissionObjective );
-DECLARE_EVENT_TwoParams( UMSMissionObjective, FMSOnMissionObjectiveEndedEvent, UMSMissionObjective * MissionObjective, bool WasCancelled );
+DECLARE_EVENT_TwoParams( UMSMissionObjective, FMSOnObjectiveEndedEvent, UMSMissionObjective * MissionObjective, bool WasCancelled );
 
 UCLASS( Abstract, BlueprintType, Blueprintable )
 class MISSIONSYSTEM_API UMSMissionObjective : public UObject, public IGameplayTagAssetInterface
@@ -22,18 +21,20 @@ class MISSIONSYSTEM_API UMSMissionObjective : public UObject, public IGameplayTa
 public:
     UMSMissionObjective();
 
-    friend class UMSMission;
+    FMSOnObjectiveEndedEvent & OnObjectiveEnded();
 
-    FMSOnMissionObjectiveStartedEvent & OnMissionObjectiveStarted();
-    FMSOnMissionObjectiveEndedEvent & OnMissionObjectiveEnded();
-
+    const FGuid & GetGuid() const;
     bool IsComplete() const;
     bool IsCancelled() const;
-
     void Execute();
+    void PostLoad() override;
+    void PostDuplicate( bool duplicate_for_pie ) override;
+    void PostEditImport() override;
 
     UFUNCTION( BlueprintCallable )
     void CompleteObjective();
+
+    void CancelObjective();
 
     UWorld * GetWorld() const override;
 
@@ -50,7 +51,7 @@ protected:
     UFUNCTION( BlueprintNativeEvent, DisplayName = "OnObjectiveEnded" )
     void K2_OnObjectiveEnded( bool was_cancelled );
 
-    void CancelObjective();
+    void GenerateGuidIfNeeded( bool force_generation = false );
 
     UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
     TArray< TObjectPtr< UMSMissionAction > > StartActions;
@@ -71,23 +72,25 @@ protected:
     uint8 bExecuteEndActionsWhenCancelled : 1;
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
-    uint8 bIsComplete : 1;
+    bool bIsComplete;
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
-    uint8 bIsCancelled : 1;
+    bool bIsCancelled;
 
-    FMSOnMissionObjectiveStartedEvent OnObjectiveStartedEvent;
-    FMSOnMissionObjectiveEndedEvent OnObjectiveCompleteEvent;
+    UPROPERTY( VisibleAnywhere, AdvancedDisplay )
+    FGuid ObjectiveId;
+
+    FMSOnObjectiveEndedEvent OnObjectiveCompleteEvent;
 };
 
-FORCEINLINE FMSOnMissionObjectiveStartedEvent & UMSMissionObjective::OnMissionObjectiveStarted()
-{
-    return OnObjectiveStartedEvent;
-}
-
-FORCEINLINE FMSOnMissionObjectiveEndedEvent & UMSMissionObjective::OnMissionObjectiveEnded()
+FORCEINLINE FMSOnObjectiveEndedEvent & UMSMissionObjective::OnObjectiveEnded()
 {
     return OnObjectiveCompleteEvent;
+}
+
+FORCEINLINE const FGuid & UMSMissionObjective::GetGuid() const
+{
+    return ObjectiveId;
 }
 
 FORCEINLINE bool UMSMissionObjective::IsComplete() const
