@@ -54,6 +54,25 @@ void UMSMissionObjective::CompleteObjective()
     }
 }
 
+void UMSMissionObjective::CancelObjective()
+{
+    if ( !bIsComplete && !bIsCancelled )
+    {
+        bIsCancelled = true;
+
+        K2_OnObjectiveEnded( true );
+
+        if ( bExecuteEndActionsWhenCancelled )
+        {
+            EndActionsExecutor.Execute();
+        }
+        else
+        {
+            OnObjectiveCompleteEvent.Broadcast( this, bIsCancelled );
+        }
+    }
+}
+
 UWorld * UMSMissionObjective::GetWorld() const
 {
     if ( IsTemplate() )
@@ -82,29 +101,11 @@ EDataValidationResult UMSMissionObjective::IsDataValid( FDataValidationContext &
     return FDVEDataValidator( context )
         .NoNullItem( VALIDATOR_GET_PROPERTY( StartActions ) )
         .NoNullItem( VALIDATOR_GET_PROPERTY( EndActions ) )
+        .IsValid( VALIDATOR_GET_PROPERTY( ObjectiveId ) )
         .Result();
 }
 
 #endif
-
-void UMSMissionObjective::CancelObjective()
-{
-    if ( !bIsComplete && !bIsCancelled )
-    {
-        bIsCancelled = true;
-
-        K2_OnObjectiveEnded( true );
-
-        if ( bExecuteEndActionsWhenCancelled )
-        {
-            EndActionsExecutor.Execute();
-        }
-        else
-        {
-            OnObjectiveCompleteEvent.Broadcast( this, bIsCancelled );
-        }
-    }
-}
 
 void UMSMissionObjective::GenerateGuidIfNeeded( bool force_generation )
 {

@@ -21,8 +21,6 @@ class MISSIONSYSTEM_API UMSMissionObjective : public UObject, public IGameplayTa
 public:
     UMSMissionObjective();
 
-    friend class UMSMission;
-
     FMSOnObjectiveEndedEvent & OnObjectiveEnded();
 
     const FGuid & GetGuid() const;
@@ -35,6 +33,8 @@ public:
 
     UFUNCTION( BlueprintCallable )
     void CompleteObjective();
+
+    void CancelObjective();
 
     UWorld * GetWorld() const override;
 
@@ -51,7 +51,6 @@ protected:
     UFUNCTION( BlueprintNativeEvent, DisplayName = "OnObjectiveEnded" )
     void K2_OnObjectiveEnded( bool was_cancelled );
 
-    void CancelObjective();
     void GenerateGuidIfNeeded( bool force_generation = false );
 
     UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
