@@ -133,7 +133,17 @@ void UMSMissionSystem::ResumeMissionsFromHistory()
     }
 }
 
-void UMSMissionSystem::WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartsDelegate & when_mission_starts )
+bool UMSMissionSystem::CompleteObjective( UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > mission_objective_class )
+{
+    if ( auto * mission = GetActiveMission( mission_data ) )
+    {
+        return mission->CompleteObjective( mission_objective_class );
+    }
+
+    return false;
+}
+
+void UMSMissionSystem::WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartedDelegate & when_mission_starts )
 {
     if ( IsMissionActive( mission_data ) )
     {

@@ -38,6 +38,7 @@ public:
     void Start();
     void Complete();
     void Cancel();
+    bool CompleteObjective( const TSubclassOf< UMSMissionObjective > & objective_class );
 
     UFUNCTION( BlueprintPure )
     bool IsComplete() const;
