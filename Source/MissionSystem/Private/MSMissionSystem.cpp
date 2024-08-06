@@ -3,11 +3,10 @@
 #include "Log/CoreExtLog.h"
 #include "MSLog.h"
 #include "MSMission.h"
-#include "Serialization/MemoryWriter.h"
-#include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "ViewModels/MSViewModel.h"
 
 #include <Engine/World.h>
+#include <Serialization/MemoryWriter.h>
 
 #if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
 static FAutoConsoleCommand SkipMissionsCommand(
