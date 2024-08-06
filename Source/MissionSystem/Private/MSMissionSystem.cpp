@@ -5,6 +5,7 @@
 #include "MSMission.h"
 #include "Serialization/MemoryWriter.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
+#include "ViewModels/MSViewModel.h"
 
 #include <Engine/World.h>
 
@@ -61,6 +62,13 @@ static FAutoConsoleCommand ClearIgnoreObjectivesTags(
         }
     } ) );
 #endif
+
+void UMSMissionSystem::Initialize( FSubsystemCollectionBase & collection )
+{
+    Super::Initialize( collection );
+
+    ViewModel = NewObject< UMSViewModel >( this );
+}
 
 void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
 {
@@ -397,9 +405,13 @@ void UMSMissionSystem::StartMission( UMSMission * mission )
     auto * mission_data = mission->GetMissionData();
 
     UE_SLOG( LogMissionSystem, Verbose, TEXT( "Start mission (%s)" ), *GetNameSafe( mission_data ) );
-    mission->Start();
 
-    BroadcastOnMissionStarts( mission );
+    // :NOTE: This is intended to broadcast now before actually starting the mission
+    // This is to make sure no objectives have been started yet, and that any object listening to the
+    // events mission started / objective started receive them in the correct order
+    BroadcastOnMissionStarted( mission );
+
+    mission->Start();
 }
 
 void UMSMissionSystem::StartNextMissions( const UMSMissionData * mission_data )
@@ -423,7 +435,9 @@ void UMSMissionSystem::OnMissionEnded( UMSMission * mission, const bool was_canc
 
     ActiveMissions.Remove( mission );
 
-    BroadcastOnMissionEnds( mission, was_cancelled );
+    BroadcastOnMissionEnded( mission, was_cancelled );
+
+    ViewModel->SetMissionEnded( mission );
 
     if ( !was_cancelled || mission_data->bStartNextMissionsWhenCancelled )
     {
@@ -438,7 +452,7 @@ void UMSMissionSystem::OnMissionObjectiveStarted( const TSubclassOf< UMSMissionO
         return;
     }
 
-    BroadcastOnMissionObjectiveStarts( mission, objective );
+    BroadcastOnMissionObjectiveStarted( mission, objective );
 }
 
 void UMSMissionSystem::OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, const bool was_cancelled, UMSMission * mission )
@@ -450,10 +464,10 @@ void UMSMissionSystem::OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObj
         return;
     }
 
-    BroadcastOnMissionObjectiveEnds( mission, objective, was_cancelled );
+    BroadcastOnMissionObjectiveEnded( mission, objective, was_cancelled );
 }
 
-void UMSMissionSystem::BroadcastOnMissionStarts( UMSMission * mission )
+void UMSMissionSystem::BroadcastOnMissionStarted( UMSMission * mission )
 {
     const auto * mission_data = mission->GetMissionData();
 
@@ -469,9 +483,11 @@ void UMSMissionSystem::BroadcastOnMissionStarts( UMSMission * mission )
             MissionStartObservers.RemoveAt( index );
         }
     }
+
+    ViewModel->SetMissionStarted( mission );
 }
 
-void UMSMissionSystem::BroadcastOnMissionEnds( UMSMission * mission, bool was_cancelled )
+void UMSMissionSystem::BroadcastOnMissionEnded( UMSMission * mission, bool was_cancelled )
 {
     auto * mission_data = mission->GetMissionData();
 
@@ -487,9 +503,11 @@ void UMSMissionSystem::BroadcastOnMissionEnds( UMSMission * mission, bool was_ca
             MissionEndObservers.RemoveAt( index );
         }
     }
+
+    ViewModel->SetMissionEnded( mission );
 }
 
-void UMSMissionSystem::BroadcastOnMissionObjectiveStarts( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective )
+void UMSMissionSystem::BroadcastOnMissionObjectiveStarted( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective )
 {
     OnMissionObjectiveStartedDelegate.Broadcast( mission->GetMissionData(), objective );
 
@@ -497,9 +515,11 @@ void UMSMissionSystem::BroadcastOnMissionObjectiveStarts( UMSMission * mission, 
     {
         observer.Callback.ExecuteIfBound( objective->GetClass() );
     }
+
+    ViewModel->SetMissionObjectiveStarted( mission, objective );
 }
 
-void UMSMissionSystem::BroadcastOnMissionObjectiveEnds( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled )
+void UMSMissionSystem::BroadcastOnMissionObjectiveEnded( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled )
 {
     OnMissionObjectiveEndedDelegate.Broadcast( mission->GetMissionData(), objective, was_cancelled );
 
@@ -513,4 +533,6 @@ void UMSMissionSystem::BroadcastOnMissionObjectiveEnds( UMSMission * mission, co
             MissionObjectiveEndObservers.RemoveAt( index );
         }
     }
+
+    ViewModel->SetMissionObjectiveEnded( mission, objective );
 }

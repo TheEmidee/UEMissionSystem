@@ -22,6 +22,7 @@ public:
     UMSMissionObjective();
 
     FMSOnObjectiveEndedEvent & OnObjectiveEnded();
+    const FText & GetDescription() const;
 
     const FGuid & GetGuid() const;
     bool IsComplete() const;
@@ -89,6 +90,11 @@ protected:
 FORCEINLINE FMSOnObjectiveEndedEvent & UMSMissionObjective::OnObjectiveEnded()
 {
     return OnObjectiveCompleteEvent;
+}
+
+FORCEINLINE const FText & UMSMissionObjective::GetDescription() const
+{
+    return Description;
 }
 
 FORCEINLINE const FGuid & UMSMissionObjective::GetGuid() const

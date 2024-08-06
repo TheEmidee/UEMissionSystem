@@ -9,6 +9,7 @@
 
 #include "MSMissionSystem.generated.h"
 
+class UMSViewModel;
 class UMSMissionData;
 
 DECLARE_DYNAMIC_DELEGATE_OneParam( FMSMissionSystemMissionStartedDynamicDelegate, const UMSMissionData *, MissionData );
@@ -36,6 +37,8 @@ public:
     FMSOnMissionEndedEvent & OnMissionEnded();
     FMSOnMissionObjectiveEndedEvent & OnMissionObjectiveEnded();
     const FMSMissionHistory & GetMissionHistory() const;
+
+    void Initialize( FSubsystemCollectionBase & collection ) override;
 
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System" )
     void StartMission( UMSMissionData * mission_data );
@@ -125,10 +128,10 @@ private:
     void OnMissionEnded( UMSMission * mission, bool was_cancelled );
     void OnMissionObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective, UMSMission * mission );
     void OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled, UMSMission * mission );
-    void BroadcastOnMissionStarts(UMSMission* mission);
-    void BroadcastOnMissionEnds( UMSMission * mission, bool was_cancelled );
-    void BroadcastOnMissionObjectiveStarts( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective );
-    void BroadcastOnMissionObjectiveEnds(UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled);
+    void BroadcastOnMissionStarted( UMSMission * mission );
+    void BroadcastOnMissionEnded( UMSMission * mission, bool was_cancelled );
+    void BroadcastOnMissionObjectiveStarted( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective );
+    void BroadcastOnMissionObjectiveEnded( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled );
 
     UPROPERTY()
     TArray< UMSMission * > ActiveMissions;
@@ -147,6 +150,9 @@ private:
 
     UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess = true ) )
     FMSMissionSystemMissionObjectiveEndedMulticastDynamicDelegate OnMissionObjectiveEndedDelegate;
+
+    UPROPERTY( Transient, BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
+    TObjectPtr< UMSViewModel > ViewModel;
 
     TArray< FMissionStartObserver > MissionStartObservers;
     TArray< FMissionEndObserver > MissionEndObservers;
