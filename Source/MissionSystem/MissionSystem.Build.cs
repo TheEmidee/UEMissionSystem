@@ -24,7 +24,8 @@ namespace UnrealBuildTool.Rules
                     "Engine",
                     "GameplayTags",
                     "DataValidationExtensions",
-                    "CoreExtensions"
+                    "CoreExtensions",
+                    "ModelViewViewModel"
                 }
             );
         }

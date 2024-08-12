@@ -36,6 +36,12 @@ public:
     void PostDuplicate( bool duplicate_for_pie ) override;
     void PostEditImport() override;
 
+    UPROPERTY( EditDefaultsOnly, BlueprintReadOnly )
+    FText Name;
+
+    UPROPERTY( EditDefaultsOnly, BlueprintReadOnly )
+    FText Description;
+
     UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
     TArray< TObjectPtr< UMSMissionAction > > StartActions;
 

@@ -3,10 +3,10 @@
 #include "Log/CoreExtLog.h"
 #include "MSLog.h"
 #include "MSMission.h"
-#include "Serialization/MemoryWriter.h"
-#include "Serialization/ObjectAndNameAsStringProxyArchive.h"
+#include "ViewModels/MSViewModel.h"
 
 #include <Engine/World.h>
+#include <Serialization/MemoryWriter.h>
 
 #if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
 static FAutoConsoleCommand SkipMissionsCommand(
@@ -61,6 +61,13 @@ static FAutoConsoleCommand ClearIgnoreObjectivesTags(
         }
     } ) );
 #endif
+
+void UMSMissionSystem::Initialize( FSubsystemCollectionBase & collection )
+{
+    Super::Initialize( collection );
+
+    ViewModel = NewObject< UMSViewModel >( this );
+}
 
 void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
 {
@@ -133,7 +140,17 @@ void UMSMissionSystem::ResumeMissionsFromHistory()
     }
 }
 
-void UMSMissionSystem::WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartsDelegate & when_mission_starts )
+bool UMSMissionSystem::CompleteObjective( UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > mission_objective_class )
+{
+    if ( auto * mission = GetActiveMission( mission_data ) )
+    {
+        return mission->CompleteObjective( mission_objective_class );
+    }
+
+    return false;
+}
+
+void UMSMissionSystem::WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartedDelegate & when_mission_starts )
 {
     if ( IsMissionActive( mission_data ) )
     {
@@ -148,7 +165,7 @@ void UMSMissionSystem::WhenMissionStartsOrIsActive( UMSMissionData * mission_dat
     MissionStartObservers.Emplace( MoveTemp( observer ) );
 }
 
-void UMSMissionSystem::WhenMissionEnds( UMSMissionData * mission_data, const FMSMissionSystemMissionEndsDelegate & when_mission_ends )
+void UMSMissionSystem::WhenMissionEnds( UMSMissionData * mission_data, const FMSMissionSystemMissionEndedDelegate & when_mission_ends )
 {
     if ( IsMissionComplete( mission_data ) )
     {
@@ -163,7 +180,7 @@ void UMSMissionSystem::WhenMissionEnds( UMSMissionData * mission_data, const FMS
     MissionEndObservers.Emplace( MoveTemp( observer ) );
 }
 
-void UMSMissionSystem::WhenMissionObjectiveStartsOrIsActive( const TSubclassOf< UMSMissionObjective > & mission_objective_class, const FMSMissionSystemMissionObjectiveStartsDelegate & when_mission_objective_starts )
+void UMSMissionSystem::WhenMissionObjectiveStartsOrIsActive( const TSubclassOf< UMSMissionObjective > & mission_objective_class, const FMSMissionSystemMissionObjectiveStartedDelegate & when_mission_objective_starts )
 {
     if ( IsMissionObjectiveActive( mission_objective_class ) )
     {
@@ -178,7 +195,7 @@ void UMSMissionSystem::WhenMissionObjectiveStartsOrIsActive( const TSubclassOf< 
     MissionObjectiveStartObservers.Emplace( MoveTemp( observer ) );
 }
 
-void UMSMissionSystem::WhenMissionObjectiveEnds( const TSubclassOf< UMSMissionObjective > & mission_objective_class, const FMSMissionSystemMissionObjectiveEndsDelegate & when_mission_objective_ends )
+void UMSMissionSystem::WhenMissionObjectiveEnds( const TSubclassOf< UMSMissionObjective > & mission_objective_class, const FMSMissionSystemMissionObjectiveEndedDelegate & when_mission_objective_ends )
 {
     FMissionObjectiveEndObserver observer;
     observer.MissionObjective = mission_objective_class;
@@ -277,36 +294,36 @@ void UMSMissionSystem::Serialize( FArchive & archive )
     archive << MissionHistory;
 }
 
-void UMSMissionSystem::K2_WhenMissionStartsOrIsActive( UMSMissionData * mission_data, FMSMissionSystemMissionStartsDynamicDelegate when_mission_starts )
+void UMSMissionSystem::K2_WhenMissionStartsOrIsActive( UMSMissionData * mission_data, FMSMissionSystemMissionStartedDynamicDelegate when_mission_starts )
 {
-    const auto active_delegate = FMSMissionSystemMissionStartsDelegate::CreateWeakLambda( when_mission_starts.GetUObject(), [ when_mission_starts ]( const UMSMissionData * mission_data ) {
+    const auto active_delegate = FMSMissionSystemMissionStartedDelegate::CreateWeakLambda( when_mission_starts.GetUObject(), [ when_mission_starts ]( const UMSMissionData * mission_data ) {
         when_mission_starts.ExecuteIfBound( mission_data );
     } );
 
     WhenMissionStartsOrIsActive( mission_data, active_delegate );
 }
 
-void UMSMissionSystem::K2_WhenMissionEnds( UMSMissionData * mission_data, FMSMissionSystemMissionEndsDynamicDelegate when_mission_ends )
+void UMSMissionSystem::K2_WhenMissionEnds( UMSMissionData * mission_data, FMSMissionSystemMissionEndedDynamicDelegate when_mission_ends )
 {
-    const auto ended_delegate = FMSMissionSystemMissionEndsDelegate::CreateWeakLambda( when_mission_ends.GetUObject(), [ when_mission_ends ]( const UMSMissionData * mission_data, const bool was_cancelled ) {
+    const auto ended_delegate = FMSMissionSystemMissionEndedDelegate::CreateWeakLambda( when_mission_ends.GetUObject(), [ when_mission_ends ]( const UMSMissionData * mission_data, const bool was_cancelled ) {
         when_mission_ends.ExecuteIfBound( mission_data, was_cancelled );
     } );
 
     WhenMissionEnds( mission_data, ended_delegate );
 }
 
-void UMSMissionSystem::K2_WhenMissionObjectiveStartsOrIsActive( TSubclassOf< UMSMissionObjective > mission_objective, FMSMissionSystemMissionObjectiveStartsDynamicDelegate when_mission_objective_starts )
+void UMSMissionSystem::K2_WhenMissionObjectiveStartsOrIsActive( TSubclassOf< UMSMissionObjective > mission_objective, FMSMissionSystemMissionObjectiveStartedDynamicDelegate when_mission_objective_starts )
 {
-    const auto active_delegate = FMSMissionSystemMissionObjectiveStartsDelegate::CreateWeakLambda( when_mission_objective_starts.GetUObject(), [ when_mission_objective_starts ]( TSubclassOf< UMSMissionObjective > mission_objective ) {
+    const auto active_delegate = FMSMissionSystemMissionObjectiveStartedDelegate::CreateWeakLambda( when_mission_objective_starts.GetUObject(), [ when_mission_objective_starts ]( TSubclassOf< UMSMissionObjective > mission_objective ) {
         when_mission_objective_starts.ExecuteIfBound( mission_objective );
     } );
 
     WhenMissionObjectiveStartsOrIsActive( mission_objective, active_delegate );
 }
 
-void UMSMissionSystem::K2_WhenMissionObjectiveEnds( TSubclassOf< UMSMissionObjective > mission_objective, FMSMissionSystemMissionObjectiveEndsDynamicDelegate when_mission_objective_ends )
+void UMSMissionSystem::K2_WhenMissionObjectiveEnds( TSubclassOf< UMSMissionObjective > mission_objective, FMSMissionSystemMissionObjectiveEndedDynamicDelegate when_mission_objective_ends )
 {
-    const auto ended_delegate = FMSMissionSystemMissionObjectiveEndsDelegate::CreateWeakLambda( when_mission_objective_ends.GetUObject(), [ when_mission_objective_ends ]( TSubclassOf< UMSMissionObjective > mission_objective, const bool was_cancelled ) {
+    const auto ended_delegate = FMSMissionSystemMissionObjectiveEndedDelegate::CreateWeakLambda( when_mission_objective_ends.GetUObject(), [ when_mission_objective_ends ]( TSubclassOf< UMSMissionObjective > mission_objective, const bool was_cancelled ) {
         when_mission_objective_ends.ExecuteIfBound( mission_objective, was_cancelled );
     } );
 
@@ -374,8 +391,8 @@ UMSMission * UMSMissionSystem::CreateMissionFromData( UMSMissionData * mission_d
     mission->Initialize( mission_data );
 
     mission->OnMissionEnded().AddUObject( this, &UMSMissionSystem::OnMissionEnded );
-    mission->OnMissionObjectiveStarted().AddUObject( this, &UMSMissionSystem::OnMissionObjectiveStarted );
-    mission->OnMissionObjectiveEnded().AddUObject( this, &UMSMissionSystem::OnMissionObjectiveEnded );
+    mission->OnMissionObjectiveStarted().AddUObject( this, &UMSMissionSystem::OnMissionObjectiveStarted, mission );
+    mission->OnMissionObjectiveEnded().AddUObject( this, &UMSMissionSystem::OnMissionObjectiveEnded, mission );
 
     ActiveMissions.Add( mission );
 
@@ -384,21 +401,16 @@ UMSMission * UMSMissionSystem::CreateMissionFromData( UMSMissionData * mission_d
 
 void UMSMissionSystem::StartMission( UMSMission * mission )
 {
-    const auto * mission_data = mission->GetMissionData();
+    auto * mission_data = mission->GetMissionData();
 
     UE_SLOG( LogMissionSystem, Verbose, TEXT( "Start mission (%s)" ), *GetNameSafe( mission_data ) );
+
+    // :NOTE: This is intended to broadcast now before actually starting the mission
+    // This is to make sure no objectives have been started yet, and that any object listening to the
+    // events mission started / objective started receive them in the correct order
+    BroadcastOnMissionStarted( mission );
+
     mission->Start();
-
-    for ( auto index = MissionStartObservers.Num() - 1; index >= 0; --index )
-    {
-        auto & observer = MissionStartObservers[ index ];
-
-        if ( observer.MissionData == mission_data )
-        {
-            observer.Callback.ExecuteIfBound( mission_data );
-            MissionStartObservers.RemoveAt( index );
-        }
-    }
 }
 
 void UMSMissionSystem::StartNextMissions( const UMSMissionData * mission_data )
@@ -420,8 +432,65 @@ void UMSMissionSystem::OnMissionEnded( UMSMission * mission, const bool was_canc
         return;
     }
 
-    OnMissionEndedEvent.Broadcast( mission, was_cancelled );
     ActiveMissions.Remove( mission );
+
+    BroadcastOnMissionEnded( mission, was_cancelled );
+
+    ViewModel->SetMissionEnded( mission );
+
+    if ( !was_cancelled || mission_data->bStartNextMissionsWhenCancelled )
+    {
+        StartNextMissions( mission_data );
+    }
+}
+
+void UMSMissionSystem::OnMissionObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective, UMSMission * mission )
+{
+    if ( !ensureAlways( MissionHistory.AddActiveObjective( objective ) ) )
+    {
+        return;
+    }
+
+    BroadcastOnMissionObjectiveStarted( mission, objective );
+}
+
+void UMSMissionSystem::OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, const bool was_cancelled, UMSMission * mission )
+{
+    UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnObjectiveEnded (%s)" ), *objective->GetClass()->GetName() );
+
+    if ( !ensureAlways( MissionHistory.SetObjectiveComplete( objective, was_cancelled ) ) )
+    {
+        return;
+    }
+
+    BroadcastOnMissionObjectiveEnded( mission, objective, was_cancelled );
+}
+
+void UMSMissionSystem::BroadcastOnMissionStarted( UMSMission * mission )
+{
+    const auto * mission_data = mission->GetMissionData();
+
+    OnMissionStartedDelegate.Broadcast( mission );
+
+    for ( auto index = MissionStartObservers.Num() - 1; index >= 0; --index )
+    {
+        auto & observer = MissionStartObservers[ index ];
+
+        if ( observer.MissionData == mission_data )
+        {
+            observer.Callback.ExecuteIfBound( mission_data );
+            MissionStartObservers.RemoveAt( index );
+        }
+    }
+
+    ViewModel->SetMissionStarted( mission );
+}
+
+void UMSMissionSystem::BroadcastOnMissionEnded( UMSMission * mission, bool was_cancelled )
+{
+    auto * mission_data = mission->GetMissionData();
+
+    OnMissionEndedDelegate.Broadcast( mission_data, was_cancelled );
 
     for ( auto index = MissionEndObservers.Num() - 1; index >= 0; --index )
     {
@@ -434,35 +503,24 @@ void UMSMissionSystem::OnMissionEnded( UMSMission * mission, const bool was_canc
         }
     }
 
-    if ( !was_cancelled || mission_data->bStartNextMissionsWhenCancelled )
-    {
-        StartNextMissions( mission_data );
-    }
+    ViewModel->SetMissionEnded( mission );
 }
 
-void UMSMissionSystem::OnMissionObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective )
+void UMSMissionSystem::BroadcastOnMissionObjectiveStarted( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective )
 {
-    if ( !ensureAlways( MissionHistory.AddActiveObjective( objective ) ) )
-    {
-        return;
-    }
+    OnMissionObjectiveStartedDelegate.Broadcast( mission->GetMissionData(), objective );
 
     for ( auto & observer : MissionObjectiveStartObservers )
     {
         observer.Callback.ExecuteIfBound( objective->GetClass() );
     }
+
+    ViewModel->SetMissionObjectiveStarted( mission, objective );
 }
 
-void UMSMissionSystem::OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, const bool was_cancelled )
+void UMSMissionSystem::BroadcastOnMissionObjectiveEnded( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled )
 {
-    UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnObjectiveEnded (%s)" ), *objective->GetClass()->GetName() );
-
-    if ( !ensureAlways( MissionHistory.SetObjectiveComplete( objective, was_cancelled ) ) )
-    {
-        return;
-    }
-
-    OnMissionObjectiveEndedEvent.Broadcast( objective, was_cancelled );
+    OnMissionObjectiveEndedDelegate.Broadcast( mission->GetMissionData(), objective, was_cancelled );
 
     for ( auto index = MissionObjectiveEndObservers.Num() - 1; index >= 0; --index )
     {
@@ -474,4 +532,6 @@ void UMSMissionSystem::OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObj
             MissionObjectiveEndObservers.RemoveAt( index );
         }
     }
+
+    ViewModel->SetMissionObjectiveEnded( mission, objective );
 }

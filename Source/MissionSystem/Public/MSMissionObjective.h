@@ -22,6 +22,7 @@ public:
     UMSMissionObjective();
 
     FMSOnObjectiveEndedEvent & OnObjectiveEnded();
+    const FText & GetDescription() const;
 
     const FGuid & GetGuid() const;
     bool IsComplete() const;
@@ -65,10 +66,13 @@ protected:
     UPROPERTY()
     FMSActionExecutor EndActionsExecutor;
 
-    UPROPERTY( EditAnywhere, Category = "Tags" )
+    UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Infos", meta = ( AllowPrivateAccess = true ) )
+    FText Description;
+
+    UPROPERTY( EditDefaultsOnly, Category = "Tags" )
     FGameplayTagContainer Tags;
 
-    UPROPERTY( EditAnywhere, Category = "Actions" )
+    UPROPERTY( EditDefaultsOnly, Category = "Actions" )
     uint8 bExecuteEndActionsWhenCancelled : 1;
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
@@ -86,6 +90,11 @@ protected:
 FORCEINLINE FMSOnObjectiveEndedEvent & UMSMissionObjective::OnObjectiveEnded()
 {
     return OnObjectiveCompleteEvent;
+}
+
+FORCEINLINE const FText & UMSMissionObjective::GetDescription() const
+{
+    return Description;
 }
 
 FORCEINLINE const FGuid & UMSMissionObjective::GetGuid() const

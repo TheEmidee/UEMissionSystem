@@ -109,6 +109,19 @@ void UMSMission::Cancel()
     }
 }
 
+bool UMSMission::CompleteObjective( const TSubclassOf< UMSMissionObjective > & objective_class )
+{
+    if ( auto * objective = ActiveObjectives.FindByPredicate( [ & ]( const TObjectPtr< UMSMissionObjective > & active_objective ) {
+             return objective_class == active_objective->GetClass();
+         } ) )
+    {
+        ( *objective )->CompleteObjective();
+        return true;
+    }
+
+    return false;
+}
+
 bool UMSMission::IsComplete() const
 {
     for ( auto objective : ActiveObjectives )
@@ -194,8 +207,6 @@ void UMSMission::ExecuteNextObjective()
 
         if ( !CanExecuteObjective( objective_class ) )
         {
-            /*objective->MarkAsGarbage();
-            ActiveObjectives.Remove( objective );*/
             ExecuteNextObjective();
             return;
         }
