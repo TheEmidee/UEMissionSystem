@@ -26,6 +26,10 @@
     {
       "Name": "CoreExtensions",
       "Enabled": true
+    },
+    {
+      "Name": "ModelViewViewModel",
+      "Enabled": true
     }
   ]
 }
