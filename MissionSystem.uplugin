@@ -16,6 +16,11 @@
       "Name": "MissionSystem",
       "Type": "Runtime",
       "LoadingPhase": "Default"
+    },
+    {
+      "Name": "MissionSystemEditor",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
     }
   ],
   "Plugins": [
