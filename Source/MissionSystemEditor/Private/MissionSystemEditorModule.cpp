@@ -15,9 +15,9 @@ FMissionSystemEditor::FMissionSystemEditor()
 
 void FMissionSystemEditor::StartupModule()
 {
-    IAssetTools & asset_tools = FAssetToolsModule::GetModule().Get();
+    auto & asset_tools = FAssetToolsModule::GetModule().Get();
 
-    auto bit = asset_tools.RegisterAdvancedAssetCategory( MISSION_SYSTEM_MENU_CATEGORY_KEY, MISSION_SYSTEM_MENU_CATEGORY_KEY_TEXT );
+    const auto bit = asset_tools.RegisterAdvancedAssetCategory( MISSION_SYSTEM_MENU_CATEGORY_KEY, MISSION_SYSTEM_MENU_CATEGORY_KEY_TEXT );
 
     RegisterAction< FMSMissionDataAssetTypeActions >( bit );
     RegisterAction< FMSMissionObjectiveAssetTypeActions >( bit );

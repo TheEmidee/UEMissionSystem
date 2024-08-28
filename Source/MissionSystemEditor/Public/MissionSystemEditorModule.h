@@ -26,7 +26,8 @@ private:
 template < typename _ACTION_TYPE_ >
 void FMissionSystemEditor::RegisterAction( EAssetTypeCategories::Type category )
 {
-    IAssetTools & asset_tools = FAssetToolsModule::GetModule().Get();
+    auto & asset_tools = FAssetToolsModule::GetModule().Get();
+
     const auto action = MakeShared< _ACTION_TYPE_ >( category );
     asset_tools.RegisterAssetTypeActions( action );
     RegisteredAssetTypeActions.Add( action );
