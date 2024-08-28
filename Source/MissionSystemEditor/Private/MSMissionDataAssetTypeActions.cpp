@@ -26,28 +26,3 @@ uint32 FMSMissionDataAssetTypeActions::GetCategories()
 {
     return Category;
 }
-
-FMSMissionObjectiveAssetTypeActions::FMSMissionObjectiveAssetTypeActions( EAssetTypeCategories::Type category ) :
-    Category( category )
-{
-}
-
-FText FMSMissionObjectiveAssetTypeActions::GetName() const
-{
-    return INVTEXT( "Mission Objective" );
-}
-
-FColor FMSMissionObjectiveAssetTypeActions::GetTypeColor() const
-{
-    return FColor::Cyan;
-}
-
-UClass * FMSMissionObjectiveAssetTypeActions::GetSupportedClass() const
-{
-    return UMSMissionObjective::StaticClass();
-}
-
-uint32 FMSMissionObjectiveAssetTypeActions::GetCategories()
-{
-    return Category;
-}

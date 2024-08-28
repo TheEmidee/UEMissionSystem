@@ -20,7 +20,6 @@ void FMissionSystemEditor::StartupModule()
     const auto bit = asset_tools.RegisterAdvancedAssetCategory( MISSION_SYSTEM_MENU_CATEGORY_KEY, MISSION_SYSTEM_MENU_CATEGORY_KEY_TEXT );
 
     RegisterAction< FMSMissionDataAssetTypeActions >( bit );
-    RegisterAction< FMSMissionObjectiveAssetTypeActions >( bit );
 }
 
 void FMissionSystemEditor::ShutdownModule()
