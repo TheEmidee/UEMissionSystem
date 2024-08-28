@@ -14,13 +14,15 @@ enum class EMSState : uint8
     Complete
 };
 
-USTRUCT( BlueprintType )
+USTRUCT()
 struct MISSIONSYSTEM_API FMSMissionHistory
 {
     GENERATED_USTRUCT_BODY()
 
 public:
     const TArray< UMSMissionData * > & GetActiveMissionData() const;
+
+    bool HasData() const;
 
     bool IsMissionActive( UMSMissionData * mission_data ) const;
     bool IsMissionCancelled( UMSMissionData * mission_data ) const;

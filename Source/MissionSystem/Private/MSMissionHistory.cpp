@@ -121,6 +121,11 @@ namespace
     }
 }
 
+bool FMSMissionHistory::HasData() const
+{
+    return !MissionStates.IsEmpty() || !ObjectiveStates.IsEmpty();
+}
+
 bool FMSMissionHistory::IsMissionActive( UMSMissionData * mission_data ) const
 {
     return DoesMissionHasState( mission_data, EMSState::Active );
@@ -211,17 +216,6 @@ bool FMSMissionHistory::DoesObjectiveHasState( const TSubclassOf< UMSMissionObje
 
 FArchive & operator<<( FArchive & archive, FMSMissionHistory & mission_history )
 {
-    /*if ( archive.IsSaving() )
-    {
-        int num = mission_history.ActiveMissionsData.Num();
-        archive << num;
-
-        for ( int i = 0; i < num; ++i )
-        {
-            archive << mission_history.ActiveMissionsData[ i ];
-        }
-    }*/
-
     archive << mission_history.ActiveMissionsData;
     archive << mission_history.MissionStates;
     archive << mission_history.ObjectiveStates;

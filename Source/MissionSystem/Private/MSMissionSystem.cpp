@@ -69,6 +69,11 @@ void UMSMissionSystem::Initialize( FSubsystemCollectionBase & collection )
     ViewModel = NewObject< UMSViewModel >( this );
 }
 
+bool UMSMissionSystem::HasDataInHistory() const
+{
+    return MissionHistory.HasData();
+}
+
 void UMSMissionSystem::StartMission( UMSMissionData * mission_data )
 {
     auto * mission = TryCreateMissionFromData( mission_data );
