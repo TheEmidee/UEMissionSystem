@@ -36,9 +36,13 @@ class MISSIONSYSTEM_API UMSMissionSystem final : public UWorldSubsystem
 public:
     FMSOnMissionEndedEvent & OnMissionEnded();
     FMSOnMissionObjectiveEndedEvent & OnMissionObjectiveEnded();
+
     const FMSMissionHistory & GetMissionHistory() const;
 
     void Initialize( FSubsystemCollectionBase & collection ) override;
+
+    UFUNCTION( BlueprintCallable, BlueprintPure = false, meta = ( ExpandBoolAsExecs = "ReturnValue" ) )
+    bool HasDataInHistory() const;
 
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System" )
     void StartMission( UMSMissionData * mission_data );
