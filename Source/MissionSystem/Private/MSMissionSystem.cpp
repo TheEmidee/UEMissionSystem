@@ -136,7 +136,7 @@ void UMSMissionSystem::ResumeMissionsFromHistory()
             continue;
         }
 
-        mission->Start();
+        StartMission( mission );
     }
 }
 
