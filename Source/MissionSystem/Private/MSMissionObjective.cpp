@@ -12,11 +12,11 @@ UMSMissionObjective::UMSMissionObjective() :
 
 void UMSMissionObjective::Execute()
 {
-    StartActionsExecutor.Initialize( *this, StartActions, [ this ]() {
+    StartActionsExecutor.Initialize( this, StartActions, [ this ]() {
         K2_Execute();
     } );
 
-    EndActionsExecutor.Initialize( *this, EndActions, [ this ]() {
+    EndActionsExecutor.Initialize( this, EndActions, [ this ]() {
         OnObjectiveCompleteEvent.Broadcast( this, bIsCancelled );
     } );
 

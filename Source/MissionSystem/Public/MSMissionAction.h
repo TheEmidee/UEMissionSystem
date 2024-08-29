@@ -17,6 +17,8 @@ class MISSIONSYSTEM_API UMSMissionAction : public UObject
 public:
     FMSOnMissionActionCompleteDelegate & OnMissionActionComplete();
 
+    void Initialize( UObject * world_context );
+
     /* Executes the actions. You must call FinishExecute to notify the parent objective / mission it can continue execution  */
     UFUNCTION( BlueprintNativeEvent )
     void Execute();
@@ -28,6 +30,7 @@ public:
 
 protected:
     FMSOnMissionActionCompleteDelegate OnMissionActionCompleteEvent;
+    TWeakObjectPtr< UObject > Outer;
 };
 
 FORCEINLINE FMSOnMissionActionCompleteDelegate & UMSMissionAction::OnMissionActionComplete()

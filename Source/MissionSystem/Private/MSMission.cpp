@@ -66,11 +66,11 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
         }
     }
 
-    StartActionsExecutor.Initialize( *this, mission_data->StartActions, [ this ]() {
+    StartActionsExecutor.Initialize( this, mission_data->StartActions, [ this ]() {
         TryStart();
     } );
 
-    EndActionsExecutor.Initialize( *this, mission_data->EndActions, [ this ]() {
+    EndActionsExecutor.Initialize( this, mission_data->EndActions, [ this ]() {
         ensure( IsComplete() || bIsCancelled );
         ActiveObjectives.Empty();
         OnMissionEndedEvent.Broadcast( this, bIsCancelled );
