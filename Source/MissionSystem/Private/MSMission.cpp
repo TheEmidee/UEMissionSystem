@@ -4,7 +4,7 @@
 #include "MSMissionAction.h"
 #include "MSMissionData.h"
 #include "MSMissionObjective.h"
-#include "MSMissionSystem.h"
+#include "MSMissionSystemComponent.h"
 
 #include <Engine/World.h>
 
@@ -37,7 +37,7 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
     ActiveObjectives.Reserve( mission_data->Objectives.Num() );
     PendingObjectives.Reserve( mission_data->Objectives.Num() );
 
-    const auto * subsystem = Cast< UMSMissionSystem >( GetOuter() );
+    const auto * subsystem = Cast< UMSMissionSystemComponent >( GetOuter() );
     check( subsystem != nullptr );
 
     const auto & mission_history = subsystem->GetMissionHistory();
@@ -230,10 +230,7 @@ void UMSMission::ExecuteNextObjective()
 bool UMSMission::CanExecuteObjective( const TSubclassOf< UMSMissionObjective > & objective_class ) const
 {
 #if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
-    if ( const auto * mission_system = GetWorld()->GetSubsystem< UMSMissionSystem >() )
-    {
-        // return !mission_system->MustObjectiveBeIgnored( objective_class );
-    }
+    // :TODO:
 #endif
 
     return true;
