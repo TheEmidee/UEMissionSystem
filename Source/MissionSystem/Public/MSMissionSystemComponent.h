@@ -40,9 +40,6 @@ class MISSIONSYSTEM_API UMSMissionSystemComponent final : public UActorComponent
 public:
     explicit UMSMissionSystemComponent( const FObjectInitializer & object_initializer = FObjectInitializer::Get() );
 
-    FMSOnMissionEndedEvent & OnMissionEnded();
-    FMSOnMissionObjectiveEndedEvent & OnMissionObjectiveEnded();
-
     const FMSMissionHistory & GetMissionHistory() const;
 
     void BeginPlay() override;
