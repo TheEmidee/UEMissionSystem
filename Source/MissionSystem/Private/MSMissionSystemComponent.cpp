@@ -108,30 +108,6 @@ UMSMissionSystemComponent::UMSMissionSystemComponent( const FObjectInitializer &
 {
 }
 
-void UMSMissionSystemComponent::BeginPlay()
-{
-    Super::BeginPlay();
-
-#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
-    if ( CVarDisableAllMissions.GetValueOnGameThread() == 1 )
-    {
-        return;
-    }
-#endif
-
-    if ( bTryResumeMissionFromHistory )
-    {
-        if ( HasDataInHistory() )
-        {
-            ResumeMissionsFromHistory();
-        }
-        else if ( FirstMissionToStart != nullptr )
-        {
-            StartMission( FirstMissionToStart );
-        }
-    }
-}
-
 bool UMSMissionSystemComponent::HasDataInHistory() const
 {
     return MissionHistory.HasData();
@@ -347,6 +323,28 @@ void UMSMissionSystemComponent::Serialize( FArchive & archive )
 void UMSMissionSystemComponent::ClearMissionHistory()
 {
     MissionHistory.Clear();
+}
+
+void UMSMissionSystemComponent::TryResumeMissionFromHistory()
+{
+#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+    if ( CVarDisableAllMissions.GetValueOnGameThread() == 1 )
+    {
+        return;
+    }
+#endif
+
+    if ( bTryResumeMissionFromHistory )
+    {
+        if ( HasDataInHistory() )
+        {
+            ResumeMissionsFromHistory();
+        }
+        else if ( FirstMissionToStart != nullptr )
+        {
+            StartMission( FirstMissionToStart );
+        }
+    }
 }
 
 void UMSMissionSystemComponent::OnRegister()
