@@ -67,6 +67,12 @@ static FAutoConsoleCommand ClearIgnoreObjectivesTags(
             mission_system->ClearIgnoreObjectivesTags();
         }*/
     } ) );
+
+static TAutoConsoleVariable< int32 > CVarDisableAllMissions( TEXT( "MissionSystem.DisableAllMissions" ),
+    0,
+    TEXT( "Set to 1 to disable missions." ),
+    ECVF_Default | ECVF_Preview );
+
 #endif
 
 UMSMissionSystemComponent::UMSMissionSystemComponent( const FObjectInitializer & object_initializer ) :
@@ -81,6 +87,13 @@ UMSMissionSystemComponent::UMSMissionSystemComponent( const FObjectInitializer &
 void UMSMissionSystemComponent::BeginPlay()
 {
     Super::BeginPlay();
+
+#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+    if ( CVarDisableAllMissions.GetValueOnGameThread() == 1 )
+    {
+        return;
+    }
+#endif
 
     if ( bTryResumeMissionFromHistory )
     {
@@ -102,6 +115,13 @@ bool UMSMissionSystemComponent::HasDataInHistory() const
 
 void UMSMissionSystemComponent::StartMission( UMSMissionData * mission_data )
 {
+#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+    if ( CVarDisableAllMissions.GetValueOnGameThread() == 1 )
+    {
+        return;
+    }
+#endif
+
     auto * mission = TryCreateMissionFromData( mission_data );
 
     if ( mission == nullptr )
