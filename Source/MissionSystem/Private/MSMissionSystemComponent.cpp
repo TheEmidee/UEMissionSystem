@@ -15,6 +15,7 @@ static FAutoConsoleCommand SkipMissionsCommand(
     TEXT( "MissionSystem.SkipMissions" ),
     TEXT( "Skips the current missions." ),
     FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateLambda( []( const TArray< FString > & /*args*/, const UWorld * world, FOutputDevice & /*output_device*/ ) {
+        // :TODO:
         /*if ( const auto * mission_system = world->GetSubsystem< UMSMissionSystemComponent >() )
         {
             mission_system->CancelCurrentMissions();
@@ -25,6 +26,7 @@ static FAutoConsoleCommand CompleteMissionsCommand(
     TEXT( "MissionSystem.CompleteMissions" ),
     TEXT( "Completes the current missions." ),
     FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateLambda( []( const TArray< FString > & /*args*/, const UWorld * world, FOutputDevice & /*output_device*/ ) {
+        // :TODO:
         /*if ( const auto * mission_system = world->GetSubsystem< UMSMissionSystemComponent >() )
         {
             mission_system->CompleteCurrentMissions();
@@ -35,6 +37,7 @@ static FAutoConsoleCommand ListActiveMissionsCommand(
     TEXT( "MissionSystem.ListActiveMissions" ),
     TEXT( "Prints the active missions in the log." ),
     FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateLambda( []( const TArray< FString > & /*args*/, const UWorld * world, FOutputDevice & output_device ) {
+        // :TODO:
         /*if ( auto * mission_system = world->GetSubsystem< UMSMissionSystemComponent >() )
         {
             mission_system->DumpActiveMissions( output_device );
@@ -47,6 +50,7 @@ static FAutoConsoleCommand IgnoreObjectivesWithTag(
         TEXT( "Can be used multiple times." )
             TEXT( "Objectives already started that match the tags will be completed." ),
     FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateLambda( []( const TArray< FString > & args, const UWorld * world, FOutputDevice & output_device ) {
+        // :TODO:
         /*if ( auto * mission_system = world->GetSubsystem< UMSMissionSystemComponent >() )
         {
             mission_system->IgnoreObjectivesWithTags( args );
@@ -57,6 +61,7 @@ static FAutoConsoleCommand ClearIgnoreObjectivesTags(
     TEXT( "MissionSystem.ClearIgnoreObjectivesTag" ),
     TEXT( "Clears the list of tags used to ignore objectives." ),
     FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateLambda( []( const TArray< FString > & /*args*/, const UWorld * world, FOutputDevice & /*output_device*/ ) {
+        // :TODO:
         /*if ( auto * mission_system = world->GetSubsystem< UMSMissionSystemComponent >() )
         {
             mission_system->ClearIgnoreObjectivesTags();
