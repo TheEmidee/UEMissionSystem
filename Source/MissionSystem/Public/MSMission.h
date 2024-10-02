@@ -21,7 +21,7 @@ class MISSIONSYSTEM_API UMSMission final : public UObject
     GENERATED_BODY()
 
 public:
-    friend class UMSMissionSystem;
+    friend class UMSMissionSystemComponent;
 
     UMSMission();
 

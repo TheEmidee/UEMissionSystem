@@ -4,6 +4,11 @@ void UMSMissionAction::Execute_Implementation()
 {
 }
 
+void UMSMissionAction::Initialize( UObject * world_context )
+{
+    Outer = world_context;
+}
+
 void UMSMissionAction::FinishExecute()
 {
     OnMissionActionCompleteEvent.Broadcast( this );
@@ -16,9 +21,9 @@ UWorld * UMSMissionAction::GetWorld() const
         return nullptr;
     }
 
-    if ( const auto * outer = GetOuter() )
+    if ( Outer.IsValid() )
     {
-        return outer->GetWorld();
+        return Outer->GetWorld();
     }
 
     return nullptr;

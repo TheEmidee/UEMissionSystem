@@ -14,7 +14,7 @@ struct MISSIONSYSTEM_API FMSActionExecutor
 public:
     const TArray< UMSMissionAction * > & GetInstancedActions() const;
 
-    void Initialize( UObject & action_owner, const TArray< UMSMissionAction * > & action_classes, TFunction< void() > callback );
+    void Initialize( UObject * action_owner, const TArray< UMSMissionAction * > & action_classes, TFunction< void() > callback );
     void Execute();
 
 private:
@@ -26,6 +26,8 @@ private:
 
     UPROPERTY()
     TArray< UMSMissionAction * > PendingActions;
+
+    TWeakObjectPtr< UObject > Outer;
 
     TFunction< void() > Callback;
 };
