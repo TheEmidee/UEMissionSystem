@@ -8,6 +8,7 @@
 
 #include <Engine/GameInstance.h>
 #include <Engine/World.h>
+#include <GameFramework/PlayerController.h>
 #include <Serialization/MemoryWriter.h>
 
 #if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
@@ -318,6 +319,11 @@ void UMSMissionSystemComponent::Serialize( FArchive & archive )
     Super::Serialize( archive );
 
     archive << MissionHistory;
+}
+
+void UMSMissionSystemComponent::ClearMissionHistory()
+{
+    MissionHistory.Clear();
 }
 
 void UMSMissionSystemComponent::OnRegister()

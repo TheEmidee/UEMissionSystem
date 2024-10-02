@@ -204,6 +204,13 @@ bool FMSMissionHistory::SetObjectiveComplete( const TSubclassOf< UMSMissionObjec
     return SetComplete( mission_objective_class, ObjectiveStates, was_cancelled );
 }
 
+void FMSMissionHistory::Clear()
+{
+    ActiveMissionsData.Reset();
+    MissionStates.Reset();
+    ObjectiveStates.Reset();
+}
+
 bool FMSMissionHistory::DoesMissionHasState( UMSMissionData * mission_data, EMSState state ) const
 {
     return DoesHaveState( mission_data, MissionStates, state );
