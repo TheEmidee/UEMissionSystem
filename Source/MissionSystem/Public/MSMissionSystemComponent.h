@@ -42,8 +42,6 @@ public:
 
     const FMSMissionHistory & GetMissionHistory() const;
 
-    void BeginPlay() override;
-
     UFUNCTION( BlueprintCallable, BlueprintPure = false, meta = ( ExpandBoolAsExecs = "ReturnValue" ) )
     bool HasDataInHistory() const;
 
@@ -89,6 +87,9 @@ public:
 
     void Serialize( FArchive & archive ) override;
     void ClearMissionHistory();
+
+    UFUNCTION( BlueprintCallable )
+    void TryResumeMissionFromHistory();
 
 protected:
     void OnRegister() override;
