@@ -39,6 +39,7 @@ public:
     bool SetObjectiveComplete( const TSubclassOf< UMSMissionObjective > & mission_objective_class, bool was_cancelled );
 
     friend FArchive & operator<<( FArchive & archive, FMSMissionHistory & mission_history );
+    void Clear();
 
 private:
     bool DoesMissionHasState( UMSMissionData * mission_data, EMSState state ) const;

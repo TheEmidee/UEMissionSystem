@@ -88,6 +88,7 @@ public:
 #endif
 
     void Serialize( FArchive & archive ) override;
+    void ClearMissionHistory();
 
 protected:
     void OnRegister() override;
