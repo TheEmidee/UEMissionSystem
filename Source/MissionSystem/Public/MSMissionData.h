@@ -36,33 +36,43 @@ public:
     void PostDuplicate( bool duplicate_for_pie ) override;
     void PostEditImport() override;
 
+    // The name of the mission
     UPROPERTY( EditDefaultsOnly, BlueprintReadOnly )
     FText Name;
 
+    // The description of the mission
     UPROPERTY( EditDefaultsOnly, BlueprintReadOnly )
     FText Description;
 
+    // All the actions that must be executed when the mission starts
     UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
     TArray< TObjectPtr< UMSMissionAction > > StartActions;
 
+    // All the actions that must be executed when the mission ends
     UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
     TArray< TObjectPtr< UMSMissionAction > > EndActions;
 
+    // The list of objectives to complete
     UPROPERTY( EditDefaultsOnly, Category = "ActiveObjectives" )
     TArray< FMSMissionObjectiveData > Objectives;
 
+    // The missions to start when this mission is complete
     UPROPERTY( EditDefaultsOnly, Category = "Other missions" )
     TArray< UMSMissionData * > NextMissions;
 
+    // The missions to cancel when this mission is started 
     UPROPERTY( EditDefaultsOnly, Category = "Other missions" )
     TArray< UMSMissionData * > MissionsToCancel;
 
+    // Is this mission enabled?
     UPROPERTY( EditDefaultsOnly, Category = "Options" )
     uint8 bEnabled : 1;
 
+    // Set to true to execute the end actions even when this mission is cancelled
     UPROPERTY( EditDefaultsOnly, Category = "Options" )
     uint8 bExecuteEndActionsWhenCancelled : 1;
 
+    // Set to true to start the next missions when this mission is cancelled
     UPROPERTY( EditDefaultsOnly, Category = "Options" )
     uint8 bStartNextMissionsWhenCancelled : 1;
 

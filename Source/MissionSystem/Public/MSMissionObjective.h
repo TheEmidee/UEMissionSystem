@@ -54,9 +54,11 @@ protected:
 
     void GenerateGuidIfNeeded( bool force_generation = false );
 
+    // The actions to execute when this objective is started
     UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
     TArray< TObjectPtr< UMSMissionAction > > StartActions;
 
+    // The actions to execute when this objective is ended
     UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
     TArray< TObjectPtr< UMSMissionAction > > EndActions;
 
@@ -66,21 +68,27 @@ protected:
     UPROPERTY()
     FMSActionExecutor EndActionsExecutor;
 
+    // The description of the objective
     UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, Category = "Infos", meta = ( AllowPrivateAccess = true ) )
     FText Description;
 
+    // The tags attached to the objective
     UPROPERTY( EditDefaultsOnly, Category = "Tags" )
     FGameplayTagContainer Tags;
 
+    // Set to true to execute the end actions even when this objective is cancelled
     UPROPERTY( EditDefaultsOnly, Category = "Actions" )
     uint8 bExecuteEndActionsWhenCancelled : 1;
 
+    // This flag is set to true when this objective is complete
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
     bool bIsComplete;
 
+    // This flag is set to true when this objective is cancelled
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
     bool bIsCancelled;
 
+    // The id of the objective. It's used by the mission history. It's auto-generated
     UPROPERTY( VisibleAnywhere, AdvancedDisplay )
     FGuid ObjectiveId;
 
