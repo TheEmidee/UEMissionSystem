@@ -53,11 +53,10 @@ private:
     void OnObjectiveCompleted( UMSMissionObjective * mission_objective, bool was_cancelled );
     void TryStart();
     void TryEnd();
-
-    UFUNCTION()
     void ExecuteNextObjective();
-
+    void ExecuteAllObjectives();
     bool CanExecuteObjective( const TSubclassOf< UMSMissionObjective > & objective_class ) const;
+    void CreateObjective( const TSubclassOf< UMSMissionObjective > & objective_class );
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
     UMSMissionData * Data;

@@ -66,6 +66,13 @@ public:
     UPROPERTY( EditDefaultsOnly, Category = "Options" )
     uint8 bStartNextMissionsWhenCancelled : 1;
 
+    // Set to true to force the objectives to be completed one after the other
+    // Set to false to allow to complete the objectives in any order
+    UPROPERTY( EditDefaultsOnly, Category = "Options" )
+    uint8 bMustCompleteObjectivesSequentially : 1;
+
+    // Id of the mission, used when the mission history is serialized
+    // This is generated automatically
     UPROPERTY( VisibleAnywhere, AdvancedDisplay )
     FGuid MissionId;
 

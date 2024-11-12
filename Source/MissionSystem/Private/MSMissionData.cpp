@@ -16,7 +16,8 @@ FMSMissionObjectiveData::FMSMissionObjectiveData( const TSubclassOf< UMSMissionO
 UMSMissionData::UMSMissionData() :
     bEnabled( true ),
     bExecuteEndActionsWhenCancelled( true ),
-    bStartNextMissionsWhenCancelled( false )
+    bStartNextMissionsWhenCancelled( false ),
+    bMustCompleteObjectivesSequentially( true )
 {
 }
 
