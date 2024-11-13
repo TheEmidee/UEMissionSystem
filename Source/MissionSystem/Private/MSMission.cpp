@@ -173,9 +173,16 @@ void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, 
         return;
     }
 
-    if ( !was_cancelled && Data->bMustCompleteObjectivesSequentially )
+    if ( Data->bMustCompleteObjectivesSequentially )
     {
-        ExecuteNextObjective();
+        if ( !was_cancelled )
+        {
+            ExecuteNextObjective();
+        }
+    }
+    else
+    {
+        TryEnd();
     }
 }
 
@@ -234,12 +241,10 @@ void UMSMission::ExecuteAllObjectives()
         {
             auto objective_class = PendingObjectives.Pop();
 
-            if ( !CanExecuteObjective( objective_class ) )
+            if ( CanExecuteObjective( objective_class ) )
             {
-                continue;
+                CreateObjective( objective_class );
             }
-
-            CreateObjective( objective_class );
         }
     }
     else
