@@ -14,12 +14,12 @@ enum class EMSState : uint8
     Complete
 };
 
+// This structure holds the completion of the missions and objectives, and must be serialized in the save game
 USTRUCT()
 struct MISSIONSYSTEM_API FMSMissionHistory
 {
     GENERATED_USTRUCT_BODY()
 
-public:
     const TArray< UMSMissionData * > & GetActiveMissionData() const;
 
     bool HasData() const;

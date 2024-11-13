@@ -173,9 +173,16 @@ void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, 
         return;
     }
 
-    if ( !was_cancelled )
+    if ( Data->bMustCompleteObjectivesSequentially )
     {
-        ExecuteNextObjective();
+        if ( !was_cancelled )
+        {
+            ExecuteNextObjective();
+        }
+    }
+    else
+    {
+        TryEnd();
     }
 }
 
@@ -188,7 +195,14 @@ void UMSMission::TryStart()
 
     bIsStarted = true;
 
-    ExecuteNextObjective();
+    if ( Data->bMustCompleteObjectivesSequentially )
+    {
+        ExecuteNextObjective();
+    }
+    else
+    {
+        ExecuteAllObjectives();
+    }
 }
 
 void UMSMission::TryEnd()
@@ -211,15 +225,27 @@ void UMSMission::ExecuteNextObjective()
             return;
         }
 
-        auto * objective = NewObject< UMSMissionObjective >( this, objective_class );
-        ActiveObjectives.Add( objective );
+        CreateObjective( objective_class );
+    }
+    else
+    {
+        TryEnd();
+    }
+}
 
-        objective->OnObjectiveEnded().AddUObject( this, &UMSMission::OnObjectiveCompleted );
+void UMSMission::ExecuteAllObjectives()
+{
+    if ( PendingObjectives.Num() > 0 )
+    {
+        while ( !PendingObjectives.IsEmpty() )
+        {
+            auto objective_class = PendingObjectives.Pop();
 
-        UE_LOG( LogMissionSystem, Verbose, TEXT( "Execute objective %s" ), *objective->GetClass()->GetName() );
-
-        objective->Execute();
-        OnMissionObjectiveStartedEvent.Broadcast( objective->GetClass() );
+            if ( CanExecuteObjective( objective_class ) )
+            {
+                CreateObjective( objective_class );
+            }
+        }
     }
     else
     {
@@ -234,4 +260,17 @@ bool UMSMission::CanExecuteObjective( const TSubclassOf< UMSMissionObjective > &
 #endif
 
     return true;
+}
+
+void UMSMission::CreateObjective( const TSubclassOf< UMSMissionObjective > & objective_class )
+{
+    auto * objective = NewObject< UMSMissionObjective >( this, objective_class );
+    ActiveObjectives.Add( objective );
+
+    objective->OnObjectiveEnded().AddUObject( this, &UMSMission::OnObjectiveCompleted );
+
+    UE_LOG( LogMissionSystem, Verbose, TEXT( "Execute objective %s" ), *objective->GetClass()->GetName() );
+
+    objective->Execute();
+    OnMissionObjectiveStartedEvent.Broadcast( objective->GetClass() );
 }
