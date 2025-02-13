@@ -14,7 +14,7 @@ struct MISSIONSYSTEM_API FMSActionExecutor
 public:
     const TArray< UMSMissionAction * > & GetInstancedActions() const;
 
-    void Initialize( UObject * action_owner, const TArray< UMSMissionAction * > & action_classes, TFunction< void() > callback );
+    void Initialize( UObject * action_owner, const TArray< UMSMissionAction * > & action_classes, const TFunction< void() > & callback );
     void Execute();
 
 private:
