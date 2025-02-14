@@ -5,7 +5,7 @@
 #include "MSMissionAction.h"
 #include "MSMissionData.h"
 
-void FMSActionExecutor::Initialize( UObject * action_owner, const TArray< UMSMissionAction * > & action_classes, const TFunction< void() > callback )
+void FMSActionExecutor::Initialize( UObject * action_owner, const TArray< UMSMissionAction * > & action_classes, const TFunction< void() > & callback )
 {
     Outer = action_owner;
     Callback = callback;
