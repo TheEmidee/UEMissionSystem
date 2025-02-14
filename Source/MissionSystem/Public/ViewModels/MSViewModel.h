@@ -19,7 +19,10 @@ public:
     void SetMissionStarted( UMSMission * mission );
     void SetMissionEnded( UMSMission * mission );
     void SetMissionObjectiveStarted( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective );
-    void SetMissionObjectiveEnded( UMSMission * mission, const TSubclassOf<UMSMissionObjective> & objective );
+    void SetMissionObjectiveEnded( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective );
+
+    UFUNCTION( BlueprintPure, FieldNotify )
+    bool HasActiveMissions() const;
 
 private:
     UMSMissionViewModel * GetMissionViewModel( UMSMission * mission ) const;

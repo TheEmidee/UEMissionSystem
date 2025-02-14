@@ -14,6 +14,7 @@ void UMSViewModel::SetMissionStarted( UMSMission * mission )
     ActiveMissions.Add( mission_vm );
 
     UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveMissions );
+    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( HasActiveMissions );
 }
 
 void UMSViewModel::SetMissionEnded( UMSMission * mission )
@@ -23,6 +24,7 @@ void UMSViewModel::SetMissionEnded( UMSMission * mission )
     } );
 
     UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveMissions );
+    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( HasActiveMissions );
 }
 
 void UMSViewModel::SetMissionObjectiveStarted( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective )
@@ -39,6 +41,11 @@ void UMSViewModel::SetMissionObjectiveEnded( UMSMission * mission, const TSubcla
     {
         mission_vm->SetObjectiveEnded( objective );
     }
+}
+
+bool UMSViewModel::HasActiveMissions() const
+{
+    return !ActiveMissions.IsEmpty();
 }
 
 UMSMissionViewModel * UMSViewModel::GetMissionViewModel( UMSMission * mission ) const
