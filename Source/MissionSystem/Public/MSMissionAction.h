@@ -1,7 +1,5 @@
 #pragma once
 
-#include "GameFramework/PlayerController.h"
-
 #include <CoreMinimal.h>
 #include <UObject/NoExportTypes.h>
 
@@ -9,6 +7,7 @@
 
 class UMSMissionSystemComponent;
 class UMSMissionAction;
+class APlayerController;
 
 DECLARE_MULTICAST_DELEGATE_OneParam( FMSOnMissionActionCompleteDelegate, UMSMissionAction * );
 
