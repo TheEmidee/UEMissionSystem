@@ -10,6 +10,8 @@
 
 class UMSMissionAction;
 class UMSMissionObjective;
+class APlayerController;
+class UMSMissionSystemComponent;
 
 DECLARE_EVENT_TwoParams( UMSMissionObjective, FMSOnObjectiveEndedEvent, UMSMissionObjective * MissionObjective, bool WasCancelled );
 
@@ -47,7 +49,7 @@ public:
 
 protected:
     UFUNCTION( BlueprintNativeEvent, DisplayName = "Execute" )
-    void K2_Execute();
+    void K2_Execute( APlayerController * player_controller, UMSMissionSystemComponent * mission_system_component );
 
     UFUNCTION( BlueprintNativeEvent, DisplayName = "OnObjectiveEnded" )
     void K2_OnObjectiveEnded( bool was_cancelled );
