@@ -17,7 +17,7 @@ void UMSMissionObjective::Execute()
 {
     StartActionsExecutor.Initialize( this, StartActions, [ this ]() {
         APlayerController * pc = nullptr;
-        UMSMissionSystemComponent * component;
+        UMSMissionSystemComponent * component = nullptr;
 
         auto * object = GetOuter();
         do
