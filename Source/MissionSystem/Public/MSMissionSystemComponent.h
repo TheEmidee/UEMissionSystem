@@ -78,7 +78,7 @@ public:
     void WhenMissionObjectiveStartsOrIsActive( const TSubclassOf< UMSMissionObjective > & mission_objective_class, const FMSMissionSystemMissionObjectiveStartedDelegate & when_mission_objective_starts );
     void WhenMissionObjectiveEnds( const TSubclassOf< UMSMissionObjective > & mission_objective_class, const FMSMissionSystemMissionObjectiveEndedDelegate & when_mission_objective_ends );
 
-#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+#if !UE_BUILD_SHIPPING
     void DumpActiveMissions( FOutputDevice & output_device );
     void IgnoreObjectivesWithTags( const TArray< FString > & tags );
     void ClearIgnoreObjectivesTags();
