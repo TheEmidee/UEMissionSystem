@@ -2,6 +2,9 @@
 
 #include "DVEDataValidator.h"
 #include "MSMissionAction.h"
+#include "MSMissionSystemComponent.h"
+
+#include <GameFramework/PlayerController.h>
 
 UMSMissionObjective::UMSMissionObjective() :
     bExecuteEndActionsWhenCancelled( false ),
@@ -13,7 +16,23 @@ UMSMissionObjective::UMSMissionObjective() :
 void UMSMissionObjective::Execute()
 {
     StartActionsExecutor.Initialize( this, StartActions, [ this ]() {
-        K2_Execute();
+        APlayerController * pc = nullptr;
+        UMSMissionSystemComponent * component = nullptr;
+
+        auto * object = GetOuter();
+        do
+        {
+            component = Cast< UMSMissionSystemComponent >( object );
+            if ( component != nullptr )
+            {
+                pc = Cast< APlayerController >( component->GetOwner() );
+                break;
+            }
+
+            object = object->GetOuter();
+        } while ( object != nullptr );
+
+        K2_Execute( pc, component );
     } );
 
     EndActionsExecutor.Initialize( this, EndActions, [ this ]() {
@@ -116,7 +135,7 @@ void UMSMissionObjective::GenerateGuidIfNeeded( bool force_generation )
     }
 }
 
-void UMSMissionObjective::K2_Execute_Implementation()
+void UMSMissionObjective::K2_Execute_Implementation( APlayerController * player_controller, UMSMissionSystemComponent * mission_system_component )
 {
 }
 

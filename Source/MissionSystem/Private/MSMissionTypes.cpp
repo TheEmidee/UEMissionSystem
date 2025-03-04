@@ -10,19 +10,6 @@ void FMSActionExecutor::Initialize( UObject * action_owner, const TArray< UMSMis
     Outer = action_owner;
     Callback = callback;
 
-    FString owning_object_name;
-    if ( const auto * owning_mission_data = Cast< UMSMission >( action_owner ) )
-    {
-        if ( auto * mission_data = owning_mission_data->GetMissionData() )
-        {
-            owning_object_name = mission_data->GetName();
-        }
-    }
-    else if ( IsValid( action_owner ) )
-    {
-        owning_object_name = action_owner->GetName();
-    }
-
     InstancedActions = action_classes;
 
     for ( auto * action : InstancedActions )

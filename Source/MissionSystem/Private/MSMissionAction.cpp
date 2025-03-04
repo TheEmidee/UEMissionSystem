@@ -2,10 +2,12 @@
 
 #include "MSMissionSystemComponent.h"
 
+#include <GameFramework/PlayerController.h>
+
 void UMSMissionAction::Execute()
 {
     APlayerController * pc = nullptr;
-    UMSMissionSystemComponent * component = nullptr;
+    UMSMissionSystemComponent * component;
 
     auto * object = Outer.Get();
     do
