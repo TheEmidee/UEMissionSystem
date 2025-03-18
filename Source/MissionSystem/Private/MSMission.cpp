@@ -272,5 +272,9 @@ void UMSMission::CreateObjective( const TSubclassOf< UMSMissionObjective > & obj
     UE_LOG( LogMissionSystem, Verbose, TEXT( "Execute objective %s" ), *objective->GetClass()->GetName() );
 
     objective->Execute();
-    OnMissionObjectiveStartedEvent.Broadcast( objective->GetClass() );
+
+    if ( !objective->IsComplete() )
+    {
+        OnMissionObjectiveStartedEvent.Broadcast( objective->GetClass() );
+    }
 }
