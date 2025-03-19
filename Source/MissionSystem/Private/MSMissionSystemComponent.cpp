@@ -365,6 +365,7 @@ void UMSMissionSystemComponent::OnRegister()
                 context.ContextClass = UMSViewModel::StaticClass();
                 context.ContextName = ViewModelContextName;
 
+                system->GetViewModelCollection()->RemoveViewModel( context );
                 system->GetViewModelCollection()->AddViewModelInstance( context, ViewModel );
             }
         }
