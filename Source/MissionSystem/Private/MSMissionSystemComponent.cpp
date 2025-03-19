@@ -435,6 +435,15 @@ UMSMission * UMSMissionSystemComponent::TryCreateMissionFromData( UMSMissionData
         return nullptr;
     }
 
+    for ( auto * required_mission : mission_data->RequiredMissions )
+    {
+        if ( !MissionHistory.IsMissionComplete( required_mission ) )
+        {
+            UE_SLOG( LogMissionSystem, Warning, TEXT( "StartMission called with a mission that does not its required missions to be complete" ) );
+            return nullptr;
+        }
+    }
+
     check( ActiveMissions.FindByPredicate( [ mission_data ]( const auto * mission ) {
         return mission->GetMissionData() == mission_data;
     } ) == nullptr );
