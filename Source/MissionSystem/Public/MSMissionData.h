@@ -56,11 +56,15 @@ public:
     UPROPERTY( EditDefaultsOnly, Category = "ActiveObjectives" )
     TArray< FMSMissionObjectiveData > Objectives;
 
+    // The missions that need to be complete to allow this mission to start
+    UPROPERTY( EditDefaultsOnly, Category = "Requirements" )
+    TArray< UMSMissionData * > RequiredMissions;
+
     // The missions to start when this mission is complete
     UPROPERTY( EditDefaultsOnly, Category = "Other missions" )
     TArray< UMSMissionData * > NextMissions;
 
-    // The missions to cancel when this mission is started 
+    // The missions to cancel when this mission is started
     UPROPERTY( EditDefaultsOnly, Category = "Other missions" )
     TArray< UMSMissionData * > MissionsToCancel;
 

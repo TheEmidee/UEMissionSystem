@@ -177,7 +177,7 @@ bool UMSMissionSystemComponent::IsMissionObjectiveActive( const TSubclassOf< UMS
 
 void UMSMissionSystemComponent::ResumeMissionsFromHistory()
 {
-    for ( const auto mission_data : MissionHistory.GetActiveMissionData() )
+    for ( auto * mission_data : MissionHistory.GetActiveMissionData() )
     {
         // :NOTE: Bypass the checks of TryCreateMissionFromData
         auto * mission = CreateMissionFromData( mission_data );
@@ -186,6 +186,8 @@ void UMSMissionSystemComponent::ResumeMissionsFromHistory()
         {
             continue;
         }
+
+
 
         StartMission( mission );
     }
@@ -363,6 +365,7 @@ void UMSMissionSystemComponent::OnRegister()
                 context.ContextClass = UMSViewModel::StaticClass();
                 context.ContextName = ViewModelContextName;
 
+                system->GetViewModelCollection()->RemoveViewModel( context );
                 system->GetViewModelCollection()->AddViewModelInstance( context, ViewModel );
             }
         }
@@ -430,6 +433,15 @@ UMSMission * UMSMissionSystemComponent::TryCreateMissionFromData( UMSMissionData
     {
         UE_SLOG( LogMissionSystem, Warning, TEXT( "StartMission called with an already active mission" ) );
         return nullptr;
+    }
+
+    for ( auto * required_mission : mission_data->RequiredMissions )
+    {
+        if ( !MissionHistory.IsMissionComplete( required_mission ) )
+        {
+            UE_SLOG( LogMissionSystem, Warning, TEXT( "StartMission called with a mission that does not its required missions to be complete" ) );
+            return nullptr;
+        }
     }
 
     check( ActiveMissions.FindByPredicate( [ mission_data ]( const auto * mission ) {
