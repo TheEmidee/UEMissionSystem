@@ -43,7 +43,7 @@ public:
     UFUNCTION( BlueprintPure )
     bool IsComplete() const;
 
-#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+#if !UE_BUILD_SHIPPING
     void DumpMission( FOutputDevice & output_device );
 #endif
 

@@ -11,7 +11,7 @@
 #include <GameFramework/PlayerController.h>
 #include <Serialization/MemoryWriter.h>
 
-#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+#if !UE_BUILD_SHIPPING
 static FAutoConsoleCommand SkipMissionsCommand(
     TEXT( "MissionSystem.SkipMissions" ),
     TEXT( "Skips the current missions." ),
@@ -115,7 +115,7 @@ bool UMSMissionSystemComponent::HasDataInHistory() const
 
 void UMSMissionSystemComponent::StartMission( UMSMissionData * mission_data )
 {
-#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+#if !UE_BUILD_SHIPPING
     if ( CVarDisableAllMissions.GetValueOnGameThread() == 1 )
     {
         return;
@@ -255,7 +255,7 @@ void UMSMissionSystemComponent::WhenMissionObjectiveEnds( const TSubclassOf< UMS
     MissionObjectiveEndObservers.Emplace( MoveTemp( observer ) );
 }
 
-#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+#if !UE_BUILD_SHIPPING
 void UMSMissionSystemComponent::DumpActiveMissions( FOutputDevice & output_device )
 {
     output_device.Logf( ELogVerbosity::Verbose, TEXT( "Mission System - Active Missions :" ) );
@@ -327,7 +327,7 @@ void UMSMissionSystemComponent::ClearMissionHistory()
 
 void UMSMissionSystemComponent::TryResumeMissionFromHistory()
 {
-#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+#if !UE_BUILD_SHIPPING
     if ( CVarDisableAllMissions.GetValueOnGameThread() == 1 )
     {
         return;

@@ -135,7 +135,7 @@ bool UMSMission::IsComplete() const
     return true;
 }
 
-#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+#if !UE_BUILD_SHIPPING
 void UMSMission::DumpMission( FOutputDevice & output_device )
 {
     const auto get_status = []( bool is_complete, bool is_cancelled ) {
@@ -255,7 +255,7 @@ void UMSMission::ExecuteAllObjectives()
 
 bool UMSMission::CanExecuteObjective( const TSubclassOf< UMSMissionObjective > & objective_class ) const
 {
-#if !( UE_BUILD_SHIPPING || UE_BUILD_TEST )
+#if !UE_BUILD_SHIPPING
     // :TODO:
 #endif
 
