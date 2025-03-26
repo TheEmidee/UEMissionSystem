@@ -51,6 +51,7 @@ EDataValidationResult UMSMissionData::IsDataValid( FDataValidationContext & cont
         .NoNullItem( VALIDATOR_GET_PROPERTY( StartActions ) )
         .NoNullItem( VALIDATOR_GET_PROPERTY( EndActions ) )
         .NoNullItem( VALIDATOR_GET_PROPERTY( NextMissions ) )
+        .NoNullItem( VALIDATOR_GET_PROPERTY( RequiredMissions ) )
         .IsValid( VALIDATOR_GET_PROPERTY( MissionId ) )
         .CustomValidation< TArray< FMSMissionObjectiveData > >( Objectives, []( FDataValidationContext & context, const TArray< FMSMissionObjectiveData > & objectives ) {
             for ( const auto & objective_data : objectives )
