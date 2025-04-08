@@ -28,6 +28,9 @@ private:
     UPROPERTY( BlueprintReadOnly, FieldNotify, meta = ( AllowPrivateAccess ) )
     TArray< TObjectPtr< UMSObjectiveViewModel > > ActiveObjectives;
 
+    UPROPERTY( BlueprintReadOnly, FieldNotify, meta = ( AllowPrivateAccess ) )
+    TArray< TObjectPtr< UMSObjectiveViewModel > > CompletedObjectives;
+
     UPROPERTY( Transient )
     TObjectPtr< UMSMission > Mission;
 };
