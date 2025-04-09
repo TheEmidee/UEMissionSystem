@@ -4,6 +4,12 @@
 #include "MSMissionData.h"
 #include "ViewModels/MSObjectiveViewModel.h"
 
+void UMSMissionViewModel::RemoveCompletedObjective( UMSObjectiveViewModel * objective_vm )
+{
+    CompletedObjectives.Remove( objective_vm );
+    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( CompletedObjectives );
+}
+
 void UMSMissionViewModel::Initialize( UMSMission * mission )
 {
     check( mission != nullptr );
@@ -28,11 +34,13 @@ void UMSMissionViewModel::SetObjectiveEnded( const TSubclassOf< UMSMissionObject
         return objective_vm->GetObjectiveClass() == objective;
     };
 
-    auto * objective_vm = ActiveObjectives.FindByPredicate( predicate );
-    CompletedObjectives.AddUnique( *objective_vm );
+    if ( auto * objective_vm = ActiveObjectives.FindByPredicate( predicate ) )
+    {
+        CompletedObjectives.AddUnique( *objective_vm );
 
-    ActiveObjectives.RemoveAll( predicate );
+        ActiveObjectives.RemoveAll( predicate );
 
-    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveObjectives );
-    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( CompletedObjectives );
+        UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveObjectives );
+        UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( CompletedObjectives );
+    }
 }

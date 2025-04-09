@@ -1,6 +1,14 @@
 #include "ViewModels/MSViewModel.h"
 
+#include "MSMission.h"
+#include "MSMissionData.h"
 #include "ViewModels/MSMissionViewModel.h"
+
+void UMSViewModel::RemoveCompletedMission( UMSMissionViewModel * mission_vm )
+{
+    CompletedMissions.Remove( mission_vm );
+    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( CompletedMissions );
+}
 
 void UMSViewModel::SetMissionStarted( UMSMission * mission )
 {
@@ -9,20 +17,30 @@ void UMSViewModel::SetMissionStarted( UMSMission * mission )
         return;
     }
 
-    auto * mission_vm = NewObject< UMSMissionViewModel >( this );
-    mission_vm->Initialize( mission );
-    ActiveMissions.Add( mission_vm );
-
-    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveMissions );
-    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( HasActiveMissions );
+    if ( !mission->GetMissionData()->bHideOnVM )
+    {
+        auto * mission_vm = NewObject< UMSMissionViewModel >( this );
+        mission_vm->Initialize( mission );
+        ActiveMissions.Add( mission_vm );
+        UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveMissions );
+        UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( HasActiveMissions );
+    }
 }
 
 void UMSViewModel::SetMissionEnded( UMSMission * mission )
 {
-    ActiveMissions.RemoveAll( [ & ]( auto mission_vm ) {
+    const auto predicate = [ & ]( auto mission_vm ) {
         return mission_vm->GetMission() == mission;
-    } );
+    };
 
+    if ( auto * mission_vm = ActiveMissions.FindByPredicate( predicate ) )
+    {
+        CompletedMissions.AddUnique( *mission_vm );
+
+        UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( CompletedMissions );
+    }
+
+    ActiveMissions.RemoveAll( predicate );
     UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveMissions );
     UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( HasActiveMissions );
 }

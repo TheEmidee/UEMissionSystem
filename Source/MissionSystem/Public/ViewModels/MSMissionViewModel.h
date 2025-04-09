@@ -1,5 +1,7 @@
 #pragma once
 
+#include "MSObjectiveViewModel.h"
+
 #include <CoreMinimal.h>
 #include <MVVMViewModelBase.h>
 
@@ -15,6 +17,9 @@ class MISSIONSYSTEM_API UMSMissionViewModel final : public UMVVMViewModelBase
     GENERATED_BODY()
 
 public:
+    UFUNCTION( BlueprintCallable )
+    void RemoveCompletedObjective( UMSObjectiveViewModel * objective_vm );
+
     UMSMission * GetMission() const;
 
     void Initialize( UMSMission * mission );
