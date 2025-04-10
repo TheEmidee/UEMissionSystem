@@ -37,10 +37,7 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
     ActiveObjectives.Reserve( mission_data->Objectives.Num() );
     PendingObjectives.Reserve( mission_data->Objectives.Num() );
 
-    const auto * subsystem = Cast< UMSMissionSystemComponent >( GetOuter() );
-    check( subsystem != nullptr );
-
-    const auto & mission_history = subsystem->GetMissionHistory();
+    const auto & mission_history = GetMissionHistory();
 
     for ( const auto & objective_data : mission_data->Objectives )
     {
@@ -158,6 +155,14 @@ void UMSMission::DumpMission( FOutputDevice & output_device )
 }
 #endif
 
+const FMSMissionHistory & UMSMission::GetMissionHistory() const
+{
+    auto * subsystem = Cast< UMSMissionSystemComponent >( GetOuter() );
+    check( subsystem != nullptr );
+
+    return subsystem->GetMissionHistory();
+}
+
 void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, const bool was_cancelled )
 {
     if ( !bIsStarted )
@@ -166,6 +171,7 @@ void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, 
     }
 
     mission_objective->OnObjectiveEnded().RemoveAll( this );
+    mission_objective->OnObjectiveProgressionUpdated().RemoveAll( this );
     OnMissionObjectiveCompleteEvent.Broadcast( mission_objective->GetClass(), was_cancelled );
 
     if ( bIsCancelled )
@@ -184,6 +190,11 @@ void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, 
     {
         TryEnd();
     }
+}
+
+void UMSMission::OnObjectiveProgressionUpdated( UMSMissionObjective * mission_objective, int current_progression, int required_progression )
+{
+    OnMissionObjectiveProgressionUpdatedEvent.Broadcast( mission_objective->GetClass(), current_progression, required_progression );
 }
 
 void UMSMission::TryStart()
@@ -268,8 +279,11 @@ void UMSMission::CreateObjective( const TSubclassOf< UMSMissionObjective > & obj
     ActiveObjectives.Add( objective );
 
     objective->OnObjectiveEnded().AddUObject( this, &UMSMission::OnObjectiveCompleted );
+    objective->OnObjectiveProgressionUpdated().AddUObject( this, &UMSMission::OnObjectiveProgressionUpdated );
 
     UE_LOG( LogMissionSystem, Verbose, TEXT( "Execute objective %s" ), *objective->GetClass()->GetName() );
+
+    objective->IncrementProgression( GetMissionHistory().GetObjectiveProgression( objective_class ) );
 
     objective->Execute();
 

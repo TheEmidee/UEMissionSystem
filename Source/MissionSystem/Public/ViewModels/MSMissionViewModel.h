@@ -24,6 +24,7 @@ public:
 
     void Initialize( UMSMission * mission );
     void SetObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective );
+    void SetObjectiveProgression( const TSubclassOf< UMSMissionObjective > & objective, int current_progression );
     void SetObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective );
 
 private:

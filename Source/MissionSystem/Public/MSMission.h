@@ -6,6 +6,7 @@
 
 #include "MSMission.generated.h"
 
+struct FMSMissionHistory;
 class UMSMissionAction;
 class UMSMissionData;
 class UMSMissionObjective;
@@ -13,6 +14,7 @@ class UMSMission;
 
 DECLARE_EVENT_TwoParams( UMSMission, FMSOnMissionEndedEvent, UMSMission * Mission, bool WasCancelled );
 DECLARE_EVENT_OneParam( UMSMission, FMSOnMissionObjectiveStartedEvent, const TSubclassOf< UMSMissionObjective > & MissionObjective );
+DECLARE_EVENT_ThreeParams( UMSMission, FMSOnMissionObjectiveProgressionUpdatedEvent, const TSubclassOf< UMSMissionObjective > & MissionObjective, int CurrentProgression, int RequiredProgression );
 DECLARE_EVENT_TwoParams( UMSMission, FMSOnMissionObjectiveEndedEvent, const TSubclassOf< UMSMissionObjective > & MissionObjective, bool WasCancelled );
 
 UCLASS()
@@ -29,6 +31,7 @@ public:
 
     FMSOnMissionEndedEvent & OnMissionEnded();
     FMSOnMissionObjectiveStartedEvent & OnMissionObjectiveStarted();
+    FMSOnMissionObjectiveProgressionUpdatedEvent & OnMissionObjectiveProgressionUpdated();
     FMSOnMissionObjectiveEndedEvent & OnMissionObjectiveEnded();
     const TArray< UMSMissionObjective * > & GetObjectives() const;
     const TArray< UMSMissionAction * > & GetStartActions() const;
@@ -50,7 +53,10 @@ public:
     UMSMissionData * GetMissionData() const;
 
 private:
+    const FMSMissionHistory & GetMissionHistory() const;
+
     void OnObjectiveCompleted( UMSMissionObjective * mission_objective, bool was_cancelled );
+    void OnObjectiveProgressionUpdated( UMSMissionObjective * mission_objective, int current_progression, int required_progression );
     void TryStart();
     void TryEnd();
     void ExecuteNextObjective();
@@ -63,6 +69,7 @@ private:
 
     FMSOnMissionEndedEvent OnMissionEndedEvent;
     FMSOnMissionObjectiveStartedEvent OnMissionObjectiveStartedEvent;
+    FMSOnMissionObjectiveProgressionUpdatedEvent OnMissionObjectiveProgressionUpdatedEvent;
     FMSOnMissionObjectiveEndedEvent OnMissionObjectiveCompleteEvent;
 
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
@@ -91,6 +98,11 @@ FORCEINLINE FMSOnMissionEndedEvent & UMSMission::OnMissionEnded()
 FORCEINLINE FMSOnMissionObjectiveStartedEvent & UMSMission::OnMissionObjectiveStarted()
 {
     return OnMissionObjectiveStartedEvent;
+}
+
+FORCEINLINE FMSOnMissionObjectiveProgressionUpdatedEvent & UMSMission::OnMissionObjectiveProgressionUpdated()
+{
+    return OnMissionObjectiveProgressionUpdatedEvent;
 }
 
 FORCEINLINE FMSOnMissionObjectiveEndedEvent & UMSMission::OnMissionObjectiveEnded()

@@ -28,6 +28,16 @@ void UMSMissionViewModel::SetObjectiveStarted( const TSubclassOf< UMSMissionObje
     UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveObjectives );
 }
 
+void UMSMissionViewModel::SetObjectiveProgression( const TSubclassOf< UMSMissionObjective > & objective, int current_progression )
+{
+    if ( const auto * objective_vm = ActiveObjectives.FindByPredicate( [ & ]( auto view_model ) {
+             return view_model->GetObjectiveClass() == objective;
+         } ) )
+    {
+        ( *objective_vm )->SetProgression( current_progression );
+    }
+}
+
 void UMSMissionViewModel::SetObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective )
 {
     const auto predicate = [ & ]( auto objective_vm ) {
