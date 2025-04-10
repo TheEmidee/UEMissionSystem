@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MSMissionObjective.h"
+#include "MSMissionViewModel.h"
 
 #include <CoreMinimal.h>
 #include <MVVMViewModelBase.h>
@@ -16,6 +17,9 @@ class MISSIONSYSTEM_API UMSViewModel final : public UMVVMViewModelBase
     GENERATED_BODY()
 
 public:
+    UFUNCTION( BlueprintCallable )
+    void RemoveCompletedMission( UMSMissionViewModel * mission_vm );
+
     void SetMissionStarted( UMSMission * mission );
     void SetMissionEnded( UMSMission * mission );
     void SetMissionObjectiveStarted( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective );
@@ -29,4 +33,7 @@ private:
 
     UPROPERTY( BlueprintReadOnly, FieldNotify, meta = ( AllowPrivateAccess ) )
     TArray< TObjectPtr< UMSMissionViewModel > > ActiveMissions;
+
+    UPROPERTY( BlueprintReadOnly, FieldNotify, meta = ( AllowPrivateAccess ) )
+    TArray< TObjectPtr< UMSMissionViewModel > > CompletedMissions;
 };

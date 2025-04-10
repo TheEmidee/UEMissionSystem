@@ -90,6 +90,10 @@ public:
     UPROPERTY( VisibleAnywhere, AdvancedDisplay )
     FGuid MissionId;
 
+    // Set to true if this objective shouldn't be added to the view model to be displayed
+    UPROPERTY( EditDefaultsOnly, meta = ( AllowPrivateAccess ) )
+    uint8 bHideOnVM : 1;
+
 #if WITH_EDITOR
     EDataValidationResult IsDataValid( FDataValidationContext & context ) const override;
 #endif
