@@ -28,7 +28,7 @@ struct MISSIONSYSTEM_API FMSMissionHistory
     bool IsMissionCancelled( UMSMissionData * mission_data ) const;
     bool IsMissionComplete( UMSMissionData * mission_data ) const;
     bool IsMissionFinished( UMSMissionData * mission_data ) const;
-    bool AddActiveMission(UMSMissionData* mission_data);
+    bool AddActiveMission( UMSMissionData * mission_data );
     bool SetMissionComplete( UMSMissionData * mission_data, bool was_cancelled );
 
     bool IsObjectiveActive( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const;
@@ -36,6 +36,8 @@ struct MISSIONSYSTEM_API FMSMissionHistory
     bool IsObjectiveComplete( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const;
     bool IsObjectiveFinished( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const;
     bool AddActiveObjective( const TSubclassOf< UMSMissionObjective > & mission_objective_class );
+    int GetObjectiveProgression( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const;
+    void UpdateObjectiveProgression( const TSubclassOf< UMSMissionObjective > & mission_objective_class, int progression );
     bool SetObjectiveComplete( const TSubclassOf< UMSMissionObjective > & mission_objective_class, bool was_cancelled );
 
     friend FArchive & operator<<( FArchive & archive, FMSMissionHistory & mission_history );
@@ -50,6 +52,7 @@ private:
 
     TMap< FGuid, EMSState > MissionStates;
     TMap< FGuid, EMSState > ObjectiveStates;
+    TMap< FGuid, int > ObjectiveProgressions;
 };
 
 FORCEINLINE const TArray< UMSMissionData * > & FMSMissionHistory::GetActiveMissionData() const

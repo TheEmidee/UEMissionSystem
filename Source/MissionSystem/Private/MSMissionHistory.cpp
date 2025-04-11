@@ -199,6 +199,45 @@ bool FMSMissionHistory::AddActiveObjective( const TSubclassOf< UMSMissionObjecti
     return TryAddToMap( mission_objective_class, ObjectiveStates );
 }
 
+int FMSMissionHistory::GetObjectiveProgression( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const
+{
+    if ( !ensureAlways( mission_objective_class != nullptr ) )
+    {
+        return INDEX_NONE;
+    }
+
+    const auto id = GetGuid( mission_objective_class );
+
+    if ( !ensureAlways( id.IsValid() ) )
+    {
+        return INDEX_NONE;
+    }
+
+    if ( auto * progression = ObjectiveProgressions.Find( id ) )
+    {
+        return *progression;
+    }
+
+    return INDEX_NONE;
+}
+
+void FMSMissionHistory::UpdateObjectiveProgression( const TSubclassOf< UMSMissionObjective > & mission_objective_class, int progression )
+{
+    if ( !ensureAlways( mission_objective_class != nullptr ) )
+    {
+        return;
+    }
+
+    const auto id = GetGuid( mission_objective_class );
+
+    if ( !ensureAlways( id.IsValid() ) )
+    {
+        return;
+    }
+
+    ObjectiveProgressions.FindOrAdd( id ) = progression;
+}
+
 bool FMSMissionHistory::SetObjectiveComplete( const TSubclassOf< UMSMissionObjective > & mission_objective_class, bool was_cancelled )
 {
     return SetComplete( mission_objective_class, ObjectiveStates, was_cancelled );
@@ -209,6 +248,7 @@ void FMSMissionHistory::Clear()
     ActiveMissionsData.Reset();
     MissionStates.Reset();
     ObjectiveStates.Reset();
+    ObjectiveProgressions.Reset();
 }
 
 bool FMSMissionHistory::DoesMissionHasState( UMSMissionData * mission_data, EMSState state ) const
@@ -226,6 +266,7 @@ FArchive & operator<<( FArchive & archive, FMSMissionHistory & mission_history )
     archive << mission_history.ActiveMissionsData;
     archive << mission_history.MissionStates;
     archive << mission_history.ObjectiveStates;
+    archive << mission_history.ObjectiveProgressions;
 
     return archive;
 }

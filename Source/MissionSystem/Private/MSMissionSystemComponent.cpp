@@ -187,8 +187,6 @@ void UMSMissionSystemComponent::ResumeMissionsFromHistory()
             continue;
         }
 
-
-
         StartMission( mission );
     }
 }
@@ -246,6 +244,20 @@ void UMSMissionSystemComponent::WhenMissionObjectiveStartsOrIsActive( const TSub
     observer.Callback = when_mission_objective_starts;
 
     MissionObjectiveStartObservers.Emplace( MoveTemp( observer ) );
+}
+
+void UMSMissionSystemComponent::WhenMissionObjectiveProgressionIsUpdated( const TSubclassOf< UMSMissionObjective > & mission_objective_class, const FMSMissionSystemMissionObjectiveProgressionUpdatedDelegate & when_mission_objective_progression_is_updated, bool execute_callback_now )
+{
+    if ( execute_callback_now )
+    {
+        when_mission_objective_progression_is_updated.ExecuteIfBound( mission_objective_class, MissionHistory.GetObjectiveProgression( mission_objective_class ), mission_objective_class.GetDefaultObject()->GetRequiredProgression() );
+    }
+
+    FMissionObjectiveProgressionObserver observer;
+    observer.MissionObjective = mission_objective_class;
+    observer.Callback = when_mission_objective_progression_is_updated;
+
+    MissionObjectiveProgressionObservers.Emplace( MoveTemp( observer ) );
 }
 
 void UMSMissionSystemComponent::WhenMissionObjectiveEnds( const TSubclassOf< UMSMissionObjective > & mission_objective_class, const FMSMissionSystemMissionObjectiveEndedDelegate & when_mission_objective_ends )
@@ -399,6 +411,15 @@ void UMSMissionSystemComponent::K2_WhenMissionObjectiveStartsOrIsActive( TSubcla
     WhenMissionObjectiveStartsOrIsActive( mission_objective, active_delegate );
 }
 
+void UMSMissionSystemComponent::K2_WhenMissionObjectiveProgressionIsUpdated( TSubclassOf< UMSMissionObjective > mission_objective, FMSMissionSystemMissionObjectiveProgressionUpdatedDynamicDelegate when_mission_objective_progression_is_updated, bool execute_callback_now )
+{
+    const auto delegate = FMSMissionSystemMissionObjectiveProgressionUpdatedDelegate::CreateWeakLambda( when_mission_objective_progression_is_updated.GetUObject(), [ when_mission_objective_progression_is_updated ]( TSubclassOf< UMSMissionObjective > mission_objective, int current_progression, int required_progression ) {
+        when_mission_objective_progression_is_updated.ExecuteIfBound( mission_objective, current_progression, required_progression );
+    } );
+
+    WhenMissionObjectiveProgressionIsUpdated( mission_objective, delegate, execute_callback_now );
+}
+
 void UMSMissionSystemComponent::K2_WhenMissionObjectiveEnds( TSubclassOf< UMSMissionObjective > mission_objective, FMSMissionSystemMissionObjectiveEndedDynamicDelegate when_mission_objective_ends )
 {
     const auto ended_delegate = FMSMissionSystemMissionObjectiveEndedDelegate::CreateWeakLambda( when_mission_objective_ends.GetUObject(), [ when_mission_objective_ends ]( TSubclassOf< UMSMissionObjective > mission_objective, const bool was_cancelled ) {
@@ -479,6 +500,7 @@ UMSMission * UMSMissionSystemComponent::CreateMissionFromData( UMSMissionData * 
 
     mission->OnMissionEnded().AddUObject( this, &UMSMissionSystemComponent::OnMissionEnded );
     mission->OnMissionObjectiveStarted().AddUObject( this, &UMSMissionSystemComponent::OnMissionObjectiveStarted, mission );
+    mission->OnMissionObjectiveProgressionUpdated().AddUObject( this, &UMSMissionSystemComponent::OnMissionObjectiveProgressionUpdated, mission );
     mission->OnMissionObjectiveEnded().AddUObject( this, &UMSMissionSystemComponent::OnMissionObjectiveEnded, mission );
 
     ActiveMissions.Add( mission );
@@ -542,6 +564,13 @@ void UMSMissionSystemComponent::OnMissionObjectiveStarted( const TSubclassOf< UM
     }
 
     BroadcastOnMissionObjectiveStarted( mission, objective );
+}
+
+void UMSMissionSystemComponent::OnMissionObjectiveProgressionUpdated( const TSubclassOf< UMSMissionObjective > & objective, int current_progression, int required_progression, UMSMission * mission )
+{
+    MissionHistory.UpdateObjectiveProgression( objective, current_progression );
+
+    BroadcastOnMissionObjectiveProgressionUpdated( mission, objective, current_progression, required_progression );
 }
 
 void UMSMissionSystemComponent::OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, const bool was_cancelled, UMSMission * mission )
@@ -614,6 +643,21 @@ void UMSMissionSystemComponent::BroadcastOnMissionObjectiveStarted( UMSMission *
     if ( ViewModel != nullptr )
     {
         ViewModel->SetMissionObjectiveStarted( mission, objective );
+    }
+}
+
+void UMSMissionSystemComponent::BroadcastOnMissionObjectiveProgressionUpdated( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective, int current_progression, int required_progression )
+{
+    OnMissionObjectiveProgressionIsUpdatedDelegate.Broadcast( mission->GetMissionData(), objective, current_progression, required_progression );
+
+    for ( auto & observer : MissionObjectiveProgressionObservers )
+    {
+        observer.Callback.ExecuteIfBound( objective->GetClass(), current_progression, required_progression );
+    }
+
+    if ( ViewModel != nullptr )
+    {
+        ViewModel->SetMissionObjectiveProgression( mission, objective, current_progression );
     }
 }
 

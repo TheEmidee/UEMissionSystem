@@ -9,7 +9,9 @@
 UMSMissionObjective::UMSMissionObjective() :
     bExecuteEndActionsWhenCancelled( false ),
     bIsComplete( false ),
-    bIsCancelled( false )
+    bIsCancelled( false ),
+    RequiredProgression( INDEX_NONE ),
+    CurrentProgression( INDEX_NONE )
 {
 }
 
@@ -68,8 +70,23 @@ void UMSMissionObjective::CompleteObjective()
     if ( !bIsComplete )
     {
         bIsComplete = true;
+        CurrentProgression = RequiredProgression;
         K2_OnObjectiveEnded( false );
         EndActionsExecutor.Execute();
+    }
+}
+
+void UMSMissionObjective::IncrementProgression( int steps )
+{
+    CurrentProgression += steps;
+
+    if ( CurrentProgression >= RequiredProgression )
+    {
+        CompleteObjective();
+    }
+    else
+    {
+        OnObjectiveProgressionUpdatedEvent.Broadcast( this, CurrentProgression, RequiredProgression );
     }
 }
 

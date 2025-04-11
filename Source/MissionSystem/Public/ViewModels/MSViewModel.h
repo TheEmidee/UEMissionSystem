@@ -23,6 +23,7 @@ public:
     void SetMissionStarted( UMSMission * mission );
     void SetMissionEnded( UMSMission * mission );
     void SetMissionObjectiveStarted( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective );
+    void SetMissionObjectiveProgression( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective, int current_progression );
     void SetMissionObjectiveEnded( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective );
 
     UFUNCTION( BlueprintPure, FieldNotify )

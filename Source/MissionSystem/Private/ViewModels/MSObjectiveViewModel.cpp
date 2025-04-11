@@ -6,5 +6,13 @@ void UMSObjectiveViewModel::Initialize( const TSubclassOf< UMSMissionObjective >
 {
     ObjectiveClass = objective_class;
 
-    Name = ObjectiveClass.GetDefaultObject()->GetDescription();
+    const auto * cdo = ObjectiveClass.GetDefaultObject();
+    Name = cdo->GetDescription();
+    RequiredProgression = cdo->GetRequiredProgression();
+}
+
+void UMSObjectiveViewModel::SetProgression( int progression )
+{
+    CurrentProgression = progression;
+    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( CurrentProgression );
 }

@@ -53,6 +53,14 @@ void UMSViewModel::SetMissionObjectiveStarted( UMSMission * mission, const TSubc
     }
 }
 
+void UMSViewModel::SetMissionObjectiveProgression( UMSMission * mission, const TSubclassOf<UMSMissionObjective> & objective, int current_progression )
+{
+    if ( auto * mission_vm = GetMissionViewModel( mission ) )
+    {
+        mission_vm->SetObjectiveProgression( objective, current_progression );
+    }
+}
+
 void UMSViewModel::SetMissionObjectiveEnded( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective )
 {
     if ( auto * mission_vm = GetMissionViewModel( mission ) )
