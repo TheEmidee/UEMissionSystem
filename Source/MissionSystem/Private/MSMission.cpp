@@ -157,10 +157,10 @@ void UMSMission::DumpMission( FOutputDevice & output_device )
 
 const FMSMissionHistory & UMSMission::GetMissionHistory() const
 {
-    auto * subsystem = Cast< UMSMissionSystemComponent >( GetOuter() );
-    check( subsystem != nullptr );
+    auto * component = Cast< UMSMissionSystemComponent >( GetOuter() );
+    check( component != nullptr );
 
-    return subsystem->GetMissionHistory();
+    return component->GetMissionHistory();
 }
 
 void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, const bool was_cancelled )

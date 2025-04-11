@@ -203,14 +203,14 @@ int FMSMissionHistory::GetObjectiveProgression( const TSubclassOf< UMSMissionObj
 {
     if ( !ensureAlways( mission_objective_class != nullptr ) )
     {
-        return false;
+        return INDEX_NONE;
     }
 
     const auto id = GetGuid( mission_objective_class );
 
     if ( !ensureAlways( id.IsValid() ) )
     {
-        return false;
+        return INDEX_NONE;
     }
 
     if ( auto * progression = ObjectiveProgressions.Find( id ) )
