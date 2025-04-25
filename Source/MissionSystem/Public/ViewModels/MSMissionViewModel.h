@@ -23,8 +23,8 @@ public:
     UMSMission * GetMission() const;
 
     void Initialize( UMSMission * mission );
-    void SetObjectiveStarted( UMSMissionObjective * objective );
-    void RefreshObjectiveProgression( UMSMissionObjective * objective );
+    void SetObjectiveStarted(const UMSMissionObjective* objective);
+    void RefreshObjectiveProgression(const UMSMissionObjective* objective);
     void SetObjectiveEnded( UMSMissionObjective * objective );
 
 private:

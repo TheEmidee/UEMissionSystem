@@ -157,7 +157,7 @@ private:
     void BroadcastOnMissionEnded( UMSMission * mission, bool was_cancelled );
     void BroadcastOnMissionObjectiveStarted( UMSMission * mission, UMSMissionObjective * objective );
     void BroadcastOnMissionObjectiveProgressionUpdated( const UMSMission * mission, const UMSMissionObjective * objective );
-    void BroadcastOnMissionObjectiveEnded( UMSMission * mission, UMSMissionObjective * objective, bool was_cancelled );
+    void BroadcastOnMissionObjectiveEnded( const UMSMission * mission, UMSMissionObjective * objective, bool was_cancelled );
 
     UPROPERTY()
     TArray< UMSMission * > ActiveMissions;

@@ -13,20 +13,20 @@ class MISSIONSYSTEM_API UMSObjectiveViewModel final : public UMVVMViewModelBase
     GENERATED_BODY()
 
 public:
-    UMSMissionObjective * GetObjective() const;
+    const UMSMissionObjective * GetObjective() const;
 
     void RefreshProgression();
-    void Initialize( UMSMissionObjective * objective );
+    void Initialize(const UMSMissionObjective* objective);
 
     UFUNCTION( BlueprintPure, FieldNotify )
     FText GetDescription() const;
 
 private:
     UPROPERTY()
-    UMSMissionObjective * Objective;
+    const UMSMissionObjective * Objective;
 };
 
-FORCEINLINE UMSMissionObjective * UMSObjectiveViewModel::GetObjective() const
+FORCEINLINE const UMSMissionObjective * UMSObjectiveViewModel::GetObjective() const
 {
     return Objective;
 }

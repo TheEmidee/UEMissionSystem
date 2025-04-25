@@ -18,7 +18,7 @@ void UMSMissionViewModel::Initialize( UMSMission * mission )
     Name = Mission->GetMissionData()->Name;
 }
 
-void UMSMissionViewModel::SetObjectiveStarted( UMSMissionObjective * objective )
+void UMSMissionViewModel::SetObjectiveStarted(const UMSMissionObjective* objective)
 {
     auto * objective_vm = NewObject< UMSObjectiveViewModel >( this );
     objective_vm->Initialize( objective );
@@ -28,7 +28,7 @@ void UMSMissionViewModel::SetObjectiveStarted( UMSMissionObjective * objective )
     UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveObjectives );
 }
 
-void UMSMissionViewModel::RefreshObjectiveProgression( UMSMissionObjective * objective )
+void UMSMissionViewModel::RefreshObjectiveProgression( const UMSMissionObjective * objective )
 {
     if ( const auto * objective_vm = ActiveObjectives.FindByPredicate( [ & ]( auto view_model ) {
              return view_model->GetObjective() == objective;

@@ -2,7 +2,7 @@
 
 #include "MSMissionObjective.h"
 
-void UMSObjectiveViewModel::Initialize( UMSMissionObjective * objective )
+void UMSObjectiveViewModel::Initialize(const UMSMissionObjective* objective)
 {
     Objective = objective;
 

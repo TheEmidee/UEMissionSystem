@@ -657,11 +657,11 @@ void UMSMissionSystemComponent::BroadcastOnMissionObjectiveProgressionUpdated( c
 
     if ( ViewModel != nullptr )
     {
-        ViewModel->RefreshMissionObjectiveProgression( mission, objective, objective->GetCurrentProgression() );
+        ViewModel->RefreshMissionObjectiveProgression( mission, objective );
     }
 }
 
-void UMSMissionSystemComponent::BroadcastOnMissionObjectiveEnded( UMSMission * mission, UMSMissionObjective * objective, bool was_cancelled )
+void UMSMissionSystemComponent::BroadcastOnMissionObjectiveEnded( const UMSMission * mission, UMSMissionObjective * objective, bool was_cancelled )
 {
     OnMissionObjectiveEndedDelegate.Broadcast( mission->GetMissionData(), objective->GetClass(), was_cancelled );
 
