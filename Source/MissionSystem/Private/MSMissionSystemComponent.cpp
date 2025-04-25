@@ -556,7 +556,7 @@ void UMSMissionSystemComponent::OnMissionEnded( UMSMission * mission, const bool
     }
 }
 
-void UMSMissionSystemComponent::OnMissionObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective, UMSMission * mission )
+void UMSMissionSystemComponent::OnMissionObjectiveStarted( UMSMissionObjective * objective, UMSMission * mission )
 {
     if ( !ensureAlways( MissionHistory.AddActiveObjective( objective ) ) )
     {
@@ -566,14 +566,14 @@ void UMSMissionSystemComponent::OnMissionObjectiveStarted( const TSubclassOf< UM
     BroadcastOnMissionObjectiveStarted( mission, objective );
 }
 
-void UMSMissionSystemComponent::OnMissionObjectiveProgressionUpdated( const TSubclassOf< UMSMissionObjective > & objective, int current_progression, int required_progression, UMSMission * mission )
+void UMSMissionSystemComponent::OnMissionObjectiveProgressionUpdated( UMSMissionObjective * objective, UMSMission * mission )
 {
-    MissionHistory.UpdateObjectiveProgression( objective, current_progression );
+    MissionHistory.UpdateObjectiveProgression( objective );
 
-    BroadcastOnMissionObjectiveProgressionUpdated( mission, objective, current_progression, required_progression );
+    BroadcastOnMissionObjectiveProgressionUpdated( mission, objective );
 }
 
-void UMSMissionSystemComponent::OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, const bool was_cancelled, UMSMission * mission )
+void UMSMissionSystemComponent::OnMissionObjectiveEnded( UMSMissionObjective * objective, const bool was_cancelled, UMSMission * mission )
 {
     UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnObjectiveEnded (%s)" ), *objective->GetClass()->GetName() );
 
@@ -631,9 +631,9 @@ void UMSMissionSystemComponent::BroadcastOnMissionEnded( UMSMission * mission, b
     }
 }
 
-void UMSMissionSystemComponent::BroadcastOnMissionObjectiveStarted( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective )
+void UMSMissionSystemComponent::BroadcastOnMissionObjectiveStarted( UMSMission * mission, UMSMissionObjective * objective )
 {
-    OnMissionObjectiveStartedDelegate.Broadcast( mission->GetMissionData(), objective );
+    OnMissionObjectiveStartedDelegate.Broadcast( mission->GetMissionData(), objective->GetClass() );
 
     for ( auto & observer : MissionObjectiveStartObservers )
     {
@@ -646,24 +646,24 @@ void UMSMissionSystemComponent::BroadcastOnMissionObjectiveStarted( UMSMission *
     }
 }
 
-void UMSMissionSystemComponent::BroadcastOnMissionObjectiveProgressionUpdated( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective, int current_progression, int required_progression )
+void UMSMissionSystemComponent::BroadcastOnMissionObjectiveProgressionUpdated( const UMSMission * mission, const UMSMissionObjective * objective )
 {
-    OnMissionObjectiveProgressionIsUpdatedDelegate.Broadcast( mission->GetMissionData(), objective, current_progression, required_progression );
+    OnMissionObjectiveProgressionIsUpdatedDelegate.Broadcast( mission->GetMissionData(), objective->GetClass(), objective->GetCurrentProgression(), objective->GetRequiredProgression() );
 
     for ( auto & observer : MissionObjectiveProgressionObservers )
     {
-        observer.Callback.ExecuteIfBound( objective->GetClass(), current_progression, required_progression );
+        observer.Callback.ExecuteIfBound( objective->GetClass(), objective->GetCurrentProgression(), objective->GetRequiredProgression() );
     }
 
     if ( ViewModel != nullptr )
     {
-        ViewModel->SetMissionObjectiveProgression( mission, objective, current_progression );
+        ViewModel->RefreshMissionObjectiveProgression( mission, objective, objective->GetCurrentProgression() );
     }
 }
 
-void UMSMissionSystemComponent::BroadcastOnMissionObjectiveEnded( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled )
+void UMSMissionSystemComponent::BroadcastOnMissionObjectiveEnded( UMSMission * mission, UMSMissionObjective * objective, bool was_cancelled )
 {
-    OnMissionObjectiveEndedDelegate.Broadcast( mission->GetMissionData(), objective, was_cancelled );
+    OnMissionObjectiveEndedDelegate.Broadcast( mission->GetMissionData(), objective->GetClass(), was_cancelled );
 
     for ( auto index = MissionObjectiveEndObservers.Num() - 1; index >= 0; --index )
     {

@@ -78,7 +78,12 @@ void UMSMissionObjective::CompleteObjective()
 
 void UMSMissionObjective::IncrementProgression( int steps )
 {
-    CurrentProgression += steps;
+    SetProgression( CurrentProgression + steps );
+}
+
+void UMSMissionObjective::SetProgression( int new_progression )
+{
+    CurrentProgression = new_progression;
 
     if ( CurrentProgression >= RequiredProgression )
     {
@@ -86,7 +91,7 @@ void UMSMissionObjective::IncrementProgression( int steps )
     }
     else
     {
-        OnObjectiveProgressionUpdatedEvent.Broadcast( this, CurrentProgression, RequiredProgression );
+        OnObjectiveProgressionUpdatedEvent.Broadcast( this );
     }
 }
 

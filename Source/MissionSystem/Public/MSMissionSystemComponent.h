@@ -117,13 +117,13 @@ protected:
 private:
     struct FMissionStartObserver
     {
-        UMSMissionData * MissionData;
+        UMSMissionData * MissionData = nullptr;
         FMSMissionSystemMissionStartedDelegate Callback;
     };
 
     struct FMissionEndObserver
     {
-        UMSMissionData * MissionData;
+        UMSMissionData * MissionData = nullptr;
         FMSMissionSystemMissionEndedDelegate Callback;
     };
 
@@ -150,14 +150,14 @@ private:
     void StartMission( UMSMission * mission );
     void StartNextMissions( const UMSMissionData * mission_data );
     void OnMissionEnded( UMSMission * mission, bool was_cancelled );
-    void OnMissionObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective, UMSMission * mission );
-    void OnMissionObjectiveProgressionUpdated( const TSubclassOf< UMSMissionObjective > & objective, int current_progression, int required_progression, UMSMission * mission );
-    void OnMissionObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled, UMSMission * mission );
+    void OnMissionObjectiveStarted( UMSMissionObjective * objective, UMSMission * mission );
+    void OnMissionObjectiveProgressionUpdated( UMSMissionObjective * objective, UMSMission * mission );
+    void OnMissionObjectiveEnded( UMSMissionObjective * objective, bool was_cancelled, UMSMission * mission );
     void BroadcastOnMissionStarted( UMSMission * mission );
     void BroadcastOnMissionEnded( UMSMission * mission, bool was_cancelled );
-    void BroadcastOnMissionObjectiveStarted( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective );
-    void BroadcastOnMissionObjectiveProgressionUpdated( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective, int current_progression, int required_progression );
-    void BroadcastOnMissionObjectiveEnded( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled );
+    void BroadcastOnMissionObjectiveStarted( UMSMission * mission, UMSMissionObjective * objective );
+    void BroadcastOnMissionObjectiveProgressionUpdated( const UMSMission * mission, const UMSMissionObjective * objective );
+    void BroadcastOnMissionObjectiveEnded( UMSMission * mission, UMSMissionObjective * objective, bool was_cancelled );
 
     UPROPERTY()
     TArray< UMSMission * > ActiveMissions;

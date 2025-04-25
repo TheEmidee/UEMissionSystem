@@ -18,7 +18,7 @@ void UMSMissionViewModel::Initialize( UMSMission * mission )
     Name = Mission->GetMissionData()->Name;
 }
 
-void UMSMissionViewModel::SetObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective )
+void UMSMissionViewModel::SetObjectiveStarted( UMSMissionObjective * objective )
 {
     auto * objective_vm = NewObject< UMSObjectiveViewModel >( this );
     objective_vm->Initialize( objective );
@@ -28,20 +28,20 @@ void UMSMissionViewModel::SetObjectiveStarted( const TSubclassOf< UMSMissionObje
     UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveObjectives );
 }
 
-void UMSMissionViewModel::SetObjectiveProgression( const TSubclassOf< UMSMissionObjective > & objective, int current_progression )
+void UMSMissionViewModel::RefreshObjectiveProgression( UMSMissionObjective * objective )
 {
     if ( const auto * objective_vm = ActiveObjectives.FindByPredicate( [ & ]( auto view_model ) {
-             return view_model->GetObjectiveClass() == objective;
+             return view_model->GetObjective() == objective;
          } ) )
     {
-        ( *objective_vm )->SetProgression( current_progression );
+        ( *objective_vm )->RefreshProgression();
     }
 }
 
-void UMSMissionViewModel::SetObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective )
+void UMSMissionViewModel::SetObjectiveEnded( UMSMissionObjective * objective )
 {
     const auto predicate = [ & ]( auto objective_vm ) {
-        return objective_vm->GetObjectiveClass() == objective;
+        return objective_vm->GetObjective() == objective;
     };
 
     if ( auto * objective_vm = ActiveObjectives.FindByPredicate( predicate ) )

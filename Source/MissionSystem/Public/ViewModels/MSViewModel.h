@@ -22,9 +22,9 @@ public:
 
     void SetMissionStarted( UMSMission * mission );
     void SetMissionEnded( UMSMission * mission );
-    void SetMissionObjectiveStarted( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective );
-    void SetMissionObjectiveProgression( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective, int current_progression );
-    void SetMissionObjectiveEnded( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective );
+    void RefreshMissionObjectiveProgression( UMSMission * mission, UMSMissionObjective * objective ) const;
+    void SetMissionObjectiveStarted( UMSMission * mission, UMSMissionObjective * objective ) const;
+    void SetMissionObjectiveEnded( UMSMission * mission, UMSMissionObjective * objective ) const;
 
     UFUNCTION( BlueprintPure, FieldNotify )
     bool HasActiveMissions() const;

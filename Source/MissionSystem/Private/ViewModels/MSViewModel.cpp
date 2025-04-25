@@ -45,7 +45,7 @@ void UMSViewModel::SetMissionEnded( UMSMission * mission )
     UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( HasActiveMissions );
 }
 
-void UMSViewModel::SetMissionObjectiveStarted( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective )
+void UMSViewModel::SetMissionObjectiveStarted( UMSMission * mission, UMSMissionObjective * objective ) const
 {
     if ( auto * mission_vm = GetMissionViewModel( mission ) )
     {
@@ -53,15 +53,15 @@ void UMSViewModel::SetMissionObjectiveStarted( UMSMission * mission, const TSubc
     }
 }
 
-void UMSViewModel::SetMissionObjectiveProgression( UMSMission * mission, const TSubclassOf<UMSMissionObjective> & objective, int current_progression )
+void UMSViewModel::RefreshMissionObjectiveProgression( UMSMission * mission, UMSMissionObjective * objective ) const
 {
     if ( auto * mission_vm = GetMissionViewModel( mission ) )
     {
-        mission_vm->SetObjectiveProgression( objective, current_progression );
+        mission_vm->RefreshObjectiveProgression( objective );
     }
 }
 
-void UMSViewModel::SetMissionObjectiveEnded( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective )
+void UMSViewModel::SetMissionObjectiveEnded( UMSMission * mission, UMSMissionObjective * objective ) const
 {
     if ( auto * mission_vm = GetMissionViewModel( mission ) )
     {

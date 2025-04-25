@@ -2,17 +2,24 @@
 
 #include "MSMissionObjective.h"
 
-void UMSObjectiveViewModel::Initialize( const TSubclassOf< UMSMissionObjective > & objective_class )
+void UMSObjectiveViewModel::Initialize( UMSMissionObjective * objective )
 {
-    ObjectiveClass = objective_class;
+    Objective = objective;
 
-    const auto * cdo = ObjectiveClass.GetDefaultObject();
-    Name = cdo->GetDescription();
-    RequiredProgression = cdo->GetRequiredProgression();
+    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( GetDescription );
 }
 
-void UMSObjectiveViewModel::SetProgression( int progression )
+void UMSObjectiveViewModel::RefreshProgression()
 {
-    CurrentProgression = progression;
-    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( CurrentProgression );
+    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( GetDescription );
+}
+
+FText UMSObjectiveViewModel::GetDescription() const
+{
+    if ( Objective->GetRequiredProgression() > INDEX_NONE )
+    {
+        return FText::FormatNamed( Objective->GetDescription(), TEXT( "CurrentProgression" ), Objective->GetCurrentProgression(), TEXT( "RequiredProgression" ), Objective->GetRequiredProgression() );
+    }
+
+    return Objective->GetDescription();
 }
