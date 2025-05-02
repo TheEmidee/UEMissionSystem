@@ -16,7 +16,7 @@ public:
     const UMSMissionObjective * GetObjective() const;
 
     void RefreshProgression();
-    void Initialize(const UMSMissionObjective* objective);
+    void Initialize( const UMSMissionObjective * objective );
 
     UFUNCTION( BlueprintPure, FieldNotify )
     FText GetDescription() const;

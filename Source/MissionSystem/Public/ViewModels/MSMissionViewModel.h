@@ -11,6 +11,8 @@ class UMSMissionObjective;
 class UMSMission;
 class UMSObjectiveViewModel;
 
+DECLARE_DELEGATE( FOnObjectivesChanged )
+
 UCLASS()
 class MISSIONSYSTEM_API UMSMissionViewModel final : public UMVVMViewModelBase
 {
@@ -26,6 +28,8 @@ public:
     void SetObjectiveStarted(const UMSMissionObjective* objective);
     void RefreshObjectiveProgression(const UMSMissionObjective* objective);
     void SetObjectiveEnded( UMSMissionObjective * objective );
+
+    FOnObjectivesChanged OnObjectivesChanged;
 
 private:
     UPROPERTY( BlueprintReadOnly, EditAnywhere, FieldNotify, Category = "ViewModel", meta = ( AllowPrivateAccess ) )

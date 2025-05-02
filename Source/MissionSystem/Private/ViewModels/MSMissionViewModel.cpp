@@ -8,6 +8,7 @@ void UMSMissionViewModel::RemoveCompletedObjective( UMSObjectiveViewModel * obje
 {
     CompletedObjectives.Remove( objective_vm );
     UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( CompletedObjectives );
+    OnObjectivesChanged.Unbind();
 }
 
 void UMSMissionViewModel::Initialize( UMSMission * mission )
@@ -18,7 +19,7 @@ void UMSMissionViewModel::Initialize( UMSMission * mission )
     Name = Mission->GetMissionData()->Name;
 }
 
-void UMSMissionViewModel::SetObjectiveStarted(const UMSMissionObjective* objective)
+void UMSMissionViewModel::SetObjectiveStarted( const UMSMissionObjective * objective )
 {
     auto * objective_vm = NewObject< UMSObjectiveViewModel >( this );
     objective_vm->Initialize( objective );
@@ -26,6 +27,7 @@ void UMSMissionViewModel::SetObjectiveStarted(const UMSMissionObjective* objecti
     ActiveObjectives.Add( objective_vm );
 
     UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveObjectives );
+    OnObjectivesChanged.ExecuteIfBound();
 }
 
 void UMSMissionViewModel::RefreshObjectiveProgression( const UMSMissionObjective * objective )
@@ -52,5 +54,7 @@ void UMSMissionViewModel::SetObjectiveEnded( UMSMissionObjective * objective )
 
         UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveObjectives );
         UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( CompletedObjectives );
+
+        OnObjectivesChanged.ExecuteIfBound();
     }
 }

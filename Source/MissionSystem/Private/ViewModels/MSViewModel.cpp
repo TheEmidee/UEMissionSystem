@@ -24,6 +24,7 @@ void UMSViewModel::SetMissionStarted( UMSMission * mission )
         ActiveMissions.Add( mission_vm );
         UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveMissions );
         UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( HasActiveMissions );
+        mission_vm->OnObjectivesChanged.BindUObject( this, &ThisClass::BroadCastOnMissionsObjectivesChanged );
     }
 }
 
@@ -53,7 +54,7 @@ void UMSViewModel::SetMissionObjectiveStarted( const UMSMission * mission, UMSMi
     }
 }
 
-void UMSViewModel::RefreshMissionObjectiveProgression(const UMSMission * mission, const UMSMissionObjective* objective) const
+void UMSViewModel::RefreshMissionObjectiveProgression( const UMSMission * mission, const UMSMissionObjective * objective ) const
 {
     if ( auto * mission_vm = GetMissionViewModel( mission ) )
     {
@@ -84,4 +85,9 @@ UMSMissionViewModel * UMSViewModel::GetMissionViewModel( const UMSMission * miss
     }
 
     return nullptr;
+}
+
+void UMSViewModel::BroadCastOnMissionsObjectivesChanged()
+{
+    OnMissionsObjectivesChanged.ExecuteIfBound();
 }
