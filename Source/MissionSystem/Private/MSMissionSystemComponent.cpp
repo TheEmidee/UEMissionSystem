@@ -179,8 +179,13 @@ void UMSMissionSystemComponent::ResumeMissionsFromHistory()
 {
     for ( auto * mission_data : MissionHistory.GetActiveMissionData() )
     {
-        // :NOTE: Bypass the checks of TryCreateMissionFromData
-        auto * mission = CreateMissionFromData( mission_data );
+        UMSMission * mission = GetActiveMission( mission_data );
+
+        if ( mission == nullptr )
+        {
+            // :NOTE: Bypass the checks of TryCreateMissionFromData
+            mission = CreateMissionFromData( mission_data );
+        }
 
         if ( mission == nullptr )
         {
