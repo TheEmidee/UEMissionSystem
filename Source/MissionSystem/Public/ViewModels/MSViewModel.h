@@ -11,7 +11,7 @@
 class UMSMission;
 class UMSMissionViewModel;
 
-DECLARE_DYNAMIC_DELEGATE( FOnMissionsObjectivesChanged );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE( FMSOnMissionsObjectivesChangedDelegate );
 
 UCLASS()
 class MISSIONSYSTEM_API UMSViewModel final : public UMVVMViewModelBase
@@ -41,6 +41,6 @@ private:
     UPROPERTY( BlueprintReadOnly, FieldNotify, meta = ( AllowPrivateAccess ) )
     TArray< TObjectPtr< UMSMissionViewModel > > CompletedMissions;
 
-    UPROPERTY( BlueprintReadWrite, FieldNotify, meta = ( AllowPrivateAccess ) )
-    FOnMissionsObjectivesChanged OnMissionsObjectivesChanged;
+    UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess ) )
+    FMSOnMissionsObjectivesChangedDelegate OnMissionsObjectivesChangedDelegate;
 };
