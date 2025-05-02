@@ -14,6 +14,14 @@ enum class EMSState : uint8
     Complete
 };
 
+struct FMSObjectiveProgressionData
+{
+    int CurrentProgression;
+    TArray< uint8 > RecordData;
+
+    friend FArchive & operator<<( FArchive & archive, FMSObjectiveProgressionData & progression_data );
+};
+
 // This structure holds the completion of the missions and objectives, and must be serialized in the save game
 USTRUCT()
 struct MISSIONSYSTEM_API FMSMissionHistory
@@ -35,10 +43,11 @@ struct MISSIONSYSTEM_API FMSMissionHistory
     bool IsObjectiveCancelled( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const;
     bool IsObjectiveComplete( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const;
     bool IsObjectiveFinished( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const;
-    bool AddActiveObjective( const TSubclassOf< UMSMissionObjective > & mission_objective_class );
+    bool AddActiveObjective( const UMSMissionObjective * mission_objective );
     int GetObjectiveProgression( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const;
-    void UpdateObjectiveProgression( const TSubclassOf< UMSMissionObjective > & mission_objective_class, int progression );
-    bool SetObjectiveComplete( const TSubclassOf< UMSMissionObjective > & mission_objective_class, bool was_cancelled );
+    void UpdateObjectiveProgression( UMSMissionObjective * mission_objective );
+    bool SetObjectiveComplete( const UMSMissionObjective * mission_objective, bool was_cancelled );
+    void InitializeObjective( UMSMissionObjective * mission_objective ) const;
 
     friend FArchive & operator<<( FArchive & archive, FMSMissionHistory & mission_history );
     void Clear();
@@ -52,7 +61,7 @@ private:
 
     TMap< FGuid, EMSState > MissionStates;
     TMap< FGuid, EMSState > ObjectiveStates;
-    TMap< FGuid, int > ObjectiveProgressions;
+    TMap< FGuid, FMSObjectiveProgressionData > ObjectiveProgressions;
 };
 
 FORCEINLINE const TArray< UMSMissionData * > & FMSMissionHistory::GetActiveMissionData() const

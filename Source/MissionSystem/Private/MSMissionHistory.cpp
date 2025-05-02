@@ -2,6 +2,10 @@
 
 #include "MSMissionData.h"
 
+#include <Serialization/MemoryReader.h>
+#include <Serialization/MemoryWriter.h>
+#include <Serialization/ObjectAndNameAsStringProxyArchive.h>
+
 namespace
 {
     template < typename _ObjectType_ >
@@ -18,6 +22,12 @@ namespace
     {
         auto * cdo = object.GetDefaultObject();
         return cdo->GetGuid();
+    }
+
+    template <>
+    FGuid GetGuid( UMSMissionObjective * object )
+    {
+        return object->GetGuid();
     }
 
     template < typename _ObjectType_ >
@@ -194,9 +204,9 @@ bool FMSMissionHistory::IsObjectiveFinished( const TSubclassOf< UMSMissionObject
     return state > EMSState::Active;
 }
 
-bool FMSMissionHistory::AddActiveObjective( const TSubclassOf< UMSMissionObjective > & mission_objective_class )
+bool FMSMissionHistory::AddActiveObjective( const UMSMissionObjective * mission_objective )
 {
-    return TryAddToMap( mission_objective_class, ObjectiveStates );
+    return TryAddToMap( TSubclassOf< UMSMissionObjective >( mission_objective->GetClass() ), ObjectiveStates );
 }
 
 int FMSMissionHistory::GetObjectiveProgression( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const
@@ -215,32 +225,63 @@ int FMSMissionHistory::GetObjectiveProgression( const TSubclassOf< UMSMissionObj
 
     if ( auto * progression = ObjectiveProgressions.Find( id ) )
     {
-        return *progression;
+        return progression->CurrentProgression;
     }
 
     return INDEX_NONE;
 }
 
-void FMSMissionHistory::UpdateObjectiveProgression( const TSubclassOf< UMSMissionObjective > & mission_objective_class, int progression )
+void FMSMissionHistory::UpdateObjectiveProgression( UMSMissionObjective * mission_objective )
 {
-    if ( !ensureAlways( mission_objective_class != nullptr ) )
+    if ( !ensureAlways( mission_objective != nullptr ) )
     {
         return;
     }
 
-    const auto id = GetGuid( mission_objective_class );
+    const auto id = GetGuid( mission_objective );
 
     if ( !ensureAlways( id.IsValid() ) )
     {
         return;
     }
 
-    ObjectiveProgressions.FindOrAdd( id ) = progression;
+    auto & objective_data = ObjectiveProgressions.FindOrAdd( id );
+    objective_data.CurrentProgression = mission_objective->GetCurrentProgression();
+
+    FMemoryWriter memory_writer( objective_data.RecordData );
+    FObjectAndNameAsStringProxyArchive archive( memory_writer, true );
+    archive.ArIsSaveGame = true;
+    mission_objective->Serialize( archive );
 }
 
-bool FMSMissionHistory::SetObjectiveComplete( const TSubclassOf< UMSMissionObjective > & mission_objective_class, bool was_cancelled )
+bool FMSMissionHistory::SetObjectiveComplete( const UMSMissionObjective * mission_objective, bool was_cancelled )
 {
-    return SetComplete( mission_objective_class, ObjectiveStates, was_cancelled );
+    return SetComplete( TSubclassOf< UMSMissionObjective >( mission_objective->GetClass() ), ObjectiveStates, was_cancelled );
+}
+
+void FMSMissionHistory::InitializeObjective( UMSMissionObjective * mission_objective ) const
+{
+    if ( !ensureAlways( mission_objective != nullptr ) )
+    {
+        return;
+    }
+
+    const auto id = GetGuid( mission_objective );
+
+    if ( !ensureAlways( id.IsValid() ) )
+    {
+        return;
+    }
+
+    if ( auto * progression = ObjectiveProgressions.Find( id ) )
+    {
+        mission_objective->CurrentProgression = progression->CurrentProgression;
+
+        FMemoryReader memory_reader( progression->RecordData );
+        FObjectAndNameAsStringProxyArchive archive( memory_reader, true );
+        archive.ArIsSaveGame = true;
+        mission_objective->Serialize( archive );
+    }
 }
 
 void FMSMissionHistory::Clear()
@@ -267,6 +308,14 @@ FArchive & operator<<( FArchive & archive, FMSMissionHistory & mission_history )
     archive << mission_history.MissionStates;
     archive << mission_history.ObjectiveStates;
     archive << mission_history.ObjectiveProgressions;
+
+    return archive;
+}
+
+FArchive & operator<<( FArchive & archive, FMSObjectiveProgressionData & progression_data )
+{
+    archive << progression_data.CurrentProgression;
+    archive << progression_data.RecordData;
 
     return archive;
 }

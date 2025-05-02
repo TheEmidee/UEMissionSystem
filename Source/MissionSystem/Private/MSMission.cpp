@@ -172,7 +172,7 @@ void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, 
 
     mission_objective->OnObjectiveEnded().RemoveAll( this );
     mission_objective->OnObjectiveProgressionUpdated().RemoveAll( this );
-    OnMissionObjectiveCompleteEvent.Broadcast( mission_objective->GetClass(), was_cancelled );
+    OnMissionObjectiveCompleteEvent.Broadcast( mission_objective, was_cancelled );
 
     if ( bIsCancelled )
     {
@@ -192,9 +192,9 @@ void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, 
     }
 }
 
-void UMSMission::OnObjectiveProgressionUpdated( UMSMissionObjective * mission_objective, int current_progression, int required_progression )
+void UMSMission::OnObjectiveProgressionUpdated( UMSMissionObjective * mission_objective )
 {
-    OnMissionObjectiveProgressionUpdatedEvent.Broadcast( mission_objective->GetClass(), current_progression, required_progression );
+    OnMissionObjectiveProgressionUpdatedEvent.Broadcast( mission_objective );
 }
 
 void UMSMission::TryStart()
@@ -283,12 +283,12 @@ void UMSMission::CreateObjective( const TSubclassOf< UMSMissionObjective > & obj
 
     UE_LOG( LogMissionSystem, Verbose, TEXT( "Execute objective %s" ), *objective->GetClass()->GetName() );
 
-    objective->IncrementProgression( GetMissionHistory().GetObjectiveProgression( objective_class ) );
+    GetMissionHistory().InitializeObjective( objective );
 
     objective->Execute();
 
     if ( !objective->IsComplete() )
     {
-        OnMissionObjectiveStartedEvent.Broadcast( objective->GetClass() );
+        OnMissionObjectiveStartedEvent.Broadcast( objective );
     }
 }

@@ -13,9 +13,9 @@ class UMSMissionObjective;
 class UMSMission;
 
 DECLARE_EVENT_TwoParams( UMSMission, FMSOnMissionEndedEvent, UMSMission * Mission, bool WasCancelled );
-DECLARE_EVENT_OneParam( UMSMission, FMSOnMissionObjectiveStartedEvent, const TSubclassOf< UMSMissionObjective > & MissionObjective );
-DECLARE_EVENT_ThreeParams( UMSMission, FMSOnMissionObjectiveProgressionUpdatedEvent, const TSubclassOf< UMSMissionObjective > & MissionObjective, int CurrentProgression, int RequiredProgression );
-DECLARE_EVENT_TwoParams( UMSMission, FMSOnMissionObjectiveEndedEvent, const TSubclassOf< UMSMissionObjective > & MissionObjective, bool WasCancelled );
+DECLARE_EVENT_OneParam( UMSMission, FMSOnMissionObjectiveStartedEvent, UMSMissionObjective * MissionObjective );
+DECLARE_EVENT_OneParam( UMSMission, FMSOnMissionObjectiveProgressionUpdatedEvent, UMSMissionObjective * MissionObjective );
+DECLARE_EVENT_TwoParams( UMSMission, FMSOnMissionObjectiveEndedEvent, UMSMissionObjective * MissionObjective, bool WasCancelled );
 
 UCLASS()
 class MISSIONSYSTEM_API UMSMission final : public UObject
@@ -56,7 +56,7 @@ private:
     const FMSMissionHistory & GetMissionHistory() const;
 
     void OnObjectiveCompleted( UMSMissionObjective * mission_objective, bool was_cancelled );
-    void OnObjectiveProgressionUpdated( UMSMissionObjective * mission_objective, int current_progression, int required_progression );
+    void OnObjectiveProgressionUpdated(UMSMissionObjective * mission_objective);
     void TryStart();
     void TryEnd();
     void ExecuteNextObjective();

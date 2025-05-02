@@ -15,20 +15,30 @@ class APlayerController;
 class UMSMissionSystemComponent;
 
 DECLARE_EVENT_TwoParams( UMSMissionObjective, FMSOnObjectiveEndedEvent, UMSMissionObjective * MissionObjective, bool WasCancelled );
-DECLARE_EVENT_ThreeParams( UMSMissionObjective, FMSOnObjectiveProgressionUpdatedEvent, UMSMissionObjective * MissionObjective, int CurrentProgression, int RequiredProgression );
+DECLARE_EVENT_OneParam( UMSMissionObjective, FMSOnObjectiveProgressionUpdatedEvent, UMSMissionObjective * MissionObjective );
 
+// Create blueprints from this class to implement your objectives
+// You will need to implement the Execute function in Blueprint, and call CompleteObjective when done
+// OnObjectiveEnded will be called when the objective is completed.
+// If there's a progression in the objective, you need to set the RequiredProgression property to something greater than 0
+// and call either IncrementProgression or RefreshProgression to update the progression.
+// When the CurrentProgression is greater or equal to the RequiredProgression, CompleteObjective will be called automatically
+// You can serialize the objective progression in FMSMissionHistory by marking properties as SaveGame in the blueprint.
 UCLASS( Abstract, BlueprintType, Blueprintable )
 class MISSIONSYSTEM_API UMSMissionObjective : public UObject, public IGameplayTagAssetInterface
 {
     GENERATED_BODY()
 
 public:
+    friend struct FMSMissionHistory;
+
     UMSMissionObjective();
 
     FMSOnObjectiveEndedEvent & OnObjectiveEnded();
     FMSOnObjectiveProgressionUpdatedEvent & OnObjectiveProgressionUpdated();
     const FText & GetDescription() const;
     int GetRequiredProgression() const;
+    int GetCurrentProgression() const;
 
     const FGuid & GetGuid() const;
     bool IsComplete() const;
@@ -43,6 +53,9 @@ public:
 
     UFUNCTION( BlueprintCallable )
     void IncrementProgression( int steps );
+
+    UFUNCTION( BlueprintCallable )
+    void SetProgression( int new_progression );
 
     void CancelObjective();
 
@@ -133,6 +146,11 @@ FORCEINLINE const FText & UMSMissionObjective::GetDescription() const
 FORCEINLINE int UMSMissionObjective::GetRequiredProgression() const
 {
     return RequiredProgression;
+}
+
+FORCEINLINE int UMSMissionObjective::GetCurrentProgression() const
+{
+    return CurrentProgression;
 }
 
 FORCEINLINE const FGuid & UMSMissionObjective::GetGuid() const

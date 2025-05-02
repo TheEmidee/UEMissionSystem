@@ -22,15 +22,15 @@ public:
 
     void SetMissionStarted( UMSMission * mission );
     void SetMissionEnded( UMSMission * mission );
-    void SetMissionObjectiveStarted( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective );
-    void SetMissionObjectiveProgression( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective, int current_progression );
-    void SetMissionObjectiveEnded( UMSMission * mission, const TSubclassOf< UMSMissionObjective > & objective );
+    void RefreshMissionObjectiveProgression(const UMSMission * mission, const UMSMissionObjective* objective) const;
+    void SetMissionObjectiveStarted( const UMSMission * mission, UMSMissionObjective * objective ) const;
+    void SetMissionObjectiveEnded( const UMSMission * mission, UMSMissionObjective * objective ) const;
 
     UFUNCTION( BlueprintPure, FieldNotify )
     bool HasActiveMissions() const;
 
 private:
-    UMSMissionViewModel * GetMissionViewModel( UMSMission * mission ) const;
+    UMSMissionViewModel * GetMissionViewModel(const UMSMission* mission) const;
 
     UPROPERTY( BlueprintReadOnly, FieldNotify, meta = ( AllowPrivateAccess ) )
     TArray< TObjectPtr< UMSMissionViewModel > > ActiveMissions;
