@@ -8,7 +8,7 @@
 class UMSMissionObjective;
 
 UCLASS()
-class MISSIONSYSTEM_API UMSObjectiveViewModel final : public UMVVMViewModelBase
+class MISSIONSYSTEMVIEWMODELS_API UMSObjectiveViewModel final : public UMVVMViewModelBase
 {
     GENERATED_BODY()
 

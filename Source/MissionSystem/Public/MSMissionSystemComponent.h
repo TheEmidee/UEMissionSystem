@@ -9,7 +9,6 @@
 
 #include "MSMissionSystemComponent.generated.h"
 
-class UMSViewModel;
 class UMSMissionData;
 
 DECLARE_DYNAMIC_DELEGATE_OneParam( FMSMissionSystemMissionStartedDynamicDelegate, const UMSMissionData *, MissionData );
@@ -97,8 +96,6 @@ public:
     void TryResumeMissionFromHistory();
 
 protected:
-    void OnRegister() override;
-
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System", meta = ( DisplayName = "When Mission Starts or Is Active", AutoCreateRefTerm = "when_mission_starts" ) )
     void K2_WhenMissionStartsOrIsActive( UMSMissionData * mission_data, FMSMissionSystemMissionStartedDynamicDelegate when_mission_starts );
 
@@ -179,18 +176,6 @@ private:
 
     UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess = true ) )
     FMSMissionSystemMissionObjectiveEndedMulticastDynamicDelegate OnMissionObjectiveEndedDelegate;
-
-    UPROPERTY( Transient, BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
-    TObjectPtr< UMSViewModel > ViewModel;
-
-    UPROPERTY( EditDefaultsOnly )
-    uint8 bCreateViewModel : 1;
-
-    UPROPERTY( EditDefaultsOnly, meta = ( EditCondition = "bCreateViewModel" ) )
-    uint8 bRegisterViewModel : 1;
-
-    UPROPERTY( EditDefaultsOnly, meta = ( EditCondition = "bCreateViewModel && bRegisterViewModel" ) )
-    FName ViewModelContextName;
 
     UPROPERTY( EditDefaultsOnly )
     uint8 bTryResumeMissionFromHistory : 1;

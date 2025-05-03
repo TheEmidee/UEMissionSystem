@@ -1,8 +1,8 @@
-#include "ViewModels/MSViewModel.h"
+#include "MSViewModel.h"
 
 #include "MSMission.h"
 #include "MSMissionData.h"
-#include "ViewModels/MSMissionViewModel.h"
+#include "MSMissionViewModel.h"
 
 void UMSViewModel::RemoveCompletedMission( UMSMissionViewModel * mission_vm )
 {

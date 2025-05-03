@@ -14,7 +14,7 @@ class UMSMissionViewModel;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE( FMSOnMissionsObjectivesChangedDelegate );
 
 UCLASS()
-class MISSIONSYSTEM_API UMSViewModel final : public UMVVMViewModelBase
+class MISSIONSYSTEMVIEWMODELS_API UMSViewModel final : public UMVVMViewModelBase
 {
     GENERATED_BODY()
 

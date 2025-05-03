@@ -14,7 +14,7 @@ class UMSObjectiveViewModel;
 DECLARE_MULTICAST_DELEGATE( FMSOnObjectiveStatusChangedDelegate )
 
 UCLASS()
-class MISSIONSYSTEM_API UMSMissionViewModel final : public UMVVMViewModelBase
+class MISSIONSYSTEMVIEWMODELS_API UMSMissionViewModel final : public UMVVMViewModelBase
 {
     GENERATED_BODY()
 

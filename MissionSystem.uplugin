@@ -18,6 +18,11 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "MissionSystemViewModels",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "MissionSystemEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"

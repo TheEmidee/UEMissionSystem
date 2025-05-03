@@ -1,4 +1,4 @@
-#include "ViewModels/MSObjectiveViewModel.h"
+#include "MSObjectiveViewModel.h"
 
 #include "MSMissionObjective.h"
 
