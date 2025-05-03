@@ -11,20 +11,24 @@ class UMSMissionObjective;
 class UMSMission;
 class UMSObjectiveViewModel;
 
+DECLARE_MULTICAST_DELEGATE( FMSOnObjectiveStatusChangedDelegate )
+
 UCLASS()
 class MISSIONSYSTEM_API UMSMissionViewModel final : public UMVVMViewModelBase
 {
     GENERATED_BODY()
 
 public:
+    FMSOnObjectiveStatusChangedDelegate & OnObjectiveStatusChanged();
+
     UFUNCTION( BlueprintCallable )
     void RemoveCompletedObjective( UMSObjectiveViewModel * objective_vm );
 
     UMSMission * GetMission() const;
 
     void Initialize( UMSMission * mission );
-    void SetObjectiveStarted(const UMSMissionObjective* objective);
-    void RefreshObjectiveProgression(const UMSMissionObjective* objective);
+    void SetObjectiveStarted( const UMSMissionObjective * objective );
+    void RefreshObjectiveProgression( const UMSMissionObjective * objective );
     void SetObjectiveEnded( UMSMissionObjective * objective );
 
 private:
@@ -39,7 +43,14 @@ private:
 
     UPROPERTY( Transient )
     TObjectPtr< UMSMission > Mission;
+
+    FMSOnObjectiveStatusChangedDelegate OnObjectiveStatusChangedDelegate;
 };
+
+FORCEINLINE FMSOnObjectiveStatusChangedDelegate & UMSMissionViewModel::OnObjectiveStatusChanged()
+{
+    return OnObjectiveStatusChangedDelegate;
+}
 
 FORCEINLINE UMSMission * UMSMissionViewModel::GetMission() const
 {
