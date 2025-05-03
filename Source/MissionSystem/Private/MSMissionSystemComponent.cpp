@@ -132,7 +132,7 @@ bool UMSMissionSystemComponent::IsMissionComplete( UMSMissionData * mission_data
     return MissionHistory.IsMissionComplete( mission_data );
 }
 
-bool UMSMissionSystemComponent::IsMissionActive( UMSMissionData * mission_data ) const
+bool UMSMissionSystemComponent::IsMissionActive( const UMSMissionData * mission_data ) const
 {
     return MissionHistory.IsMissionActive( mission_data );
 }
@@ -201,7 +201,7 @@ bool UMSMissionSystemComponent::CompleteObjective( UMSMissionData * mission_data
     return false;
 }
 
-void UMSMissionSystemComponent::WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartedDelegate & when_mission_starts )
+void UMSMissionSystemComponent::WhenMissionStartsOrIsActive( const UMSMissionData * mission_data, const FMSMissionSystemMissionStartedDelegate & when_mission_starts )
 {
     if ( IsMissionActive( mission_data ) )
     {
@@ -361,7 +361,7 @@ void UMSMissionSystemComponent::TryResumeMissionFromHistory()
     }
 }
 
-void UMSMissionSystemComponent::K2_WhenMissionStartsOrIsActive( UMSMissionData * mission_data, FMSMissionSystemMissionStartedDynamicDelegate when_mission_starts )
+void UMSMissionSystemComponent::K2_WhenMissionStartsOrIsActive( const UMSMissionData * mission_data, FMSMissionSystemMissionStartedDynamicDelegate when_mission_starts )
 {
     const auto active_delegate = FMSMissionSystemMissionStartedDelegate::CreateWeakLambda( when_mission_starts.GetUObject(), [ when_mission_starts ]( const UMSMissionData * mission_data ) {
         when_mission_starts.ExecuteIfBound( mission_data );

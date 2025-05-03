@@ -18,6 +18,12 @@ namespace
     }
 
     template <>
+    FGuid GetGuid( const UMSMissionData * object )
+    {
+        return object->GetGuid();
+    }
+
+    template <>
     FGuid GetGuid( TSubclassOf< UMSMissionObjective > object )
     {
         auto * cdo = object.GetDefaultObject();
@@ -136,7 +142,7 @@ bool FMSMissionHistory::HasData() const
     return !MissionStates.IsEmpty() || !ObjectiveStates.IsEmpty();
 }
 
-bool FMSMissionHistory::IsMissionActive( UMSMissionData * mission_data ) const
+bool FMSMissionHistory::IsMissionActive(const UMSMissionData* mission_data) const
 {
     return DoesMissionHasState( mission_data, EMSState::Active );
 }
@@ -292,7 +298,7 @@ void FMSMissionHistory::Clear()
     ObjectiveProgressions.Reset();
 }
 
-bool FMSMissionHistory::DoesMissionHasState( UMSMissionData * mission_data, EMSState state ) const
+bool FMSMissionHistory::DoesMissionHasState(const UMSMissionData* mission_data, EMSState state) const
 {
     return DoesHaveState( mission_data, MissionStates, state );
 }

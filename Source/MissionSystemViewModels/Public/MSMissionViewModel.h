@@ -27,9 +27,9 @@ public:
     UMSMission * GetMission() const;
 
     void Initialize( UMSMission * mission );
-    void SetObjectiveStarted( const UMSMissionObjective * objective );
-    void RefreshObjectiveProgression( const UMSMissionObjective * objective );
-    void SetObjectiveEnded( UMSMissionObjective * objective );
+    void SetObjectiveStarted(const TSubclassOf<UMSMissionObjective>& objective);
+    void UpdateObjectiveProgression(const TSubclassOf<UMSMissionObjective>& objective, int current_progression);
+    void SetObjectiveEnded(const TSubclassOf<UMSMissionObjective>& objective);
 
 private:
     UPROPERTY( BlueprintReadOnly, EditAnywhere, FieldNotify, Category = "ViewModel", meta = ( AllowPrivateAccess ) )
