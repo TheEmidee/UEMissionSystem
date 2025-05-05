@@ -112,16 +112,8 @@ namespace
         return true;
     }
 
-    template < typename _ObjectType_ >
-    bool SetComplete( _ObjectType_ object, TMap< FGuid, EMSState > & object_map, const bool was_cancelled )
+    bool SetComplete( const FGuid & id, TMap< FGuid, EMSState > & object_map, const bool was_cancelled )
     {
-        if ( !ensureAlways( object != nullptr ) )
-        {
-            return false;
-        }
-
-        const auto id = GetGuid( object );
-
         if ( !ensureAlways( id.IsValid() ) )
         {
             return false;
@@ -135,6 +127,19 @@ namespace
 
         return false;
     }
+
+    template < typename _ObjectType_ >
+    bool SetComplete( _ObjectType_ object, TMap< FGuid, EMSState > & object_map, const bool was_cancelled )
+    {
+        if ( !ensureAlways( object != nullptr ) )
+        {
+            return false;
+        }
+
+        const auto id = GetGuid( object );
+
+        return SetComplete( id, object_map, was_cancelled );
+    }
 }
 
 bool FMSMissionHistory::HasData() const
@@ -142,7 +147,7 @@ bool FMSMissionHistory::HasData() const
     return !MissionStates.IsEmpty() || !ObjectiveStates.IsEmpty();
 }
 
-bool FMSMissionHistory::IsMissionActive(const UMSMissionData* mission_data) const
+bool FMSMissionHistory::IsMissionActive( const UMSMissionData * mission_data ) const
 {
     return DoesMissionHasState( mission_data, EMSState::Active );
 }
@@ -262,7 +267,20 @@ void FMSMissionHistory::UpdateObjectiveProgression( UMSMissionObjective * missio
 
 bool FMSMissionHistory::SetObjectiveComplete( const UMSMissionObjective * mission_objective, bool was_cancelled )
 {
-    return SetComplete( TSubclassOf< UMSMissionObjective >( mission_objective->GetClass() ), ObjectiveStates, was_cancelled );
+    if ( !ensureAlways( mission_objective != nullptr ) )
+    {
+        return false;
+    }
+
+    const auto id = GetGuid( mission_objective );
+
+    if ( SetComplete( id, ObjectiveStates, was_cancelled ) )
+    {
+        ObjectiveProgressions.Remove( id );
+        return true;
+    }
+
+    return false;
 }
 
 void FMSMissionHistory::InitializeObjective( UMSMissionObjective * mission_objective ) const
@@ -298,7 +316,7 @@ void FMSMissionHistory::Clear()
     ObjectiveProgressions.Reset();
 }
 
-bool FMSMissionHistory::DoesMissionHasState(const UMSMissionData* mission_data, EMSState state) const
+bool FMSMissionHistory::DoesMissionHasState( const UMSMissionData * mission_data, EMSState state ) const
 {
     return DoesHaveState( mission_data, MissionStates, state );
 }
@@ -310,6 +328,16 @@ bool FMSMissionHistory::DoesObjectiveHasState( const TSubclassOf< UMSMissionObje
 
 FArchive & operator<<( FArchive & archive, FMSMissionHistory & mission_history )
 {
+    if ( archive.IsLoading() )
+    {
+        for ( const auto & [ id, state ] : mission_history.ObjectiveStates )
+        {
+            if ( state == EMSState::Complete )
+            {
+                mission_history.ObjectiveProgressions.Remove( id );
+            }
+        }
+    }
     archive << mission_history.ActiveMissionsData;
     archive << mission_history.MissionStates;
     archive << mission_history.ObjectiveStates;
