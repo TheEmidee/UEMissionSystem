@@ -9,7 +9,6 @@
 
 #include "MSMissionSystemComponent.generated.h"
 
-class UMSViewModel;
 class UMSMissionData;
 
 DECLARE_DYNAMIC_DELEGATE_OneParam( FMSMissionSystemMissionStartedDynamicDelegate, const UMSMissionData *, MissionData );
@@ -45,6 +44,11 @@ public:
     explicit UMSMissionSystemComponent( const FObjectInitializer & object_initializer = FObjectInitializer::Get() );
 
     const FMSMissionHistory & GetMissionHistory() const;
+    FMSMissionSystemMissionStartedMulticastDynamicDelegate & OnMissionStarted();
+    FMSMissionSystemMissionEndedMulticastDynamicDelegate & OnMissionEnded();
+    FMSMissionSystemMissionObjectiveStartedMulticastDynamicDelegate & OnMissionObjectiveStarted();
+    FMSMissionSystemMissionObjectiveProgressionUpdatedMulticastDynamicDelegate & OnMissionObjectiveProgressionUpdated();
+    FMSMissionSystemMissionObjectiveEndedMulticastDynamicDelegate & OnMissionObjectiveEnded();
 
     UFUNCTION( BlueprintCallable, BlueprintPure = false, meta = ( ExpandBoolAsExecs = "ReturnValue" ) )
     bool HasDataInHistory() const;
@@ -56,7 +60,7 @@ public:
     bool IsMissionComplete( UMSMissionData * mission_data ) const;
 
     UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
-    bool IsMissionActive( UMSMissionData * mission_data ) const;
+    bool IsMissionActive( const UMSMissionData * mission_data ) const;
 
     UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
     UMSMission * GetActiveMission( const UMSMissionData * mission_data ) const;
@@ -76,7 +80,7 @@ public:
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System" )
     bool CompleteObjective( UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > mission_objective_class );
 
-    void WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartedDelegate & when_mission_starts );
+    void WhenMissionStartsOrIsActive( const UMSMissionData * mission_data, const FMSMissionSystemMissionStartedDelegate & when_mission_starts );
     void WhenMissionEnds( UMSMissionData * mission_data, const FMSMissionSystemMissionEndedDelegate & when_mission_ends );
 
     void WhenMissionObjectiveStartsOrIsActive( const TSubclassOf< UMSMissionObjective > & mission_objective_class, const FMSMissionSystemMissionObjectiveStartedDelegate & when_mission_objective_starts );
@@ -97,10 +101,8 @@ public:
     void TryResumeMissionFromHistory();
 
 protected:
-    void OnRegister() override;
-
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System", meta = ( DisplayName = "When Mission Starts or Is Active", AutoCreateRefTerm = "when_mission_starts" ) )
-    void K2_WhenMissionStartsOrIsActive( UMSMissionData * mission_data, FMSMissionSystemMissionStartedDynamicDelegate when_mission_starts );
+    void K2_WhenMissionStartsOrIsActive( const UMSMissionData * mission_data, FMSMissionSystemMissionStartedDynamicDelegate when_mission_starts );
 
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System", meta = ( DisplayName = "When Mission Ends", AutoCreateRefTerm = "when_mission_ends" ) )
     void K2_WhenMissionEnds( UMSMissionData * mission_data, FMSMissionSystemMissionEndedDynamicDelegate when_mission_ends );
@@ -117,13 +119,13 @@ protected:
 private:
     struct FMissionStartObserver
     {
-        UMSMissionData * MissionData = nullptr;
+        const UMSMissionData * MissionData = nullptr;
         FMSMissionSystemMissionStartedDelegate Callback;
     };
 
     struct FMissionEndObserver
     {
-        UMSMissionData * MissionData = nullptr;
+        const UMSMissionData * MissionData = nullptr;
         FMSMissionSystemMissionEndedDelegate Callback;
     };
 
@@ -180,18 +182,6 @@ private:
     UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess = true ) )
     FMSMissionSystemMissionObjectiveEndedMulticastDynamicDelegate OnMissionObjectiveEndedDelegate;
 
-    UPROPERTY( Transient, BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
-    TObjectPtr< UMSViewModel > ViewModel;
-
-    UPROPERTY( EditDefaultsOnly )
-    uint8 bCreateViewModel : 1;
-
-    UPROPERTY( EditDefaultsOnly, meta = ( EditCondition = "bCreateViewModel" ) )
-    uint8 bRegisterViewModel : 1;
-
-    UPROPERTY( EditDefaultsOnly, meta = ( EditCondition = "bCreateViewModel && bRegisterViewModel" ) )
-    FName ViewModelContextName;
-
     UPROPERTY( EditDefaultsOnly )
     uint8 bTryResumeMissionFromHistory : 1;
 
@@ -209,4 +199,29 @@ private:
 FORCEINLINE const FMSMissionHistory & UMSMissionSystemComponent::GetMissionHistory() const
 {
     return MissionHistory;
+}
+
+FORCEINLINE FMSMissionSystemMissionStartedMulticastDynamicDelegate & UMSMissionSystemComponent::OnMissionStarted()
+{
+    return OnMissionStartedDelegate;
+}
+
+FORCEINLINE FMSMissionSystemMissionEndedMulticastDynamicDelegate & UMSMissionSystemComponent::OnMissionEnded()
+{
+    return OnMissionEndedDelegate;
+}
+
+FORCEINLINE FMSMissionSystemMissionObjectiveStartedMulticastDynamicDelegate & UMSMissionSystemComponent::OnMissionObjectiveStarted()
+{
+    return OnMissionObjectiveStartedDelegate;
+}
+
+FORCEINLINE FMSMissionSystemMissionObjectiveProgressionUpdatedMulticastDynamicDelegate & UMSMissionSystemComponent::OnMissionObjectiveProgressionUpdated()
+{
+    return OnMissionObjectiveProgressionIsUpdatedDelegate;
+}
+
+FORCEINLINE FMSMissionSystemMissionObjectiveEndedMulticastDynamicDelegate & UMSMissionSystemComponent::OnMissionObjectiveEnded()
+{
+    return OnMissionObjectiveEndedDelegate;
 }

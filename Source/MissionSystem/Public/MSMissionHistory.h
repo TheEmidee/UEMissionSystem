@@ -32,7 +32,7 @@ struct MISSIONSYSTEM_API FMSMissionHistory
 
     bool HasData() const;
 
-    bool IsMissionActive( UMSMissionData * mission_data ) const;
+    bool IsMissionActive(const UMSMissionData* mission_data) const;
     bool IsMissionCancelled( UMSMissionData * mission_data ) const;
     bool IsMissionComplete( UMSMissionData * mission_data ) const;
     bool IsMissionFinished( UMSMissionData * mission_data ) const;
@@ -53,7 +53,7 @@ struct MISSIONSYSTEM_API FMSMissionHistory
     void Clear();
 
 private:
-    bool DoesMissionHasState( UMSMissionData * mission_data, EMSState state ) const;
+    bool DoesMissionHasState(const UMSMissionData* mission_data, EMSState state) const;
     bool DoesObjectiveHasState( const TSubclassOf< UMSMissionObjective > & mission_objective_class, EMSState state ) const;
 
     UPROPERTY()

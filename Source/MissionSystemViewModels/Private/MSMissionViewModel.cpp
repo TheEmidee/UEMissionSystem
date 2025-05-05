@@ -1,8 +1,8 @@
-#include "ViewModels/MSMissionViewModel.h"
+#include "MSMissionViewModel.h"
 
 #include "MSMission.h"
 #include "MSMissionData.h"
-#include "ViewModels/MSObjectiveViewModel.h"
+#include "MSObjectiveViewModel.h"
 
 void UMSMissionViewModel::RemoveCompletedObjective( UMSObjectiveViewModel * objective_vm )
 {
@@ -18,7 +18,7 @@ void UMSMissionViewModel::Initialize( UMSMission * mission )
     Name = Mission->GetMissionData()->Name;
 }
 
-void UMSMissionViewModel::SetObjectiveStarted( const UMSMissionObjective * objective )
+void UMSMissionViewModel::SetObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective )
 {
     auto * objective_vm = NewObject< UMSObjectiveViewModel >( this );
     objective_vm->Initialize( objective );
@@ -29,17 +29,17 @@ void UMSMissionViewModel::SetObjectiveStarted( const UMSMissionObjective * objec
     OnObjectiveStatusChangedDelegate.Broadcast();
 }
 
-void UMSMissionViewModel::RefreshObjectiveProgression( const UMSMissionObjective * objective )
+void UMSMissionViewModel::UpdateObjectiveProgression( const TSubclassOf< UMSMissionObjective > & objective, int current_progression )
 {
     if ( const auto * objective_vm = ActiveObjectives.FindByPredicate( [ & ]( auto view_model ) {
              return view_model->GetObjective() == objective;
          } ) )
     {
-        ( *objective_vm )->RefreshProgression();
+        ( *objective_vm )->UpdateProgression( current_progression );
     }
 }
 
-void UMSMissionViewModel::SetObjectiveEnded( UMSMissionObjective * objective )
+void UMSMissionViewModel::SetObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective )
 {
     const auto predicate = [ & ]( auto objective_vm ) {
         return objective_vm->GetObjective() == objective;

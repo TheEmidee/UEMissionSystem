@@ -11,7 +11,7 @@ UMSMissionObjective::UMSMissionObjective() :
     bIsComplete( false ),
     bIsCancelled( false ),
     RequiredProgression( INDEX_NONE ),
-    CurrentProgression( INDEX_NONE )
+    CurrentProgression( 0 )
 {
 }
 

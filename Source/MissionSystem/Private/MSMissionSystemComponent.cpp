@@ -3,8 +3,6 @@
 #include "Log/CoreExtLog.h"
 #include "MSLog.h"
 #include "MSMission.h"
-#include "MVVMGameSubsystem.h"
-#include "ViewModels/MSViewModel.h"
 
 #include <Engine/GameInstance.h>
 #include <Engine/World.h>
@@ -101,9 +99,6 @@ static TAutoConsoleVariable< int32 > CVarDisableAllMissions( TEXT( "MissionSyste
 
 UMSMissionSystemComponent::UMSMissionSystemComponent( const FObjectInitializer & object_initializer ) :
     Super( object_initializer ),
-    bCreateViewModel( false ),
-    bRegisterViewModel( true ),
-    ViewModelContextName( TEXT( "MSViewModel" ) ),
     bTryResumeMissionFromHistory( true )
 {
 }
@@ -137,7 +132,7 @@ bool UMSMissionSystemComponent::IsMissionComplete( UMSMissionData * mission_data
     return MissionHistory.IsMissionComplete( mission_data );
 }
 
-bool UMSMissionSystemComponent::IsMissionActive( UMSMissionData * mission_data ) const
+bool UMSMissionSystemComponent::IsMissionActive( const UMSMissionData * mission_data ) const
 {
     return MissionHistory.IsMissionActive( mission_data );
 }
@@ -206,7 +201,7 @@ bool UMSMissionSystemComponent::CompleteObjective( UMSMissionData * mission_data
     return false;
 }
 
-void UMSMissionSystemComponent::WhenMissionStartsOrIsActive( UMSMissionData * mission_data, const FMSMissionSystemMissionStartedDelegate & when_mission_starts )
+void UMSMissionSystemComponent::WhenMissionStartsOrIsActive( const UMSMissionData * mission_data, const FMSMissionSystemMissionStartedDelegate & when_mission_starts )
 {
     if ( IsMissionActive( mission_data ) )
     {
@@ -366,30 +361,7 @@ void UMSMissionSystemComponent::TryResumeMissionFromHistory()
     }
 }
 
-void UMSMissionSystemComponent::OnRegister()
-{
-    Super::OnRegister();
-
-    if ( bCreateViewModel )
-    {
-        ViewModel = NewObject< UMSViewModel >( this );
-
-        if ( bRegisterViewModel )
-        {
-            if ( auto * system = GetWorld()->GetGameInstance()->GetSubsystem< UMVVMGameSubsystem >() )
-            {
-                FMVVMViewModelContext context;
-                context.ContextClass = UMSViewModel::StaticClass();
-                context.ContextName = ViewModelContextName;
-
-                system->GetViewModelCollection()->RemoveViewModel( context );
-                system->GetViewModelCollection()->AddViewModelInstance( context, ViewModel );
-            }
-        }
-    }
-}
-
-void UMSMissionSystemComponent::K2_WhenMissionStartsOrIsActive( UMSMissionData * mission_data, FMSMissionSystemMissionStartedDynamicDelegate when_mission_starts )
+void UMSMissionSystemComponent::K2_WhenMissionStartsOrIsActive( const UMSMissionData * mission_data, FMSMissionSystemMissionStartedDynamicDelegate when_mission_starts )
 {
     const auto active_delegate = FMSMissionSystemMissionStartedDelegate::CreateWeakLambda( when_mission_starts.GetUObject(), [ when_mission_starts ]( const UMSMissionData * mission_data ) {
         when_mission_starts.ExecuteIfBound( mission_data );
@@ -550,11 +522,6 @@ void UMSMissionSystemComponent::OnMissionEnded( UMSMission * mission, const bool
 
     BroadcastOnMissionEnded( mission, was_cancelled );
 
-    if ( ViewModel != nullptr )
-    {
-        ViewModel->SetMissionEnded( mission );
-    }
-
     if ( !was_cancelled || mission_data->bStartNextMissionsWhenCancelled )
     {
         StartNextMissions( mission_data );
@@ -606,11 +573,6 @@ void UMSMissionSystemComponent::BroadcastOnMissionStarted( UMSMission * mission 
             MissionStartObservers.RemoveAt( index );
         }
     }
-
-    if ( ViewModel != nullptr )
-    {
-        ViewModel->SetMissionStarted( mission );
-    }
 }
 
 void UMSMissionSystemComponent::BroadcastOnMissionEnded( UMSMission * mission, bool was_cancelled )
@@ -629,11 +591,6 @@ void UMSMissionSystemComponent::BroadcastOnMissionEnded( UMSMission * mission, b
             MissionEndObservers.RemoveAt( index );
         }
     }
-
-    if ( ViewModel != nullptr )
-    {
-        ViewModel->SetMissionEnded( mission );
-    }
 }
 
 void UMSMissionSystemComponent::BroadcastOnMissionObjectiveStarted( UMSMission * mission, UMSMissionObjective * objective )
@@ -644,11 +601,6 @@ void UMSMissionSystemComponent::BroadcastOnMissionObjectiveStarted( UMSMission *
     {
         observer.Callback.ExecuteIfBound( objective->GetClass() );
     }
-
-    if ( ViewModel != nullptr )
-    {
-        ViewModel->SetMissionObjectiveStarted( mission, objective );
-    }
 }
 
 void UMSMissionSystemComponent::BroadcastOnMissionObjectiveProgressionUpdated( const UMSMission * mission, const UMSMissionObjective * objective )
@@ -658,11 +610,6 @@ void UMSMissionSystemComponent::BroadcastOnMissionObjectiveProgressionUpdated( c
     for ( auto & observer : MissionObjectiveProgressionObservers )
     {
         observer.Callback.ExecuteIfBound( objective->GetClass(), objective->GetCurrentProgression(), objective->GetRequiredProgression() );
-    }
-
-    if ( ViewModel != nullptr )
-    {
-        ViewModel->RefreshMissionObjectiveProgression( mission, objective );
     }
 }
 
@@ -679,10 +626,5 @@ void UMSMissionSystemComponent::BroadcastOnMissionObjectiveEnded( const UMSMissi
             observer.Callback.ExecuteIfBound( objective->GetClass(), was_cancelled );
             MissionObjectiveEndObservers.RemoveAt( index );
         }
-    }
-
-    if ( ViewModel != nullptr )
-    {
-        ViewModel->SetMissionObjectiveEnded( mission, objective );
     }
 }
