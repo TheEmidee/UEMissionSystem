@@ -9,31 +9,16 @@
 namespace
 {
     template < typename _ObjectType_ >
-    FGuid GetGuid( _ObjectType_ object );
-
-    template <>
-    FGuid GetGuid( UMSMissionData * object )
+    FGuid GetGuid( _ObjectType_ * object )
     {
         return object->GetGuid();
     }
 
-    template <>
-    FGuid GetGuid( const UMSMissionData * object )
+    template < typename _ObjectType_ >
+    FGuid GetGuid( TSubclassOf< _ObjectType_ > object_class )
     {
-        return object->GetGuid();
-    }
-
-    template <>
-    FGuid GetGuid( TSubclassOf< UMSMissionObjective > object )
-    {
-        auto * cdo = object.GetDefaultObject();
+        auto * cdo = object_class.GetDefaultObject();
         return cdo->GetGuid();
-    }
-
-    template <>
-    FGuid GetGuid( UMSMissionObjective * object )
-    {
-        return object->GetGuid();
     }
 
     template < typename _ObjectType_ >
