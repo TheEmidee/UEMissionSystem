@@ -17,11 +17,18 @@ public:
 
     void UpdateProgression(int current_progression);
     void Initialize( const TSubclassOf< UMSMissionObjective > & objective );
+    void SetCompleted( bool was_cancelled );
 
     UFUNCTION( BlueprintPure, FieldNotify )
     FText GetDescription() const;
 
 private:
+    UPROPERTY( BlueprintReadOnly, FieldNotify, meta = ( AllowPrivateAccess ) )
+    bool bIsCompleted = false;
+
+    UPROPERTY( BlueprintReadOnly, FieldNotify, meta = ( AllowPrivateAccess ) )
+    bool bWasCancelled = false;
+
     UPROPERTY()
     TSubclassOf< UMSMissionObjective > Objective;
 

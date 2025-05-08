@@ -11,7 +11,9 @@ class UMSMissionObjective;
 class UMSMission;
 class UMSObjectiveViewModel;
 
-DECLARE_MULTICAST_DELEGATE( FMSOnObjectiveStatusChangedDelegate )
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams( FMSViewModelMissionObjectiveStartedMulticastDynamicDelegate, UMSMissionViewModel *, Mission, UMSObjectiveViewModel *, MissionObjective );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams( FMSViewModelMissionObjectiveProgressionUpdatedMulticastDynamicDelegate, UMSMissionViewModel *, Mission, UMSObjectiveViewModel *, MissionObjective );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams( FMSViewModelMissionObjectiveEndedMulticastDynamicDelegate, UMSMissionViewModel *, Mission, UMSObjectiveViewModel *, MissionObjective, bool, WasCancelled );
 
 UCLASS()
 class MISSIONSYSTEMVIEWMODELS_API UMSMissionViewModel final : public UMVVMViewModelBase
@@ -19,17 +21,15 @@ class MISSIONSYSTEMVIEWMODELS_API UMSMissionViewModel final : public UMVVMViewMo
     GENERATED_BODY()
 
 public:
-    FMSOnObjectiveStatusChangedDelegate & OnObjectiveStatusChanged();
-
     UFUNCTION( BlueprintCallable )
     void RemoveCompletedObjective( UMSObjectiveViewModel * objective_vm );
 
     UMSMission * GetMission() const;
 
     void Initialize( UMSMission * mission );
-    void SetObjectiveStarted(const TSubclassOf<UMSMissionObjective>& objective);
-    void UpdateObjectiveProgression(const TSubclassOf<UMSMissionObjective>& objective, int current_progression);
-    void SetObjectiveEnded(const TSubclassOf<UMSMissionObjective>& objective);
+    UMSObjectiveViewModel * SetObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective );
+    UMSObjectiveViewModel * UpdateObjectiveProgression( const TSubclassOf< UMSMissionObjective > & objective, int current_progression );
+    UMSObjectiveViewModel * SetObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled );
 
 private:
     UPROPERTY( BlueprintReadOnly, EditAnywhere, FieldNotify, Category = "ViewModel", meta = ( AllowPrivateAccess ) )
@@ -44,13 +44,15 @@ private:
     UPROPERTY( Transient )
     TObjectPtr< UMSMission > Mission;
 
-    FMSOnObjectiveStatusChangedDelegate OnObjectiveStatusChangedDelegate;
-};
+    UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess = true ) )
+    FMSViewModelMissionObjectiveStartedMulticastDynamicDelegate OnMissionObjectiveStartedDelegate;
 
-FORCEINLINE FMSOnObjectiveStatusChangedDelegate & UMSMissionViewModel::OnObjectiveStatusChanged()
-{
-    return OnObjectiveStatusChangedDelegate;
-}
+    UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess = true ) )
+    FMSViewModelMissionObjectiveProgressionUpdatedMulticastDynamicDelegate OnMissionObjectiveProgressionIsUpdatedDelegate;
+
+    UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess = true ) )
+    FMSViewModelMissionObjectiveEndedMulticastDynamicDelegate OnMissionObjectiveEndedDelegate;
+};
 
 FORCEINLINE UMSMission * UMSMissionViewModel::GetMission() const
 {

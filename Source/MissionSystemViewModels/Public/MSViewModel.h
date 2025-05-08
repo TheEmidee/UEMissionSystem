@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MSMissionObjective.h"
+#include "MSMissionSystemComponent.h"
 #include "MSMissionViewModel.h"
 
 #include <CoreMinimal.h>
@@ -8,10 +9,12 @@
 
 #include "MSViewModel.generated.h"
 
+class UMSMissionData;
 class UMSMission;
 class UMSMissionViewModel;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE( FMSOnMissionsObjectivesChangedDelegate );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FMSViewModelMissionStartedMulticastDynamicDelegate, UMSMissionViewModel *, Mission );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams( FMSViewModelMissionEndedMulticastDynamicDelegate, UMSMissionViewModel *, Mission, bool, bWasCancelled );
 
 UCLASS()
 class MISSIONSYSTEMVIEWMODELS_API UMSViewModel final : public UMVVMViewModelBase
@@ -55,6 +58,18 @@ private:
     UPROPERTY( BlueprintReadOnly, FieldNotify, meta = ( AllowPrivateAccess ) )
     TArray< TObjectPtr< UMSMissionViewModel > > CompletedMissions;
 
-    UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess ) )
-    FMSOnMissionsObjectivesChangedDelegate OnMissionsObjectivesChangedDelegate;
+    UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess = true ) )
+    FMSViewModelMissionStartedMulticastDynamicDelegate OnMissionStartedDelegate;
+
+    UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess = true ) )
+    FMSViewModelMissionEndedMulticastDynamicDelegate OnMissionEndedDelegate;
+
+    UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess = true ) )
+    FMSViewModelMissionObjectiveStartedMulticastDynamicDelegate OnMissionObjectiveStartedDelegate;
+
+    UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess = true ) )
+    FMSViewModelMissionObjectiveProgressionUpdatedMulticastDynamicDelegate OnMissionObjectiveProgressionIsUpdatedDelegate;
+
+    UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess = true ) )
+    FMSViewModelMissionObjectiveEndedMulticastDynamicDelegate OnMissionObjectiveEndedDelegate;
 };
