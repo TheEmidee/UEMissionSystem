@@ -16,7 +16,7 @@ public:
     const TSubclassOf< UMSMissionObjective > & GetObjective() const;
 
     void UpdateProgression(int current_progression);
-    void Initialize( const TSubclassOf< UMSMissionObjective > & objective );
+    void Initialize(const TSubclassOf< UMSMissionObjective > & objective, int current_progression);
     void SetCompleted( bool was_cancelled );
 
     UFUNCTION( BlueprintPure, FieldNotify )

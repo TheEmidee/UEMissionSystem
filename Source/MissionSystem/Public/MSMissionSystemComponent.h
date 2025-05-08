@@ -19,9 +19,9 @@ DECLARE_DYNAMIC_DELEGATE_TwoParams( FMSMissionSystemMissionEndedDynamicDelegate,
 DECLARE_DELEGATE_TwoParams( FMSMissionSystemMissionEndedDelegate, const UMSMissionData * MissionData, bool WasCancelled );
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams( FMSMissionSystemMissionEndedMulticastDynamicDelegate, const UMSMissionData *, MissionData, bool, WasCancelled );
 
-DECLARE_DYNAMIC_DELEGATE_OneParam( FMSMissionSystemMissionObjectiveStartedDynamicDelegate, TSubclassOf< UMSMissionObjective >, MissionObjective );
-DECLARE_DELEGATE_OneParam( FMSMissionSystemMissionObjectiveStartedDelegate, TSubclassOf< UMSMissionObjective > MissionObjective );
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams( FMSMissionSystemMissionObjectiveStartedMulticastDynamicDelegate, const UMSMissionData *, MissionData, TSubclassOf< UMSMissionObjective >, MissionObjective );
+DECLARE_DYNAMIC_DELEGATE_TwoParams( FMSMissionSystemMissionObjectiveStartedDynamicDelegate, TSubclassOf< UMSMissionObjective >, MissionObjective, int, CurrentProgression );
+DECLARE_DELEGATE_TwoParams( FMSMissionSystemMissionObjectiveStartedDelegate, TSubclassOf< UMSMissionObjective > MissionObjective, int CurrentProgression );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams( FMSMissionSystemMissionObjectiveStartedMulticastDynamicDelegate, const UMSMissionData *, MissionData, TSubclassOf< UMSMissionObjective >, MissionObjective, int, CurrentProgression );
 
 DECLARE_DYNAMIC_DELEGATE_ThreeParams( FMSMissionSystemMissionObjectiveProgressionUpdatedDynamicDelegate, TSubclassOf< UMSMissionObjective >, MissionObjective, int, CurrentProgression, int, RequiredProgression );
 DECLARE_DELEGATE_ThreeParams( FMSMissionSystemMissionObjectiveProgressionUpdatedDelegate, TSubclassOf< UMSMissionObjective > MissionObjective, int CurrentProgression, int RequiredProgression );

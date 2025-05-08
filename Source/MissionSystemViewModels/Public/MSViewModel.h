@@ -44,7 +44,7 @@ private:
     void RefreshMissionObjectiveProgression( const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > mission_objective, int current_progression, int required_progression );
 
     UFUNCTION()
-    void SetMissionObjectiveStarted( const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > objective );
+    void SetMissionObjectiveStarted(const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > objective, int current_progression);
 
     UFUNCTION()
     void SetMissionObjectiveEnded( const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > objective, bool was_cancelled );

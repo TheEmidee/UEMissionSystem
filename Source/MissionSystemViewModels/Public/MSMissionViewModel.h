@@ -11,7 +11,7 @@ class UMSMissionObjective;
 class UMSMission;
 class UMSObjectiveViewModel;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams( FMSViewModelMissionObjectiveStartedMulticastDynamicDelegate, UMSMissionViewModel *, Mission, UMSObjectiveViewModel *, MissionObjective );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams( FMSViewModelMissionObjectiveStartedMulticastDynamicDelegate, UMSMissionViewModel *, Mission, UMSObjectiveViewModel *, MissionObjective, int, CurrentProgression );
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams( FMSViewModelMissionObjectiveProgressionUpdatedMulticastDynamicDelegate, UMSMissionViewModel *, Mission, UMSObjectiveViewModel *, MissionObjective );
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams( FMSViewModelMissionObjectiveEndedMulticastDynamicDelegate, UMSMissionViewModel *, Mission, UMSObjectiveViewModel *, MissionObjective, bool, WasCancelled );
 
@@ -27,7 +27,7 @@ public:
     UMSMission * GetMission() const;
 
     void Initialize( UMSMission * mission );
-    UMSObjectiveViewModel * SetObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective );
+    UMSObjectiveViewModel * SetObjectiveStarted(const TSubclassOf< UMSMissionObjective > & objective, int current_progression);
     UMSObjectiveViewModel * UpdateObjectiveProgression( const TSubclassOf< UMSMissionObjective > & objective, int current_progression );
     UMSObjectiveViewModel * SetObjectiveEnded( const TSubclassOf< UMSMissionObjective > & objective, bool was_cancelled );
 

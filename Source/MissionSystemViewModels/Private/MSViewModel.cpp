@@ -79,13 +79,13 @@ void UMSViewModel::SetMissionEnded( const UMSMissionData * mission, bool was_can
     }
 }
 
-void UMSViewModel::SetMissionObjectiveStarted( const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > objective )
+void UMSViewModel::SetMissionObjectiveStarted( const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > objective, int current_progression )
 {
     if ( auto * mission_vm = GetMissionViewModel( mission_data ) )
     {
-        if ( auto * objective_vm = mission_vm->SetObjectiveStarted( objective ) )
+        if ( auto * objective_vm = mission_vm->SetObjectiveStarted( objective, current_progression ) )
         {
-            OnMissionObjectiveStartedDelegate.Broadcast( mission_vm, objective_vm );
+            OnMissionObjectiveStartedDelegate.Broadcast( mission_vm, objective_vm, current_progression );
         }
     }
 }
