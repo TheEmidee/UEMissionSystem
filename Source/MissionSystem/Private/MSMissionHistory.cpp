@@ -265,7 +265,7 @@ bool FMSMissionHistory::SetObjectiveComplete( const UMSMissionObjective * missio
     return SetComplete( TSubclassOf< UMSMissionObjective >( mission_objective->GetClass() ), ObjectiveStates, was_cancelled );
 }
 
-void FMSMissionHistory::InitializeObjective( UMSMissionObjective * mission_objective ) const
+void FMSMissionHistory::InitializeObjective( UMSMissionObjective * mission_objective )
 {
     if ( !ensureAlways( mission_objective != nullptr ) )
     {
@@ -281,6 +281,7 @@ void FMSMissionHistory::InitializeObjective( UMSMissionObjective * mission_objec
 
     if ( auto * progression = ObjectiveProgressions.Find( id ) )
     {
+        TryAddToMap( mission_objective, ObjectiveStates );
         mission_objective->CurrentProgression = progression->CurrentProgression;
 
         FMemoryReader memory_reader( progression->RecordData );
