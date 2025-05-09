@@ -13,6 +13,15 @@ void UMSObjectiveViewModel::Initialize( const TSubclassOf< UMSMissionObjective >
     UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( RequiredProgression );
 }
 
+void UMSObjectiveViewModel::SetCompleted( bool was_cancelled )
+{
+    bIsCompleted = true;
+    bWasCancelled = was_cancelled;
+
+    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( bIsCompleted );
+    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( bWasCancelled );
+}
+
 void UMSObjectiveViewModel::UpdateProgression( int current_progression )
 {
     CurrentProgression = current_progression;
