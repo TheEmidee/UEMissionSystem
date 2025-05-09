@@ -2,10 +2,10 @@
 
 #include "MSMissionObjective.h"
 
-void UMSObjectiveViewModel::Initialize( const TSubclassOf< UMSMissionObjective > & objective )
+void UMSObjectiveViewModel::Initialize( const TSubclassOf< UMSMissionObjective > & objective, int current_progression )
 {
     Objective = objective;
-    CurrentProgression = 0;
+    CurrentProgression = current_progression;
     RequiredProgression = objective.GetDefaultObject()->GetRequiredProgression();
 
     UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( GetDescription );

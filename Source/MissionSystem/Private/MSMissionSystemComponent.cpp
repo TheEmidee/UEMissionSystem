@@ -235,7 +235,7 @@ void UMSMissionSystemComponent::WhenMissionObjectiveStartsOrIsActive( const TSub
 {
     if ( IsMissionObjectiveActive( mission_objective_class ) )
     {
-        when_mission_objective_starts.ExecuteIfBound( mission_objective_class );
+        when_mission_objective_starts.ExecuteIfBound( mission_objective_class, MissionHistory.GetObjectiveProgression( mission_objective_class ) );
         return;
     }
 
@@ -381,8 +381,8 @@ void UMSMissionSystemComponent::K2_WhenMissionEnds( UMSMissionData * mission_dat
 
 void UMSMissionSystemComponent::K2_WhenMissionObjectiveStartsOrIsActive( TSubclassOf< UMSMissionObjective > mission_objective, FMSMissionSystemMissionObjectiveStartedDynamicDelegate when_mission_objective_starts )
 {
-    const auto active_delegate = FMSMissionSystemMissionObjectiveStartedDelegate::CreateWeakLambda( when_mission_objective_starts.GetUObject(), [ when_mission_objective_starts ]( TSubclassOf< UMSMissionObjective > mission_objective ) {
-        when_mission_objective_starts.ExecuteIfBound( mission_objective );
+    const auto active_delegate = FMSMissionSystemMissionObjectiveStartedDelegate::CreateWeakLambda( when_mission_objective_starts.GetUObject(), [ & ]( TSubclassOf< UMSMissionObjective > mission_objective, int current_progression ) {
+        when_mission_objective_starts.ExecuteIfBound( mission_objective, current_progression );
     } );
 
     WhenMissionObjectiveStartsOrIsActive( mission_objective, active_delegate );
@@ -595,11 +595,11 @@ void UMSMissionSystemComponent::BroadcastOnMissionEnded( UMSMission * mission, b
 
 void UMSMissionSystemComponent::BroadcastOnMissionObjectiveStarted( UMSMission * mission, UMSMissionObjective * objective )
 {
-    OnMissionObjectiveStartedDelegate.Broadcast( mission->GetMissionData(), objective->GetClass() );
+    OnMissionObjectiveStartedDelegate.Broadcast( mission->GetMissionData(), objective->GetClass(), objective->GetCurrentProgression() );
 
     for ( auto & observer : MissionObjectiveStartObservers )
     {
-        observer.Callback.ExecuteIfBound( objective->GetClass() );
+        observer.Callback.ExecuteIfBound( objective->GetClass(), objective->GetCurrentProgression() );
     }
 }
 

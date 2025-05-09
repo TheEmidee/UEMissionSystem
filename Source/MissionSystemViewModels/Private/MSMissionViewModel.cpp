@@ -18,16 +18,16 @@ void UMSMissionViewModel::Initialize( UMSMission * mission )
     Name = Mission->GetMissionData()->Name;
 }
 
-UMSObjectiveViewModel * UMSMissionViewModel::SetObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective )
+UMSObjectiveViewModel * UMSMissionViewModel::SetObjectiveStarted( const TSubclassOf< UMSMissionObjective > & objective, int current_progression )
 {
     auto * objective_vm = NewObject< UMSObjectiveViewModel >( this );
-    objective_vm->Initialize( objective );
+    objective_vm->Initialize( objective, current_progression );
 
     ActiveObjectives.Add( objective_vm );
 
     UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveObjectives );
 
-    OnMissionObjectiveStartedDelegate.Broadcast( this, objective_vm );
+    OnMissionObjectiveStartedDelegate.Broadcast( this, objective_vm, current_progression );
 
     return objective_vm;
 }
@@ -67,7 +67,7 @@ UMSObjectiveViewModel * UMSMissionViewModel::SetObjectiveEnded( const TSubclassO
         // When resuming missions from the history, we may broadcast an objective ended directly without having broadcasted that the objective
         // did start at some point
         view_model = NewObject< UMSObjectiveViewModel >( this );
-        view_model->Initialize( objective );
+        view_model->Initialize( objective, objective.GetDefaultObject()->GetRequiredProgression() );
     }
 
     view_model->SetCompleted( was_cancelled );
