@@ -8,6 +8,7 @@
 
 UMSMissionObjective::UMSMissionObjective() :
     bExecuteEndActionsWhenCancelled( false ),
+    bInvisibleObjective( false ),
     bIsComplete( false ),
     bIsCancelled( false ),
     RequiredProgression( INDEX_NONE ),

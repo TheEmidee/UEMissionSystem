@@ -35,19 +35,19 @@ public:
 
 private:
     UFUNCTION()
-    void SetMissionStarted( UMSMission * mission );
+    void OnMissionStarted( UMSMission * mission );
 
     UFUNCTION()
-    void SetMissionEnded( const UMSMissionData * mission, bool was_cancelled );
+    void OnMissionEnded( const UMSMissionData * mission, bool was_cancelled );
 
     UFUNCTION()
-    void RefreshMissionObjectiveProgression( const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > mission_objective, int current_progression, int required_progression );
+    void OnMissionObjectiveProgressionUpdated( const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > mission_objective, int current_progression, int required_progression );
 
     UFUNCTION()
-    void SetMissionObjectiveStarted(const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > objective, int current_progression);
+    void OnMissionObjectiveStarted(const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > mission_objective, int current_progression);
 
     UFUNCTION()
-    void SetMissionObjectiveEnded( const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > objective, bool was_cancelled );
+    void OnMissionObjectiveEnded( const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > mission_objective, bool was_cancelled );
 
     UMSMissionViewModel * GetMissionViewModel( const UMSMissionData * mission_data ) const;
     void BroadCastOnMissionsObjectivesChanged();

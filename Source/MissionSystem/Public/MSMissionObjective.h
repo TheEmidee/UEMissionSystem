@@ -39,6 +39,7 @@ public:
     const FText & GetDescription() const;
     int GetRequiredProgression() const;
     int GetCurrentProgression() const;
+    bool IsInvisibleObjective() const;
 
     const FGuid & GetGuid() const;
     bool IsComplete() const;
@@ -102,6 +103,9 @@ protected:
     UPROPERTY( EditDefaultsOnly, Category = "Actions" )
     uint8 bExecuteEndActionsWhenCancelled : 1;
 
+    UPROPERTY( EditDefaultsOnly, BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
+    uint8 bInvisibleObjective : 1;
+
     // This flag is set to true when this objective is complete
     UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess = true ) )
     bool bIsComplete;
@@ -151,6 +155,11 @@ FORCEINLINE int UMSMissionObjective::GetRequiredProgression() const
 FORCEINLINE int UMSMissionObjective::GetCurrentProgression() const
 {
     return CurrentProgression;
+}
+
+FORCEINLINE bool UMSMissionObjective::IsInvisibleObjective() const
+{
+    return bInvisibleObjective;
 }
 
 FORCEINLINE const FGuid & UMSMissionObjective::GetGuid() const
