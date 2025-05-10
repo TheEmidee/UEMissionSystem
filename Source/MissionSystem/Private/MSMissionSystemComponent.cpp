@@ -355,6 +355,8 @@ void UMSMissionSystemComponent::TryResumeMissionFromHistory()
     }
 #endif
 
+    // :TODO: We need to clean up everything when this function is called when there are active missions
+    // This would include all the various delegates, and make sure the objectives would have a chance to clean themselves too (Add a Finalize function? )
     if ( HasDataInHistory() )
     {
         ResumeMissionsFromHistory();
