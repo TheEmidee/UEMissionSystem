@@ -182,12 +182,6 @@ private:
     UPROPERTY( BlueprintAssignable, meta = ( AllowPrivateAccess = true ) )
     FMSMissionSystemMissionObjectiveEndedMulticastDynamicDelegate OnMissionObjectiveEndedDelegate;
 
-    UPROPERTY( EditDefaultsOnly )
-    uint8 bTryResumeMissionFromHistory : 1;
-
-    UPROPERTY( EditDefaultsOnly, meta = ( EditCondition = "bTryResumeMissionFromHistory" ) )
-    TObjectPtr< UMSMissionData > FirstMissionToStart;
-
     TArray< FMissionStartObserver > MissionStartObservers;
     TArray< FMissionEndObserver > MissionEndObservers;
     TArray< FMissionObjectiveStartObserver > MissionObjectiveStartObservers;

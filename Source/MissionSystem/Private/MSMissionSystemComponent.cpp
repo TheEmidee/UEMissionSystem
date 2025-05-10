@@ -1,13 +1,21 @@
 #include "MSMissionSystemComponent.h"
 
 #include "Log/CoreExtLog.h"
+#include "MSDeveloperSettings.h"
 #include "MSLog.h"
 #include "MSMission.h"
+#include "MSSettings.h"
+
+#if WITH_EDITOR
+#include <Framework/Notifications/NotificationManager.h>
+#include <Widgets/Notifications/SNotificationList.h>
+#endif
 
 #include <Engine/GameInstance.h>
 #include <Engine/World.h>
 #include <GameFramework/PlayerController.h>
-#include <Serialization/MemoryWriter.h>
+
+#define LOCTEXT_NAMESPACE "MissionSystem"
 
 #if !UE_BUILD_SHIPPING
 static FAutoConsoleCommand SkipMissionsCommand(
@@ -98,8 +106,7 @@ static TAutoConsoleVariable< int32 > CVarDisableAllMissions( TEXT( "MissionSyste
 #endif
 
 UMSMissionSystemComponent::UMSMissionSystemComponent( const FObjectInitializer & object_initializer ) :
-    Super( object_initializer ),
-    bTryResumeMissionFromHistory( true )
+    Super( object_initializer )
 {
 }
 
@@ -348,16 +355,30 @@ void UMSMissionSystemComponent::TryResumeMissionFromHistory()
     }
 #endif
 
-    if ( bTryResumeMissionFromHistory )
+    if ( HasDataInHistory() )
     {
-        if ( HasDataInHistory() )
+        ResumeMissionsFromHistory();
+    }
+    else
+    {
+        UMSMissionData * first_mission = nullptr;
+
+        if ( GetWorld()->IsPlayInEditor() )
         {
-            ResumeMissionsFromHistory();
+            first_mission = GetDefault< UMSDeveloperSettings >()->FirstMissionOverride.LoadSynchronous();
+
+#if WITH_EDITOR
+            FNotificationInfo info( FText::Format( LOCTEXT( "MissionSystem", "First mission override\nMission : {0}" ), FText::FromString( *GetNameSafe( first_mission ) ) ) );
+            info.ExpireDuration = 2.0f;
+            FSlateNotificationManager::Get().AddNotification( info );
+#endif
         }
-        else if ( FirstMissionToStart != nullptr )
+        if ( first_mission == nullptr )
         {
-            StartMission( FirstMissionToStart );
+            first_mission = GetDefault< UMSSettings >()->FirstMission.LoadSynchronous();
         }
+
+        StartMission( first_mission );
     }
 }
 
@@ -628,3 +649,5 @@ void UMSMissionSystemComponent::BroadcastOnMissionObjectiveEnded( const UMSMissi
         }
     }
 }
+
+#undef LOCTEXT_NAMESPACE
