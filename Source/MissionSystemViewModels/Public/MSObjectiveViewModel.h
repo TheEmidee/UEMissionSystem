@@ -29,7 +29,7 @@ private:
     UPROPERTY( BlueprintReadOnly, FieldNotify, meta = ( AllowPrivateAccess ) )
     bool bWasCancelled = false;
 
-    UPROPERTY()
+    UPROPERTY( BlueprintReadOnly, meta = ( AllowPrivateAccess ) )
     TSubclassOf< UMSMissionObjective > Objective;
 
     UPROPERTY( BlueprintReadOnly, FieldNotify, meta = ( AllowPrivateAccess ) )

@@ -7,11 +7,11 @@
 
 void UMSViewModel::Initialize( UMSMissionSystemComponent * component )
 {
-    component->OnMissionStarted().AddDynamic( this, &ThisClass::SetMissionStarted );
-    component->OnMissionEnded().AddDynamic( this, &ThisClass::SetMissionEnded );
-    component->OnMissionObjectiveStarted().AddDynamic( this, &ThisClass::SetMissionObjectiveStarted );
-    component->OnMissionObjectiveProgressionUpdated().AddDynamic( this, &ThisClass::RefreshMissionObjectiveProgression );
-    component->OnMissionObjectiveEnded().AddDynamic( this, &ThisClass::SetMissionObjectiveEnded );
+    component->OnMissionStarted().AddDynamic( this, &ThisClass::OnMissionStarted );
+    component->OnMissionEnded().AddDynamic( this, &ThisClass::OnMissionEnded );
+    component->OnMissionObjectiveStarted().AddDynamic( this, &ThisClass::OnMissionObjectiveStarted );
+    component->OnMissionObjectiveProgressionUpdated().AddDynamic( this, &ThisClass::OnMissionObjectiveProgressionUpdated );
+    component->OnMissionObjectiveEnded().AddDynamic( this, &ThisClass::OnMissionObjectiveEnded );
 }
 
 bool UMSViewModel::HasActiveMissions() const
@@ -35,27 +35,34 @@ void UMSViewModel::RemoveCompletedMission( UMSMissionViewModel * mission_vm )
     UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( CompletedMissions );
 }
 
-void UMSViewModel::SetMissionStarted( UMSMission * mission )
+void UMSViewModel::OnMissionStarted( UMSMission * mission )
 {
+    if ( mission->GetMissionData()->bInvisibleMission )
+    {
+        return;
+    }
+
     if ( GetMissionViewModel( mission->GetMissionData() ) != nullptr )
     {
         return;
     }
 
-    if ( !mission->GetMissionData()->bHideOnVM )
-    {
-        auto * mission_vm = NewObject< UMSMissionViewModel >( this );
-        mission_vm->Initialize( mission );
-        ActiveMissions.Add( mission_vm );
-        UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveMissions );
-        UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( HasActiveMissions );
+    auto * mission_vm = NewObject< UMSMissionViewModel >( this );
+    mission_vm->Initialize( mission );
+    ActiveMissions.Add( mission_vm );
+    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( ActiveMissions );
+    UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED( HasActiveMissions );
 
-        OnMissionStartedDelegate.Broadcast( mission_vm );
-    }
+    OnMissionStartedDelegate.Broadcast( mission_vm );
 }
 
-void UMSViewModel::SetMissionEnded( const UMSMissionData * mission, bool was_cancelled )
+void UMSViewModel::OnMissionEnded( const UMSMissionData * mission, bool was_cancelled )
 {
+    if ( mission->bInvisibleMission )
+    {
+        return;
+    }
+
     const auto predicate = [ & ]( const TObjectPtr< UMSMissionViewModel > & mission_vm ) {
         return mission_vm->GetMission()->GetMissionData() == mission;
     };
@@ -79,19 +86,39 @@ void UMSViewModel::SetMissionEnded( const UMSMissionData * mission, bool was_can
     }
 }
 
-void UMSViewModel::SetMissionObjectiveStarted( const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > objective, int current_progression )
+void UMSViewModel::OnMissionObjectiveStarted( const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > mission_objective, int current_progression )
 {
+    if ( mission_data->bInvisibleMission )
+    {
+        return;
+    }
+
+    if ( mission_objective.GetDefaultObject()->IsInvisibleObjective() )
+    {
+        return;
+    }
+
     if ( auto * mission_vm = GetMissionViewModel( mission_data ) )
     {
-        if ( auto * objective_vm = mission_vm->SetObjectiveStarted( objective, current_progression ) )
+        if ( auto * objective_vm = mission_vm->SetObjectiveStarted( mission_objective, current_progression ) )
         {
             OnMissionObjectiveStartedDelegate.Broadcast( mission_vm, objective_vm, current_progression );
         }
     }
 }
 
-void UMSViewModel::RefreshMissionObjectiveProgression( const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > mission_objective, int current_progression, int required_progression )
+void UMSViewModel::OnMissionObjectiveProgressionUpdated( const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > mission_objective, int current_progression, int required_progression )
 {
+    if ( mission_data->bInvisibleMission )
+    {
+        return;
+    }
+
+    if ( mission_objective.GetDefaultObject()->IsInvisibleObjective() )
+    {
+        return;
+    }
+
     if ( auto * mission_vm = GetMissionViewModel( mission_data ) )
     {
         if ( auto * objective_vm = mission_vm->UpdateObjectiveProgression( mission_objective, current_progression ) )
@@ -101,11 +128,21 @@ void UMSViewModel::RefreshMissionObjectiveProgression( const UMSMissionData * mi
     }
 }
 
-void UMSViewModel::SetMissionObjectiveEnded( const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > objective, bool was_cancelled )
+void UMSViewModel::OnMissionObjectiveEnded( const UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > mission_objective, bool was_cancelled )
 {
+    if ( mission_data->bInvisibleMission )
+    {
+        return;
+    }
+
+    if ( mission_objective.GetDefaultObject()->IsInvisibleObjective() )
+    {
+        return;
+    }
+
     if ( auto * mission_vm = GetMissionViewModel( mission_data ) )
     {
-        if ( auto * objective_vm = mission_vm->SetObjectiveEnded( objective, was_cancelled ) )
+        if ( auto * objective_vm = mission_vm->SetObjectiveEnded( mission_objective, was_cancelled ) )
         {
             OnMissionEndedDelegate.Broadcast( mission_vm, was_cancelled );
             OnMissionObjectiveEndedDelegate.Broadcast( mission_vm, objective_vm, was_cancelled );

@@ -17,7 +17,8 @@ UMSMissionData::UMSMissionData() :
     bEnabled( true ),
     bExecuteEndActionsWhenCancelled( true ),
     bStartNextMissionsWhenCancelled( false ),
-    bMustCompleteObjectivesSequentially( true )
+    bMustCompleteObjectivesSequentially( true ),
+    bInvisibleMission( false )
 {
 }
 
