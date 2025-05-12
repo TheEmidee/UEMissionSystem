@@ -81,7 +81,9 @@ void UMSMission::Start()
 
 void UMSMission::Complete()
 {
-    for ( auto objective : ActiveObjectives )
+    auto copy = ActiveObjectives;
+
+    for ( auto objective : copy )
     {
         objective->CompleteObjective();
     }
@@ -161,6 +163,14 @@ const FMSMissionHistory & UMSMission::GetMissionHistory() const
     check( component != nullptr );
 
     return component->GetMissionHistory();
+}
+
+FMSMissionHistory & UMSMission::GetMissionHistory()
+{
+    auto * component = Cast< UMSMissionSystemComponent >( GetOuter() );
+    check( component != nullptr );
+
+    return const_cast< FMSMissionHistory & >( component->GetMissionHistory() );
 }
 
 void UMSMission::OnObjectiveCompleted( UMSMissionObjective * mission_objective, const bool was_cancelled )

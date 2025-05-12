@@ -47,7 +47,7 @@ struct MISSIONSYSTEM_API FMSMissionHistory
     int GetObjectiveProgression( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const;
     void UpdateObjectiveProgression( UMSMissionObjective * mission_objective );
     bool SetObjectiveComplete( const UMSMissionObjective * mission_objective, bool was_cancelled );
-    void InitializeObjective( UMSMissionObjective * mission_objective ) const;
+    void InitializeObjective( UMSMissionObjective * mission_objective );
 
     friend FArchive & operator<<( FArchive & archive, FMSMissionHistory & mission_history );
     void Clear();

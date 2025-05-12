@@ -31,7 +31,7 @@ static FAutoConsoleCommand SkipMissionsCommand(
         }
     } ) );
 
-static FAutoConsoleCommand CompleteMissionsCommand(
+static FAutoConsoleCommand CompleteAllMissionsCommand(
     TEXT( "MissionSystem.CompleteMissions" ),
     TEXT( "Completes the current missions." ),
     FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateLambda( []( const TArray< FString > & /*args*/, const UWorld * world, FOutputDevice & /*output_device*/ ) {
@@ -40,6 +40,26 @@ static FAutoConsoleCommand CompleteMissionsCommand(
             if ( auto * component = ( *ite )->FindComponentByClass< UMSMissionSystemComponent >() )
             {
                 component->CompleteCurrentMissions();
+            }
+        }
+    } ) );
+
+static FAutoConsoleCommand CompleteMissionAtIndexCommand(
+    TEXT( "MissionSystem.CompleteMissionAtIndex" ),
+    TEXT( "Completes the mission at the given index (from the list output by MissionSystem.ListActiveMissions." ),
+    FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateLambda( []( const TArray< FString > & args, const UWorld * world, FOutputDevice & /*output_device*/ ) {
+        if ( args.Num() != 1 )
+        {
+            return;
+        }
+
+        const auto mission_index = FCString::Atoi( *args[ 0 ] );
+
+        for ( auto ite = world->GetPlayerControllerIterator(); ite; ++ite )
+        {
+            if ( auto * component = ( *ite )->FindComponentByClass< UMSMissionSystemComponent >() )
+            {
+                component->CompleteMissionAtIndex( mission_index );
             }
         }
     } ) );
@@ -166,9 +186,18 @@ void UMSMissionSystemComponent::CancelCurrentMissions() const
 
 void UMSMissionSystemComponent::CompleteCurrentMissions() const
 {
-    for ( auto * mission : ActiveMissions )
+    auto copy = ActiveMissions;
+    for ( auto * mission : copy )
     {
         mission->Complete();
+    }
+}
+
+void UMSMissionSystemComponent::CompleteMissionAtIndex( int mission_index ) const
+{
+    if ( ActiveMissions.IsValidIndex( mission_index ) )
+    {
+        ActiveMissions[ mission_index ]->Complete();
     }
 }
 

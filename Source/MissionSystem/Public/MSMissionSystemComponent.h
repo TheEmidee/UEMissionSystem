@@ -71,6 +71,8 @@ public:
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System" )
     void CompleteCurrentMissions() const;
 
+    void CompleteMissionAtIndex( int mission_index ) const;
+
     UFUNCTION( BlueprintPure, BlueprintAuthorityOnly, Category = "Mission System" )
     bool IsMissionObjectiveActive( const TSubclassOf< UMSMissionObjective > & mission_objective_class ) const;
 

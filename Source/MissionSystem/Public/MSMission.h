@@ -54,6 +54,7 @@ public:
 
 private:
     const FMSMissionHistory & GetMissionHistory() const;
+    FMSMissionHistory & GetMissionHistory();
 
     void OnObjectiveCompleted( UMSMissionObjective * mission_objective, bool was_cancelled );
     void OnObjectiveProgressionUpdated(UMSMissionObjective * mission_objective);
