@@ -281,7 +281,6 @@ void FMSMissionHistory::InitializeObjective( UMSMissionObjective * mission_objec
 
     if ( auto * progression = ObjectiveProgressions.Find( id ) )
     {
-        TryAddToMap( mission_objective, ObjectiveStates );
         mission_objective->CurrentProgression = progression->CurrentProgression;
 
         FMemoryReader memory_reader( progression->RecordData );
