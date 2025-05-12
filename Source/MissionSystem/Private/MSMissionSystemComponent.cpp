@@ -587,11 +587,15 @@ void UMSMissionSystemComponent::OnMissionObjectiveStarted( UMSMissionObjective *
         return;
     }
 
+    UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnObjectiveStarted(%s)" ), *objective->GetClass()->GetName() );
+
     BroadcastOnMissionObjectiveStarted( mission, objective );
 }
 
 void UMSMissionSystemComponent::OnMissionObjectiveProgressionUpdated( UMSMissionObjective * objective, UMSMission * mission )
 {
+    UE_SLOG( LogMissionSystem, Verbose, TEXT( "OnObjectiveProgressionUpdated(%s) - %i / %i" ), *objective->GetClass()->GetName(), objective->GetCurrentProgression(), objective->GetRequiredProgression() );
+
     MissionHistory.UpdateObjectiveProgression( objective );
 
     BroadcastOnMissionObjectiveProgressionUpdated( mission, objective );
