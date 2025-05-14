@@ -516,6 +516,7 @@ UMSMission * UMSMissionSystemComponent::TryCreateMissionFromData( UMSMissionData
 
     if ( !MissionHistory.AddActiveMission( mission_data ) )
     {
+        UE_SLOG( LogMissionSystem, Verbose, TEXT( "Did not create mission %s because it was already completed" ), *GetNameSafe( mission_data ) );
         return nullptr;
     }
 
@@ -524,6 +525,8 @@ UMSMission * UMSMissionSystemComponent::TryCreateMissionFromData( UMSMissionData
 
 UMSMission * UMSMissionSystemComponent::CreateMissionFromData( UMSMissionData * mission_data )
 {
+    UE_SLOG( LogMissionSystem, Verbose, TEXT( "Create mission %s" ), *GetNameSafe( mission_data ) );
+
     auto * mission = NewObject< UMSMission >( this );
     mission->Initialize( mission_data );
 

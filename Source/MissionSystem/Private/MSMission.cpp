@@ -53,6 +53,7 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
 
         if ( mission_history.IsObjectiveFinished( objective_data.Objective ) )
         {
+            UE_LOG( LogMissionSystem, Verbose, TEXT( "Don't add objective %s because it is already complete." ), *objective_data.Objective->GetClass()->GetName() );
             continue;
         }
 
