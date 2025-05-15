@@ -118,6 +118,21 @@ protected:
     UFUNCTION( BlueprintCallable, BlueprintAuthorityOnly, Category = "Mission System", meta = ( DisplayName = "When Mission Objective Ends", AutoCreateRefTerm = "when_mission_objective_ends" ) )
     void K2_WhenMissionObjectiveEnds( TSubclassOf< UMSMissionObjective > mission_objective, FMSMissionSystemMissionObjectiveEndedDynamicDelegate when_mission_objective_ends );
 
+    UFUNCTION( BlueprintImplementableEvent, Category = "Mission System" )
+    void K2_ReceiveMissionStarted( UMSMissionData * mission_data );
+
+    UFUNCTION( BlueprintImplementableEvent, Category = "Mission System" )
+    void K2_ReceiveMissionEnded( UMSMissionData * mission_data, bool was_cancelled );
+
+    UFUNCTION( BlueprintImplementableEvent, Category = "Mission System" )
+    void K2_ReceiveObjectiveStarted( UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > objective, int current_progression );
+
+    UFUNCTION( BlueprintImplementableEvent, Category = "Mission System" )
+    void K2_ReceiveObjectiveProgressionUpdated( UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > objective, int current_progression, int required_progression );
+
+    UFUNCTION( BlueprintImplementableEvent, Category = "Mission System" )
+    void K2_ReceiveObjectiveEnded( UMSMissionData * mission_data, TSubclassOf< UMSMissionObjective > objective, bool was_cancelled );
+
 private:
     struct FMissionStartObserver
     {
