@@ -77,6 +77,15 @@ void UMSMission::Initialize( UMSMissionData * mission_data )
 
 void UMSMission::Start()
 {
+    // If the mission has no objectives then we just broadcast the event
+    // This can happen by design
+    // Or if the game is saved only when objectives are completed. When the game is reloaded, it has saved that the last objective
+    // was completed, but not the mission. This mission would start on the next load, but all its objectives would be complete.
+    if ( ActiveObjectives.IsEmpty() && PendingObjectives.IsEmpty() )
+    {
+        OnMissionEndedEvent.Broadcast( this, false );
+        return;
+    }
     StartActionsExecutor.Execute();
 }
 
