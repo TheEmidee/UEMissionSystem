@@ -13,7 +13,10 @@ public class MissionSystemEditor : ModuleRules
             "Core",
             "CoreUObject",
             "Engine",
-            "UnrealEd"
+            "UnrealEd",
+            "SlateCore",
+            "Slate",
+            "PropertyEditor"
             });
 
         PrivateIncludePathModuleNames.AddRange(new string[] {

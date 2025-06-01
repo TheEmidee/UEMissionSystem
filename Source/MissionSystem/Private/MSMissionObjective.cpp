@@ -135,6 +135,15 @@ void UMSMissionObjective::GetOwnedGameplayTags( FGameplayTagContainer & tag_cont
     tag_container.AppendTags( Tags );
 }
 
+void UMSMissionObjective::GenerateGuidIfNeeded( bool force_generation )
+{
+    if ( !ObjectiveId.IsValid() || force_generation )
+    {
+        ObjectiveId = FGuid::NewGuid();
+        Modify();
+    }
+}
+
 #if WITH_EDITOR
 EDataValidationResult UMSMissionObjective::IsDataValid( FDataValidationContext & context ) const
 {
@@ -148,15 +157,6 @@ EDataValidationResult UMSMissionObjective::IsDataValid( FDataValidationContext &
 }
 
 #endif
-
-void UMSMissionObjective::GenerateGuidIfNeeded( bool force_generation )
-{
-    if ( !ObjectiveId.IsValid() || force_generation )
-    {
-        ObjectiveId = FGuid::NewGuid();
-        Modify();
-    }
-}
 
 void UMSMissionObjective::K2_Execute_Implementation( APlayerController * player_controller, UMSMissionSystemComponent * mission_system_component )
 {
