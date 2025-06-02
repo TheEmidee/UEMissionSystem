@@ -618,7 +618,9 @@ void UMSMissionSystemComponent::OnMissionObjectiveEnded( UMSMissionObjective * o
 
 void UMSMissionSystemComponent::BroadcastOnMissionStarted( UMSMission * mission )
 {
-    const auto * mission_data = mission->GetMissionData();
+    auto * mission_data = mission->GetMissionData();
+
+    K2_ReceiveMissionStarted( mission_data );
 
     OnMissionStartedDelegate.Broadcast( mission );
 
@@ -638,6 +640,8 @@ void UMSMissionSystemComponent::BroadcastOnMissionEnded( UMSMission * mission, b
 {
     auto * mission_data = mission->GetMissionData();
 
+    K2_ReceiveMissionEnded( mission_data, was_cancelled );
+
     OnMissionEndedDelegate.Broadcast( mission_data, was_cancelled );
 
     for ( auto index = MissionEndObservers.Num() - 1; index >= 0; --index )
@@ -654,6 +658,8 @@ void UMSMissionSystemComponent::BroadcastOnMissionEnded( UMSMission * mission, b
 
 void UMSMissionSystemComponent::BroadcastOnMissionObjectiveStarted( UMSMission * mission, UMSMissionObjective * objective )
 {
+    K2_ReceiveObjectiveStarted( mission->GetMissionData(), objective->GetClass(), objective->GetCurrentProgression() );
+
     OnMissionObjectiveStartedDelegate.Broadcast( mission->GetMissionData(), objective->GetClass(), objective->GetCurrentProgression() );
 
     for ( auto & observer : MissionObjectiveStartObservers )
@@ -664,6 +670,8 @@ void UMSMissionSystemComponent::BroadcastOnMissionObjectiveStarted( UMSMission *
 
 void UMSMissionSystemComponent::BroadcastOnMissionObjectiveProgressionUpdated( const UMSMission * mission, const UMSMissionObjective * objective )
 {
+    K2_ReceiveObjectiveProgressionUpdated( mission->GetMissionData(), objective->GetClass(), objective->GetCurrentProgression(), objective->GetRequiredProgression() );
+
     OnMissionObjectiveProgressionIsUpdatedDelegate.Broadcast( mission->GetMissionData(), objective->GetClass(), objective->GetCurrentProgression(), objective->GetRequiredProgression() );
 
     for ( auto & observer : MissionObjectiveProgressionObservers )
@@ -674,6 +682,8 @@ void UMSMissionSystemComponent::BroadcastOnMissionObjectiveProgressionUpdated( c
 
 void UMSMissionSystemComponent::BroadcastOnMissionObjectiveEnded( const UMSMission * mission, UMSMissionObjective * objective, bool was_cancelled )
 {
+    K2_ReceiveObjectiveEnded( mission->GetMissionData(), objective->GetClass(), was_cancelled );
+
     OnMissionObjectiveEndedDelegate.Broadcast( mission->GetMissionData(), objective->GetClass(), was_cancelled );
 
     for ( auto index = MissionObjectiveEndObservers.Num() - 1; index >= 0; --index )
