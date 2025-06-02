@@ -98,7 +98,6 @@ public:
     EDataValidationResult IsDataValid( FDataValidationContext & context ) const override;
 #endif
 
-private:
     void GenerateGuidIfNeeded( bool force_generation = false );
 };
 

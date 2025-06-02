@@ -63,6 +63,7 @@ public:
     UWorld * GetWorld() const override;
 
     void GetOwnedGameplayTags( FGameplayTagContainer & tag_container ) const override;
+    void GenerateGuidIfNeeded( bool force_generation = false );
 
 #if WITH_EDITOR
     EDataValidationResult IsDataValid( FDataValidationContext & context ) const override;
@@ -74,8 +75,6 @@ protected:
 
     UFUNCTION( BlueprintNativeEvent, DisplayName = "OnObjectiveEnded" )
     void K2_OnObjectiveEnded( bool was_cancelled );
-
-    void GenerateGuidIfNeeded( bool force_generation = false );
 
     // The actions to execute when this objective is started
     UPROPERTY( EditDefaultsOnly, Instanced, Category = "Actions" )
