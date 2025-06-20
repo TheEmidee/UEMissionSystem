@@ -86,13 +86,11 @@ void UMSMissionObjective::SetProgression( int new_progression )
 {
     CurrentProgression = new_progression;
 
+    OnObjectiveProgressionUpdatedEvent.Broadcast( this );
+
     if ( CurrentProgression >= RequiredProgression )
     {
         CompleteObjective();
-    }
-    else
-    {
-        OnObjectiveProgressionUpdatedEvent.Broadcast( this );
     }
 }
 
